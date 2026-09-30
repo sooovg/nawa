@@ -7,7 +7,7 @@
 
 The AGENTS.md §9 fields (`category`, `prompt`, `bad_output`, `model`, `model_revision`, `verified_truth`, `verification_method`,
 `source`, `license`, `reviewer`, `status`) plus provenance: `id` (`ATL-` + hash of model, item, and output), `secondary_categories`,
-`run_id`, `split`, `suite`, `item_id`, `content_hash`, `git_commit`, `train_eligible`, `train_block_reason`, `created_utc`.
+`run_id`, `split`, `suite`, `item_id`, `content_hash`, `git_commit`, `train_eligible`, `train_block_reason`, `created_utc`, `scorer_default_category` (the suite scorer's category before abstention attribution; traceability only, not a secondary category).
 
 ## Rules
 

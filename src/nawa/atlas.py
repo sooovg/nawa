@@ -30,7 +30,7 @@ INCOMING = REPO / "data_pipeline" / "atlas" / "incoming"
 REQUIRED = ("id", "category", "prompt", "bad_output", "model", "model_revision", "verified_truth",
             "verification_method", "source", "license", "reviewer", "status")
 PROVENANCE = ("secondary_categories", "run_id", "split", "suite", "item_id", "content_hash", "git_commit",
-              "train_eligible", "train_block_reason", "created_utc")
+              "train_eligible", "train_block_reason", "created_utc", "scorer_default_category")
 STATUSES = ("unverified", "verified", "rejected")
 EVAL_DERIVED_BLOCK = "derived from an evaluation item: training on it would leak the evaluation set (G1/G2)"
 
@@ -112,7 +112,10 @@ def records_from_run(run_dir: Path, created_utc: str) -> list[dict[str, Any]]:
             "license": it.meta.get("license"),
             "reviewer": "automated:deterministic-scorer (no human review yet)",
             "status": "verified" if verified else "unverified",
-            "secondary_categories": [default] if default and default != cat else [],
+            "secondary_categories": [],
+            # The suite scorer's own default before abstention attribution. Traceability only: an abstention on
+            # a math item is NOT also a calculation error, so this is not a secondary category.
+            "scorer_default_category": default,
             "run_id": lineage["run_id"],
             "split": split,
             "suite": p["suite"],
