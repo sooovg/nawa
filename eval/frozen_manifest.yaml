@@ -1,0 +1,18 @@
+# Frozen eval v1 lineage (P1-03). Content lives ONLY in the private HF dataset below.
+version: v1
+repo_id: vuuuv/nawa-eval
+repo_type: dataset
+private: true
+revision: frozen-v1                                  # HF tag
+hf_commit: 5eb6594823f88b2bd998a1387adc2f5505cf53cd  # on HF branch "dev" (not main)  # pragma: allowlist secret
+path: frozen/v1/
+digests: eval/FROZEN.sha256
+item_hashes: eval/frozen_item_hashes.txt
+items: {faithfulness: 30, abstention: 30, factual: 30, reasoning_math: 30, code: 20, tool_use: 24, robustness: 24, arabic: 30, regression_general: 25}
+total_items: 243
+seed: single-use secret (secrets.token_hex(32)), never stored — by design
+excludes: [dev, calib]                               # by content_hash
+factual_source: sources/factual_frozen_bank.yaml (private, same HF revision)
+builder: src/nawa/evaluation/frozen.py
+created: 2026-09-30
+access: Eval role only (NAWA_ROLE=eval); verified download matches eval/FROZEN.sha256
