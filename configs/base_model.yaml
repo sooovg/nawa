@@ -1,0 +1,20 @@
+# NAWA reference decoder config (ROADMAP P3-04, Track S). Loaded by nawa.model.DecoderConfig.from_yaml.
+# A reference setting for correctness checks and P3-05 sanity runs on CPU. It is NOT the chosen NAWA size:
+# size is decided by P4-01 scaling curves. vocab_size is a placeholder until the tokenizer is chosen (P3-03).
+model:
+  vocab_size: 256          # byte-level placeholder until P3-03
+  d_model: 256
+  n_layers: 4
+  n_heads: 4
+  n_kv_heads: null         # plain multi-head attention
+  d_ff: null               # derived: swiglu -> 688
+  max_seq_len: 512
+  norm: rmsnorm
+  norm_eps: 1.0e-5
+  mlp: swiglu
+  positional: rope
+  rope_theta: 10000.0
+  dropout: 0.0
+  bias: false
+  tie_embeddings: true
+  init_std: 0.02
