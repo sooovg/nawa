@@ -148,7 +148,8 @@ Core Model
 | P0-08 | DONE | bootstrap-agent | `ROADMAP.md` وسجل الحالة و`.github/CODEOWNERS` و`ci.yml`؛ CI نجح على `d34f3f1`؛ `main` محمي (PR إلزامي، فحص `test`، منع force push والحذف، enforce_admins) | 2026-09-30 |
 | R-01 | DONE | bootstrap-agent | اتساق الخارطة: ADR-0002، `tests/test_roadmap_consistency.py` | 2026-09-30 |
 | P1-01 | DONE | bootstrap-agent | `docs/failure_taxonomy.md`: FT-01..FT-16، منها 11 فئة تطلبها P1-01؛ `src/nawa/evaluation/taxonomy.py`؛ `tests/test_failure_taxonomy.py` (4 اختبارات) | 2026-09-30 |
-| P1-02 | PLANNED | — | — | — |
+| P1-02 | DONE | bootstrap-agent | 9 مجموعات في `src/nawa/evaluation/suites/` + `eval/suites/README.md` + `factual_bank.yaml`؛ dev=243 وcalib=128 عنصرًا؛ `tests/test_eval_suites.py` (15 اختبارًا) | 2026-09-30 |
+| P1-02a | BLOCKED | — | مجموعة `domain` تنتظر OD-01 (المجال الأول) | 2026-09-30 |
 | P1-03 | PLANNED | — | — | — |
 | P1-04 | PLANNED | — | — | — |
 | P1-05 | PLANNED | — | — | — |
@@ -225,11 +226,30 @@ Core Model
 - **Next unblocked task:** P1-02
 - **Duplicate-work check:** لم يكن الملف موجودًا، ولا فرع أو PR سابق للمهمة P1-01.
 
+### P1-02 — مجموعات التقييم (2026-09-30)
+
+- **Task ID:** P1-02
+- **Owner:** bootstrap-agent
+- **Status:** DONE (9 من 10 مجموعات؛ `domain` في P1-02a وهي BLOCKED)
+- **Scope:** مولدات ومقيّمات حتمية لتسع مجموعات تقييم بإجابات قابلة للتحقق الآلي، مع sandbox لتنفيذ الكود.
+- **Files created:** `src/nawa/evaluation/{normalize,schema,synth,sandbox,build}.py`، `src/nawa/evaluation/suites/*.py` (9 مجموعات + `_context.py`)، `eval/suites/README.md`، `eval/suites/factual_bank.yaml`، `tests/test_eval_suites.py`
+- **Files modified:** `.gitignore` (`eval/build/`)، `ROADMAP.md`
+- **Tests executed:** `python -m pytest`، `pre-commit run --all-files`، بناء dev وcalib
+- **Test results:** 68 passed / 0 failed؛ الـ oracle يحقق 100% في كل المجموعات؛ الضوضاء ≤ 5%
+- **Metrics:** dev: 243 عنصرًا، calib: 128 عنصرًا، بلا تداخل (content_hash)
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Dataset version:** dev/calib تُبنى حتميًا من البذرتين 1001 و2002 (غير محفوظة في Git)
+- **Known limitations:** المطابقة نصية متساهلة؛ القوالب مشتركة بين الأقسام؛ بنك factual يحتاج مراجعة بشرية؛ sandbox على مستوى العملية فقط.
+- **Roadmap section updated:** §2.2، §2.3، §2.4 (OD-01)، §4 (P1-02a)، §12
+- **Next unblocked task:** P1-03
+- **Duplicate-work check:** لم تكن توجد مجموعات تقييم أو فرع سابق لها.
+
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
 | ID | القرار | يحجب | الحالة |
 |---|---|---|---|
-| OD-01 | المجال الأول (first domain) | P1-02 (مجموعة `domain`)، T3، اعتماد الميثاق (G0) | OPEN |
+| OD-01 | المجال الأول (first domain) | P1-02a (مجموعة `domain`)، T3، اعتماد الميثاق (G0) | OPEN |
 | OD-02 | ترخيص كود المشروع | P0-01، G0 | OPEN (مؤقتًا: جميع الحقوق محفوظة) |
 | OD-03 | ترخيص الأوزان والبيانات المستقبلية | P0-01، P2-07 | OPEN |
 | OD-04 | معنى "خاص بي" / امتلاك NAWA | P0-01، G0 | OPEN |
@@ -376,6 +396,7 @@ nawa/
 
 - **P1-01 [Git]** إنشاء `docs/failure_taxonomy.md`، ويشمل: مصدر مختلق، رقم خاطئ، حساب، API وهمية، افتراض خاطئ، معلومة قديمة، خلط كيانات، مجاراة الخطأ، فقدان سياق، prompt injection، وثقة زائدة.
 - **P1-02 [Git]** بناء حزم `eval/suites/`: faithfulness، abstention، factual، reasoning_math، code، tool_use، domain، robustness، arabic، regression_general (الأسماء كما في `AGENTS.md` §10).
+  - **P1-02a [Git]** مجموعة `domain` للمجال الأول. محجوبة حتى OD-01.
 - **P1-03 [Git→HF]** فصل `dev/calib/frozen`، حساب `eval/FROZEN.sha256`، ورفع frozen إلى `nawa-eval` خاص. Eval role فقط يلمسه.
 - **P1-04 [Git]** تشغيل عدة نماذج مفتوحة بأحجام مختلفة في مسار B، مع نموذج أكبر كمرجع مقارنة إن أمكن، وتسجيل النتائج في `eval/baselines.md`.
 - **P1-05 [Git]** بناء baseline لنموذج Decoder صغير يعمل محليًا.
@@ -812,5 +833,6 @@ Limitations:
 | 1.1.0 | 2026-09-30 | اتساق الخارطة: مواءمة §2.1 مع بوابات §4 وإضافة G10؛ مواءمة نطاقات §2.2 مع قوائم §4 (P3 وP4 وP5 وP6)؛ إضافة §2.4 لسجل قرارات المالك؛ إضافة قواعد التشغيل المعتمدة في §0؛ إضافة `RISK_REGISTER.md` إلى §3.1؛ توحيد أسماء مجموعات التقييم في P1-02؛ ترتيب تنفيذ P1. لم تُحذف أي مهمة، ولم يُغيَّر أي هدف أو معيار. | ADR-0002، PR لمهمة R-01 |
 | 1.1.1 | 2026-09-30 | P0-03 وP0-04 وP0-07a منجزة؛ P0-01 وP0-02 وP0-07 محجوبة بقرارات المالك؛ إضافة المهمة الفرعية P0-07a. | P0-02..P0-07a |
 | 1.2.0 | 2026-09-30 | تفصيل صفوف P1 إلى مهام فردية؛ P1-01 منجزة. | P1-01 |
+| 1.3.0 | 2026-09-30 | P1-02 منجزة لتسع مجموعات؛ إضافة المهمة الفرعية P1-02a (`domain`) وهي BLOCKED بقرار OD-01. | P1-02 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

@@ -39,3 +39,6 @@ outputs/
 .DS_Store
 .idea/
 .vscode/
+
+# Built evaluation splits (regenerate with: python -m nawa.evaluation.build)
+eval/build/
