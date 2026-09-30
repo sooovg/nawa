@@ -3,7 +3,8 @@
 Backends:
   oracle          gold answers (sanity check of the pipeline; must score 100%)
   always_abstain  always answers "غير موجود في السياق" (shows why T2 pairs recall with answerable accuracy)
-  hf:<path>       a local Hugging Face causal LM (Track B baselines), greedy decoding on CPU
+  hf:<path>       a local Hugging Face causal LM, greedy decoding on CPU. Open-weight models need a
+                  configs/model_registry.yaml entry first (ADR-0003); NAWA's own checkpoints use the same path.
 
 Predictions go to eval/runs/<run_id>/ (git-ignored). Only aggregate reports go into Git (eval/reports/).
 """
@@ -27,7 +28,7 @@ from nawa.evaluation.schema import SUITES, Item
 
 REPO = Path(__file__).resolve().parents[3]
 ABSTAIN = "غير موجود في السياق"
-DTYPES = ("float32", "bfloat16")  # bfloat16 only to fit larger baselines in RAM; recorded in lineage + config_hash
+DTYPES = ("float32", "bfloat16")  # bfloat16 to fit larger models in RAM; recorded in lineage + config_hash
 
 
 def load_items(split: str, frozen_dir: Path | None = None) -> dict[str, list[Item]]:
