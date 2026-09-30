@@ -130,7 +130,7 @@ Core Model
 | G0 الميثاق والحدود وCI مبدئي (P0) | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
 | G1 القياس والمرجع الداخلي (P1) | PENDING_REVIEW | 2026-09-30 | كل شروط G1 في §4 لها دليل: مراجع P1-07 ونواة P3-05 محفوظة (EXP-0008..0010)؛ frozen له hash ومكان خاص (P1-03)؛ لا بيانات تدريب نصية بعد، وسجلات Atlas المشتقة من التقييم ممنوعة من التدريب (P1-08)؛ أمر إعادة التقرير موجود (P1-07). P1-01..P1-03 وP1-06 وP1-07 وP1-08 منجزة؛ P1-04 وP1-05 SUPERSEDED؛ P1-02a محجوبة بـ OD-01 وليست شرطًا لـ G1؛ P1-06a شرط لـ G5 (ADR-0004). تنتظر مراجعة المالك (§0: قاعدة استقلال الحكم) |
 | G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | — | — |
-| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (`4fc691e`)؛ P3-05 منجزة: "XOR ينجح" و"tiny LM يتعلم" مثبتان (EXP-0008، EXP-0009)؛ باقي شرطا الاستئناف (P3-06/P3-08) والـ Tokenizer (P3-01..P3-03)؛ لا يُغلق G3 قبل G0–G2 |
+| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (`4fc691e`)؛ P3-05 منجزة: "XOR ينجح" و"tiny LM يتعلم" مثبتان (EXP-0008، EXP-0009)؛ P3-06 منجزة: trainer كامل مع checkpoint/resume وgradient accumulation وmixed precision (`tests/test_trainer.py`، 35 اختبارًا)؛ باقي شرطا الاستئناف (P3-07/P3-08) والـ Tokenizer (P3-01..P3-03)؛ لا يُغلق G3 قبل G0–G2 |
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | — | — |
@@ -172,7 +172,8 @@ Core Model
 | P3-01..P3-03 | PLANNED | — | — | — |
 | P3-04 | DONE | agent-P3-04 | `src/nawa/model/{config,layers,decoder}.py` (نواة decoder مرجعية من الصفر، مكوّنات قابلة للتبديل لتجارب P4)؛ `configs/base_model.yaml`؛ `tests/test_reference_decoder.py` (49 اختبارًا)؛ EXP-0006 | 2026-09-30 |
 | P3-05 | DONE | agent-P3-05 | `src/nawa/training/sanity.py` (XOR + tiny character LM على مصدر ماركوف عربي اصطناعي بإنتروبيا محسوبة بدقة)؛ `make sanity`؛ `tests/test_sanity_training.py` (9 اختبارات)؛ EXP-0007 (FAILED) وEXP-0008 وEXP-0009 (PASSED) | 2026-09-30 |
-| P3-06..P3-08 | PLANNED | — | — | — |
+| P3-06 | DONE | agent-P3-06 | `src/nawa/training/trainer.py` (Trainer، TrainerConfig، CheckpointState، DeviceWrapper، scheduler، optimizer، gradient accumulation، mixed precision، metrics، budget guard)؛ `Makefile` (`make train`)؛ `tests/test_trainer.py` (35 اختبارًا)؛ EXP-0012 | 2026-09-30 |
+| P3-07..P3-08 | PLANNED | — | — | — |
 | P4-01..P4-08 | PLANNED | — | — | — |
 | P5-01..P5-10 | PLANNED | — | — | — |
 | P6-01..P6-09 | PLANNED | — | — | — |
@@ -432,6 +433,26 @@ Core Model
 - **Roadmap section updated:** §2.1 G1 (PENDING_REVIEW)، §2.2، §2.3، §12
 - **Next unblocked task:** P3-06 (المدرّب الكامل: optimizer وscheduler وcheckpoint وresume على CPU). ومراجعة المالك لـ G1.
 - **Duplicate-work check:** لا يوجد `data_pipeline/atlas/` ولا فرع أو PR سابق لـ P1-08. P2-01 (`mine.py`) وP2-02 (`verify.py`) مهمتان مختلفتان: هذه المهمة تبني السجل والتحقق الحتمي من تشغيلات التقييم فقط.
+
+### P3-06 — المدرّب الكامل: optimizer وscheduler وcheckpoint وresume (2026-09-30)
+
+- **Task ID:** P3-06
+- **Owner:** agent-P3-06
+- **Status:** DONE
+- **Scope:** بناء `training/trainer.py` — مدرّب كامل لـ NAWA (المسار S): optimizer (AdamW/SGD)، scheduler (warmup + cosine/linear/constant)، checkpoint save/load مع كامل الحالة (model، optimizer، scheduler، RNG، step، config hash)، resume من checkpoint، gradient accumulation، mixed precision (fp32/fp16/bf16 مع fallback آمن على CPU)، metrics tracking (loss، LR، grad norm، tokens)، budget guard، DeviceWrapper (تجريد جهاز قابل للتوسعة في P3-07). لا أوزان خارجية ولا بيانات خارجية.
+- **التصميم:** `TrainerConfig` (dataclass frozen) يخزّن كل المعاملات ويتحقق منها. `CheckpointState` يلتقط كل ما يلزم لإعادة الإنتاج. `make_scheduler` يبني LambdaLR بدالة warmup وcosine/linear/constant. `DeviceWrapper` يدير الجهاز وautocast. `Trainer` يدمج كل ذلك في حلقة تدريب واحدة. CLI entry point لاختبار الدخان.
+- **Files created:** `src/nawa/training/trainer.py`، `tests/test_trainer.py`
+- **Files modified:** `Makefile` (هدف `train` مُنفّذ)، `experiments/log.jsonl` (EXP-0012)، `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
+- **Test results:** 219 passed / 0 failed (184 سابقة + 35 جديدة). تشمل: التحقق من 9 إعدادات غير صالئة، round-trip التكوين، warmup وcosine وlinear وconstant، ثبات constant بعد warmup، warmup صفر، انخفاض loss، تتبع metrics، حساب tokens مع accumulation، gradient accumulation، checkpoint save/load round-trip، resume من checkpoint، رفض تكوين مختلف، كمال حالة checkpoint، capture/restore RNG، DeviceWrapper CPU وfp32 nullcontext وfp16 fallback، budget guard، AdamW وSGD، summary، CLI smoke test.
+- **Metrics (EXP-0012، `configs/base_model.yaml`، seed 42، CPU بنواتين، torch 2.14.1+cpu، Python 3.14.3):** config_hash `918f4cf4877c0cca`؛ smoke test نجح في 5 خطوات على بيانات اصطناعية. هذه أرقام صحة وتشغيل، لا أرقام جودة.
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء (لا أوزان مدربة)
+- **Dataset version:** لا شيء (بيانات اصطناعية من الكود)
+- **Known limitations:** DeviceWrapper يدعم جهازًا واحدًا فقط (P3-07 يضيف multi-GPU/DDP). لا تحقق عددي رسمي لاستئناف checkpoint (P3-08). لا KV cache ولا kernel مدمج. لا تدريب على نص حقيقي (يحتاج P2 وP3-01..P3-03). الوكيل أجرى القياس بنفسه، فشرط G3 يحتاج مراجعة مستقلة.
+- **Roadmap section updated:** §2.1 G3، §2.2، §2.3، §12
+- **Next unblocked task:** P3-07 (دعم CPU/GPU/multi-GPU) أو P3-08 (تحقق عددي واختبارات checkpoint resume). كلاهما ضمن P3 ولا يحتاج G2.
+- **Duplicate-work check:** لا يوجد `src/nawa/training/trainer.py` سابق، ولا فرع أو PR لـ P3-06. P3-05 كانت حلقة مصغّرة خاصة بالـ sanity check، وهذا المدرّب هو البنية التحتية الكاملة.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -1036,5 +1057,6 @@ Limitations:
 | 1.9.0 | 2026-09-30 | R-04: فك حلقة اعتمادية P1-06. P1-06 أصبحت تثبيت تعريفات T1–T6 (تعتمد على P1-07، شرط G1)، وأُضيفت P1-06a لتثبيت الأرقام على أول نواة نصية (شرط جديد لـ G5). لم يُخفض أي هدف، ولم تُحذف أي مهمة، ولم يُغيَّر أي معرف. | R-04، ADR-0004 |
 | 1.10.0 | 2026-09-30 | P1-06 منجزة: تعريفات T1–T6 (المقياس، والعتبة دون تغيير، ونوع المرجع، ومصدر التقييم) في `eval/targets.yaml` schema v2 مع مدقّق؛ نجاح T1 مشروط بـ T2؛ لا أرقام مرجعية قبل P1-06a. | P1-06 |
 | 1.11.0 | 2026-09-30 | P1-08 منجزة: Atlas بـ 224 سجلًا متحققًا ممنوعًا من التدريب؛ إصلاح تصنيف الامتناع إلى FT-13 دون تغيير أي مقياس T؛ G1 أصبحت PENDING_REVIEW. | P1-08 |
+| 1.12.0 | 2026-09-30 | P3-06 منجزة: مدرّب كامل (optimizer/scheduler/checkpoint/resume/gradient accumulation/mixed precision/metrics/budget guard)؛ تفصيل P3-06..P3-08 إلى P3-06 وP3-07..P3-08؛ `make train` مُنفّذ. لم يُغيَّر أي هدف أو معيار. | P3-06، EXP-0012 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
