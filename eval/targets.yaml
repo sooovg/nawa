@@ -1,31 +1,108 @@
 # NAWA success targets (ROADMAP §1.3, SUCCESS_CRITERIA.md). Machine-readable form for eval/report.py (P1-07).
-# P1-06 fixes the definitions and P1-06a the numbers, on NAWA's INTERNAL reference (ADR-0004) (ADR-0003: no external baseline is a gate condition). Targets may only be RAISED, never lowered (ROADMAP §1.3, AGENTS.md).
-# Thresholds are calibrated on dev/calib only, never on frozen.
-status: provisional            # -> "definitions_fixed" in P1-06, -> "anchored" in P1-06a (ADR-0004)
+# P1-06 fixes the DEFINITIONS (metric, threshold, reference type, evaluation source) — this file.
+# P1-06a fixes the NUMBERS on the first NAWA core trained on real text (ADR-0004). Until then `anchor` fields stay null.
+# Thresholds are the ROADMAP §1.3 numbers, unchanged. Targets may only be RAISED, never lowered (ROADMAP §1.3, AGENTS.md).
+# Thresholds are calibrated on dev/calib only, never on frozen. Validated by nawa.evaluation.targets (tests/test_target_definitions.py).
+schema_version: 2
+status: definitions_fixed      # provisional -> definitions_fixed (P1-06) -> anchored (P1-06a, ADR-0004)
 baseline_reference: null       # P1-06a: run_id of the first text-trained NAWA core candidate (model-only reference), dev/calib
+
+# Where every target is measured. The same rule for all targets.
+evaluation_source:
+  runner: eval/run_eval.py                  # P1-07; aggregate report -> nawa.evaluation.report.target_view
+  compare: nawa.evaluation.report.compare   # relative targets are judged against a reference report
+  splits:
+    develop: dev        # agents iterate here
+    calibrate: calib    # thresholds and abstention cut-offs are tuned here only
+    gate: frozen        # measured once per candidate, by the Eval role only (NAWA_ROLE=eval); never tuned on
+  frozen_manifest: eval/frozen_manifest.yaml
+  confidence: wilson_95  # every rate is reported with a 95% Wilson interval
+
+# Reference types (ROADMAP §0 "meaning of baseline", ADR-0003 D0). No external model is a reference for any gate.
+reference_types:
+  model_only_core: "The same NAWA candidate core without the system layers (retrieval, tools, verification, abstention): the 'model only' ablation of P6-09. First anchored in P1-06a."
+  previous_release: "The previously accepted NAWA release (P9-06). Used from the second release on."
+  absolute: "A fixed threshold, no reference model."
+  hardware_target: "A fixed resource limit on the owner's target hardware (OD-06)."
+  optional_indicator: "Not a gate condition (ADR-0003). Measured only if a documented need appears."
+
+# Trivial internal references measured now (P1-07 backends), recorded by P1-06. They bound the metrics and
+# show why T1 needs the T2 guard. They are NOT anchors for T1-T6 (that is P1-06a).
+trivial_references:
+  git_commit: e41af10
+  reproduce: "python eval/run_eval.py --model {oracle|always_abstain} --split {dev|calib}"
+  dev:   {split_sha256_prefix: b457cabe4c8dde5e, items: 243}  # pragma: allowlist secret (split sha256 prefix, not a secret)
+  calib: {split_sha256_prefix: 80484b78d2f758d9, items: 128}  # pragma: allowlist secret (split sha256 prefix, not a secret)
+  oracle:          {dev: {T1_hallucination_rate: 0.0, T2_abstention_recall: 1.0, T2_answerable_accuracy: 1.0, T5_regression_general_accuracy: 1.0, T6_citation_accuracy: 1.0, T6_claim_accuracy: 1.0},
+                    calib: {T1_hallucination_rate: 0.0, T2_abstention_recall: 1.0, T2_answerable_accuracy: 1.0, T5_regression_general_accuracy: 1.0, T6_citation_accuracy: 1.0, T6_claim_accuracy: 1.0}}
+  always_abstain:  {dev: {T1_hallucination_rate: 0.0, T2_abstention_recall: 1.0, T2_answerable_accuracy: 0.0, T5_regression_general_accuracy: 0.0, T6_citation_accuracy: 0.0, T6_claim_accuracy: 0.0},
+                    calib: {T1_hallucination_rate: 0.0, T2_abstention_recall: 1.0, T2_answerable_accuracy: 0.0, T5_regression_general_accuracy: 0.0, T6_citation_accuracy: 0.0, T6_claim_accuracy: 0.0}}
+
 targets:
   T1:
     description: relative hallucination reduction vs the same baseline, on faithfulness + factual
     metric: summary.hallucination_rate_T1
+    report_key: T1_hallucination_rate
+    suites: [faithfulness, factual]
+    direction: lower_is_better
+    threshold_kind: relative_reduction
     min_relative_reduction: 0.50
+    reference: model_only_core
+    guard: T2_answerable   # T1 passes only if T2's answerable-accuracy condition also passes (always-abstain would score 0%)
+    anchor: null           # P1-06a
+    status: DEFINED
   T2:
     description: correct abstention when evidence is missing, without losing answerable accuracy
     metric: [suites.abstention.abstention_recall, suites.abstention.answerable_accuracy]
+    report_key: [T2_abstention_recall, T2_answerable_accuracy]
+    suites: [abstention]
+    direction: higher_is_better
+    threshold_kind: absolute_recall_and_relative_drop
     min_abstention_recall: 0.80
     max_answerable_relative_drop: 0.05
+    reference: model_only_core   # for the answerable-accuracy drop; the recall threshold is absolute
+    anchor: null                 # P1-06a
+    status: DEFINED
   T3:
     description: match or exceed a 4-8x larger model on the first domain
     metric: suites.domain.accuracy
+    suites: [domain]
+    direction: higher_is_better
+    threshold_kind: optional
+    reference: optional_indicator
+    anchor: null
     status: OPTIONAL           # ADR-0003: not a gate condition; also needs OD-01 (first domain) -> P1-02a
   T4:
     description: local build with memory <= 3GB and a target CPU speed
+    metric: [peak_rss_gb, decode_tokens_per_s]
+    evaluation_source_override: compress/bench_speed.py (P8-05); run_eval.py --latency gives interim evidence
+    direction: memory_lower_speed_higher
+    threshold_kind: absolute
     max_memory_gb: 3.0
     min_decode_tokens_per_s: null   # BLOCKED on OD-06 (target hardware)
+    reference: hardware_target
+    anchor: null
+    status: DEFINED_PARTIAL         # memory limit defined; speed waits for OD-06
   T5:
     description: no general regression larger than 3% relative
     metric: suites.regression_general.accuracy
+    report_key: T5_regression_general_accuracy
+    suites: [regression_general]
+    direction: higher_is_better
+    threshold_kind: relative_drop
     max_relative_drop: 0.03
+    reference: model_only_core      # first release; from the second release on also previous_release (P9-06)
+    anchor: null                    # P1-06a
+    status: DEFINED
   T6:
     description: citation accuracy and claim accuracy measured separately
     metric: [suites.faithfulness.citation_accuracy, suites.faithfulness.accuracy]
+    report_key: [T6_citation_accuracy, T6_claim_accuracy]
+    suites: [faithfulness]
+    direction: higher_is_better
+    threshold_kind: absolute_pair
     min_citation_accuracy: null     # P1-06a (ADR-0004)
+    min_claim_accuracy: null        # P1-06a (ADR-0004)
+    reference: absolute
+    anchor: null
+    status: DEFINED_PARTIAL         # metrics defined and reported separately; numbers in P1-06a

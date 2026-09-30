@@ -103,6 +103,11 @@ def compare(candidate: dict, baseline: dict, targets_path: Path = TARGETS) -> di
         out["T2"] = {"abstention_recall": c["T2_abstention_recall"], "answerable_relative_drop": round(drop, 4),
                      "pass": c["T2_abstention_recall"] >= t["T2"]["min_abstention_recall"]
                      and drop <= t["T2"]["max_answerable_relative_drop"]}
+    if "T1" in out and t["T1"].get("guard") == "T2_answerable":
+        # ADR-0004 D3 / P1-06: T1 cannot pass on its own; always abstaining gives 0% hallucination.
+        t2_ok = "T2" in out and out["T2"]["answerable_relative_drop"] <= t["T2"]["max_answerable_relative_drop"]
+        out["T1"]["pass_unguarded"] = out["T1"]["pass"]
+        out["T1"]["pass"] = out["T1"]["pass"] and t2_ok
     if b["T5_regression_general_accuracy"]:
         drop = 1 - c["T5_regression_general_accuracy"] / b["T5_regression_general_accuracy"]
         out["T5"] = {"relative_drop": round(drop, 4), "pass": drop <= t["T5"]["max_relative_drop"]}
