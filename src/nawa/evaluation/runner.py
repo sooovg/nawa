@@ -182,7 +182,7 @@ def run(backend: Backend, split: str, suite_names: list[str] | None = None, froz
         gens = backend.generate(its)
         mod = suites.get(name)
         for it, (text, gmeta) in zip(its, gens):
-            records.append({"id": it.id, "suite": name, "output": text, "score": mod.score(it, text),
+            records.append({"id": it.id, "suite": name, "output": text, "score": suites.attribute_abstention(mod.score(it, text), text, it.gold.get("answerable")),
                             "meta": {k: v for k, v in it.meta.items() if k != "license"},
                             "answerable": it.gold.get("answerable"), "gen": gmeta})
         print(f"[{run_id}] {name}: {len(its)} items in {time.time() - t_s:.1f}s", flush=True)
