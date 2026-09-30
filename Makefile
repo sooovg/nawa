@@ -4,11 +4,11 @@
 
 PYTHON ?= python3
 
-.PHONY: help setup test secrets ci data train eval gate repro push-model push-data
+.PHONY: help setup test secrets ci data train eval report gate repro push-model push-data
 
 help:
-	@echo "Implemented: setup test secrets ci"
-	@echo "Not yet implemented (see ROADMAP.md): data train eval gate repro push-model push-data"
+	@echo "Implemented: setup test secrets ci eval report repro"
+	@echo "Not yet implemented (see ROADMAP.md): data train gate push-model push-data"
 
 setup:
 	$(PYTHON) -m pip install -e ".[dev]"
@@ -30,12 +30,20 @@ data:
 	$(call not_implemented,data,P2-05..P2-08)
 train:
 	$(call not_implemented,train,P3-06 / P5)
-eval:
-	$(call not_implemented,eval,P1-07)
+MODEL ?= oracle
+SPLIT ?= dev
+SUITE ?= all
+eval:  ## make eval MODEL=hf:<dir> SPLIT=dev SUITE=all
+	python eval/run_eval.py --model $(MODEL) --split $(SPLIT) --suites $(SUITE)
+report:  ## make report RUN=eval/runs/<run_id>
+	python eval/report.py $(RUN) --markdown
 gate:
-	$(call not_implemented,gate,P1-07)
-repro:
-	$(call not_implemented,repro,P1-07 / P10-05)
+	$(call not_implemented,gate,P1-07 records gate evidence; automated gate checks: P10-05)
+repro:  ## rebuild dev/calib, check the pipeline end-to-end with the oracle backend, run tests
+	python -m nawa.evaluation.build --split dev --out eval/build
+	python -m nawa.evaluation.build --split calib --out eval/build
+	python eval/run_eval.py --model oracle --split dev
+	python -m pytest -q
 push-model:
 	$(call not_implemented,push-model,P4-08 / P5-09 (requires manifest + gate))
 push-data:
