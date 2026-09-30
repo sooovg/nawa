@@ -249,15 +249,92 @@ def restore_rng(state: dict[str, Any]) -> None:
 # Device wrapper (P3-06: single device; P3-07 extends to multi-GPU)
 # ---------------------------------------------------------------------------
 
-class DeviceWrapper:
-    """Thin device abstraction. Single CPU/GPU now; DDP in P3-07."""
+@dataclass(frozen=True)
+class DistributedConfig:
+    """Distributed training configuration (ROADMAP P3-07).
 
-    def __init__(self, device: str | torch.device | None = None) -> None:
+    - ``"none"``: single process (CPU or one GPU).
+    - ``"ddp"``: DistributedDataParallel across ``world_size`` processes.
+
+    DDP requires ``torch.distributed`` and a process group; the trainer handles
+    the boilerplate but the caller is responsible for launching processes
+    (e.g. ``torchrun`` or ``mp.spawn``).
+    """
+    mode: str = "none"          # "none" or "ddp"
+    world_size: int = 1
+    rank: int = 0
+    local_rank: int = 0
+    backend: str = "nccl"      # "nccl" (GPU) or "gloo" (CPU)
+
+    def validate(self) -> None:
+        if self.mode not in ("none", "ddp"):
+            raise ValueError(f"distributed mode must be 'none' or 'ddp', got {self.mode!r}")
+        if self.mode == "ddp":
+            if self.world_size < 1:
+                raise ValueError(f"world_size must be >= 1, got {self.world_size}")
+            if not 0 <= self.rank < self.world_size:
+                raise ValueError(f"rank must be in [0, {self.world_size}), got {self.rank}")
+            if self.backend not in ("nccl", "gloo"):
+                raise ValueError(f"backend must be 'nccl' or 'gloo', got {self.backend!r}")
+
+    @property
+    def is_distributed(self) -> bool:
+        return self.mode == "ddp"
+
+    @property
+    def is_main(self) -> bool:
+        """True on the rank-0 process (the one that logs, saves checkpoints, evaluates)."""
+        return self.rank == 0
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class DeviceWrapper:
+    """Device abstraction (ROADMAP P3-06 + P3-07).
+
+    - Single CPU (P3-06).
+    - Single GPU: auto-detect or explicit ``device="cuda:N"``.
+    - Multi-GPU via DDP: wrap the model with ``DistributedDataParallel`` and
+      set the device to ``cuda:local_rank``.
+
+    The wrapper is intentionally thin: it moves tensors, manages autocast,
+    and provides hooks for distributed barriers. It does NOT hide the fact
+    that multi-GPU requires a process group — the caller must initialise and
+    tear down ``torch.distributed`` (the Trainer does this in ``train()``).
+    """
+
+    def __init__(
+        self,
+        device: str | torch.device | None = None,
+        distributed: DistributedConfig | None = None,
+    ) -> None:
+        self.distributed = distributed or DistributedConfig()
+        self.distributed.validate()
+
         if device is None:
-            device = "cpu"
+            if self.distributed.is_distributed:
+                device = f"cuda:{self.distributed.local_rank}"
+            elif torch.cuda.is_available():
+                device = "cuda"
+            else:
+                device = "cpu"
+
         self.device = torch.device(device)
+        self._precision: str = "fp32"
+
+        # If CUDA is requested but unavailable, fall back to CPU with a warning
+        if self.device.type == "cuda" and not torch.cuda.is_available():
+            import warnings
+            warnings.warn("CUDA requested but not available; falling back to CPU.")
+            self.device = torch.device("cpu")
+
+        # Set the CUDA device for this process
+        if self.device.type == "cuda" and torch.cuda.is_available():
+            torch.cuda.set_device(self.device)
 
     def move(self, *tensors: torch.Tensor) -> tuple[torch.Tensor, ...]:
+        """Move tensors to the configured device."""
         if self.device.type == "cpu":
             return tensors
         return tuple(t.to(self.device) for t in tensors)
@@ -268,7 +345,6 @@ class DeviceWrapper:
         dtype = dtype_map.get(self._precision, torch.float32)
 
         if dtype == torch.float32:
-            # No autocast needed for fp32
             from contextlib import nullcontext
             return nullcontext()
 
@@ -279,10 +355,68 @@ class DeviceWrapper:
             from contextlib import nullcontext
             return nullcontext()
 
-    _precision: str = "fp32"
-
     def set_precision(self, precision: str) -> None:
         self._precision = precision
+
+    def barrier(self) -> None:
+        """Synchronise all processes in distributed mode. No-op for single process."""
+        if self.distributed.is_distributed and torch.distributed.is_initialized():
+            torch.distributed.barrier()
+
+    def wrap_model(self, model: nn.Module) -> nn.Module:
+        """Wrap the model for distributed training if needed.
+
+        Returns the model (possibly wrapped in DDP) on the correct device.
+        """
+        model = model.to(self.device)
+        if self.distributed.is_distributed and torch.distributed.is_initialized():
+            from torch.nn.parallel import DistributedDataParallel as DDP
+            # device_ids=[] for CPU (gloo), [local_rank] for CUDA (nccl)
+            device_ids = [self.distributed.local_rank] if self.device.type == "cuda" else []
+            model = DDP(model, device_ids=device_ids or None)
+        return model
+
+    def unwrap_model(self, model: nn.Module) -> nn.Module:
+        """Strip DDP wrapper to access the underlying model."""
+        from torch.nn.parallel import DistributedDataParallel as DDP
+        if isinstance(model, DDP):
+            return model.module
+        return model
+
+    def should_save(self) -> bool:
+        """Only rank 0 should save checkpoints and log."""
+        return self.distributed.is_main
+
+    def should_log(self) -> bool:
+        """Only rank 0 should print logs."""
+        return self.distributed.is_main
+
+    @staticmethod
+    def init_distributed(cfg: DistributedConfig) -> None:
+        """Initialise the process group for DDP. Call once per process."""
+        if not cfg.is_distributed:
+            return
+        if torch.distributed.is_initialized():
+            return
+        import os
+        # torchrun sets these env vars
+        if not all(k in os.environ for k in ("RANK", "WORLD_SIZE")):
+            # Manual init via env vars
+            os.environ.setdefault("RANK", str(cfg.rank))
+            os.environ.setdefault("WORLD_SIZE", str(cfg.world_size))
+            os.environ.setdefault("MASTER_ADDR", "127.0.0.1")
+            os.environ.setdefault("MASTER_PORT", "29500")
+        torch.distributed.init_process_group(
+            backend=cfg.backend,
+            rank=cfg.rank,
+            world_size=cfg.world_size,
+        )
+
+    @staticmethod
+    def cleanup_distributed() -> None:
+        """Destroy the process group. Call once at the end."""
+        if torch.distributed.is_initialized():
+            torch.distributed.destroy_process_group()
 
 
 # ---------------------------------------------------------------------------
@@ -307,6 +441,7 @@ class Trainer:
         val_fn: Callable[[], torch.Tensor] | None = None,
         config: TrainerConfig | None = None,
         device: str | torch.device | None = None,
+        distributed: DistributedConfig | None = None,
     ) -> None:
         self.config = config or TrainerConfig()
         self.config.validate()
@@ -315,9 +450,15 @@ class Trainer:
         self.train_fn = train_fn
         self.val_fn = val_fn
 
-        self.device = DeviceWrapper(device)
+        # Initialise distributed if requested
+        if distributed and distributed.is_distributed:
+            DeviceWrapper.init_distributed(distributed)
+
+        self.device = DeviceWrapper(device, distributed)
         self.device.set_precision(self.config.precision)
-        self.model.to(self.device.device)
+
+        # Wrap model for distributed training and move to device
+        self.model = self.device.wrap_model(self.model)
 
         # Seed everything
         torch.manual_seed(self.config.seed)
@@ -362,17 +503,19 @@ class Trainer:
 
     def state_dict(self) -> CheckpointState:
         """Capture the full training state for checkpointing."""
+        # Use the unwrapped model for state_dict
+        raw_model = self.device.unwrap_model(self.model)
         model_cfg = {}
-        if hasattr(self.model, "cfg") and isinstance(self.model.cfg, DecoderConfig):
-            model_cfg = self.model.cfg.to_dict()
+        if hasattr(raw_model, "cfg") and isinstance(raw_model.cfg, DecoderConfig):
+            model_cfg = raw_model.cfg.to_dict()
 
         config_hash = ""
-        if hasattr(self.model, "cfg") and isinstance(self.model.cfg, DecoderConfig):
-            config_hash = self.model.cfg.config_hash()
+        if hasattr(raw_model, "cfg") and isinstance(raw_model.cfg, DecoderConfig):
+            config_hash = raw_model.cfg.config_hash()
 
         return CheckpointState(
             step=self.step,
-            model_state=self.model.state_dict(),
+            model_state=raw_model.state_dict(),
             optimizer_state=self.optimizer.state_dict(),
             scheduler_state=self.scheduler.state_dict(),
             config=self.config.to_dict(),
@@ -402,7 +545,8 @@ class Trainer:
                 f"checkpoint: {saved_cfg}, current: {self.config}"
             )
 
-        self.model.load_state_dict(ckpt.model_state)
+        raw_model = self.device.unwrap_model(self.model)
+        raw_model.load_state_dict(ckpt.model_state)
         self.optimizer.load_state_dict(ckpt.optimizer_state)
         self.scheduler.load_state_dict(ckpt.scheduler_state)
         self.step = ckpt.step
@@ -498,21 +642,25 @@ class Trainer:
 
                 # Evaluation
                 if self.val_fn and (self.step + 1) % self.config.eval_interval == 0:
-                    val_loss = self._evaluate()
-                    self.eval_history.append(EvalResult(
-                        step=self.step,
-                        val_loss=val_loss,
-                        elapsed_s=round(elapsed, 3),
-                    ))
+                    self.device.barrier()
+                    if self.device.should_save():
+                        val_loss = self._evaluate()
+                        self.eval_history.append(EvalResult(
+                            step=self.step,
+                            val_loss=val_loss,
+                            elapsed_s=round(elapsed, 3),
+                        ))
 
-                # Checkpoint
+                # Checkpoint (rank 0 only)
                 if (self.step + 1) % self.config.checkpoint_interval == 0:
-                    self.save_checkpoint()
+                    if self.device.should_save():
+                        self.save_checkpoint()
+                    self.device.barrier()
 
                 self.step += 1
 
-                # Logging
-                if self.step % self.config.log_interval == 0:
+                # Logging (rank 0 only)
+                if self.step % self.config.log_interval == 0 and self.device.should_log():
                     import sys as _sys
                     last = self.train_history[-1]
                     print(
@@ -575,6 +723,7 @@ class Trainer:
                 "device": str(self.device.device),
                 "threads": torch.get_num_threads(),
                 "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+                "distributed": self.device.distributed.to_dict(),
             },
             "software": {
                 "python": platform.python_version(),

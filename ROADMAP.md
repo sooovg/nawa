@@ -130,7 +130,7 @@ Core Model
 | G0 الميثاق والحدود وCI مبدئي (P0) | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
 | G1 القياس والمرجع الداخلي (P1) | PENDING_REVIEW | 2026-09-30 | كل شروط G1 في §4 لها دليل: مراجع P1-07 ونواة P3-05 محفوظة (EXP-0008..0010)؛ frozen له hash ومكان خاص (P1-03)؛ لا بيانات تدريب نصية بعد، وسجلات Atlas المشتقة من التقييم ممنوعة من التدريب (P1-08)؛ أمر إعادة التقرير موجود (P1-07). P1-01..P1-03 وP1-06 وP1-07 وP1-08 منجزة؛ P1-04 وP1-05 SUPERSEDED؛ P1-02a محجوبة بـ OD-01 وليست شرطًا لـ G1؛ P1-06a شرط لـ G5 (ADR-0004). تنتظر مراجعة المالك (§0: قاعدة استقلال الحكم) |
 | G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | — | — |
-| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (`4fc691e`)؛ P3-05 منجزة: "XOR ينجح" و"tiny LM يتعلم" مثبتان (EXP-0008، EXP-0009)؛ P3-06 منجزة: trainer كامل مع checkpoint/resume وgradient accumulation وmixed precision (`tests/test_trainer.py`، 35 اختبارًا)؛ باقي شرطا الاستئناف (P3-07/P3-08) والـ Tokenizer (P3-01..P3-03)؛ لا يُغلق G3 قبل G0–G2 |
+| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (`4fc691e`)؛ P3-05 منجزة: "XOR ينجح" و"tiny LM يتعلم" مثبتان (EXP-0008، EXP-0009)؛ P3-06 منجزة: trainer كامل مع checkpoint/resume وgradient accumulation وmixed precision (`tests/test_trainer.py`، 35 اختبارًا)؛ P3-07 منجزة: DeviceWrapper وDistributedConfig لدعم CPU/GPU/multi-GPU (`tests/test_device_support.py`، 28 اختبارًا)؛ باقي شرط الاستئناف العددي (P3-08) والـ Tokenizer (P3-01..P3-03)؛ لا يُغلق G3 قبل G0–G2 |
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | — | — |
@@ -173,7 +173,8 @@ Core Model
 | P3-04 | DONE | agent-P3-04 | `src/nawa/model/{config,layers,decoder}.py` (نواة decoder مرجعية من الصفر، مكوّنات قابلة للتبديل لتجارب P4)؛ `configs/base_model.yaml`؛ `tests/test_reference_decoder.py` (49 اختبارًا)؛ EXP-0006 | 2026-09-30 |
 | P3-05 | DONE | agent-P3-05 | `src/nawa/training/sanity.py` (XOR + tiny character LM على مصدر ماركوف عربي اصطناعي بإنتروبيا محسوبة بدقة)؛ `make sanity`؛ `tests/test_sanity_training.py` (9 اختبارات)؛ EXP-0007 (FAILED) وEXP-0008 وEXP-0009 (PASSED) | 2026-09-30 |
 | P3-06 | DONE | agent-P3-06 | `src/nawa/training/trainer.py` (Trainer، TrainerConfig، CheckpointState، DeviceWrapper، scheduler، optimizer، gradient accumulation، mixed precision، metrics، budget guard)؛ `Makefile` (`make train`)؛ `tests/test_trainer.py` (35 اختبارًا)؛ EXP-0012 | 2026-09-30 |
-| P3-07..P3-08 | PLANNED | — | — | — |
+| P3-07 | DONE | agent-P3-07 | `src/nawa/training/trainer.py` (DistributedConfig، DeviceWrapper: GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، should_save/should_log، init/cleanup_distributed)؛ `tests/test_device_support.py` (28 اختبارًا، 1 تخطي)؛ EXP-0013 | 2026-09-30 |
+| P3-08 | PLANNED | — | — | — |
 | P4-01..P4-08 | PLANNED | — | — | — |
 | P5-01..P5-10 | PLANNED | — | — | — |
 | P6-01..P6-09 | PLANNED | — | — | — |
@@ -453,6 +454,25 @@ Core Model
 - **Roadmap section updated:** §2.1 G3، §2.2، §2.3، §12
 - **Next unblocked task:** P3-07 (دعم CPU/GPU/multi-GPU) أو P3-08 (تحقق عددي واختبارات checkpoint resume). كلاهما ضمن P3 ولا يحتاج G2.
 - **Duplicate-work check:** لا يوجد `src/nawa/training/trainer.py` سابق، ولا فرع أو PR لـ P3-06. P3-05 كانت حلقة مصغّرة خاصة بالـ sanity check، وهذا المدرّب هو البنية التحتية الكاملة.
+
+### P3-07 — دعم CPU/GPU/multi-GPU (2026-09-30)
+
+- **Task ID:** P3-07
+- **Owner:** agent-P3-07
+- **Status:** DONE
+- **Scope:** توسيع `DeviceWrapper` (من P3-06) لدعم CPU، GPU واحد (auto-detect)، وmulti-GPU عبر DDP. إضافة `DistributedConfig` للتحقق من mode/world_size/rank/backend. عدم ربط الكود بجهاز واحد: كل المسارات قابلة للتبديل.
+- **التصميم:** `DistributedConfig` (dataclass frozen) يتحقق من صحة الإعداد. `DeviceWrapper` يوسّع ليدعم: auto-detect CUDA، fallback آمن إلى CPU مع تحذير، `wrap_model`/`unwrap_model` لـ DDP، `barrier` للتزامن، `should_save`/`should_log` لـ rank-0 فقط، `init_distributed`/`cleanup_distributed` ثابتتان. Trainer يدمج `DistributedConfig` ويستخدم `unwrap_model` في checkpoint.
+- **Files modified:** `src/nawa/training/trainer.py` (DistributedConfig، DeviceWrapper موسّع، Trainer يقبل distributed)، `ROADMAP.md`
+- **Files created:** `tests/test_device_support.py`، `experiments/log.jsonl` (EXP-0013)
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
+- **Test results:** 247 passed / 0 failed / 1 skipped (184 + 35 + 28 جديدة؛ 1 تخطي: CUDA not available). تشمل: DistributedConfig defaults وddp valid وnon-zero rank و5 حالات غير صالحة وround-trip؛ DeviceWrapper CPU default وexplicit CPU وmove no-op وCUDA fallback وfp32 nullcontext وbf16 fallback وbarrier no-op وshould_save true/false وwrap_model no DDP without process group وunwrap strips DDP وunwrap passes through non-DDP؛ Trainer accepts distributed config وsummary includes distributed info وcheckpoint uses unwrapped model وtrain loop respects should_log؛ init_distributed noop وcleanup safe.
+- **Metrics (EXP-0013):** لا يوجد GPU؛ التجربة على CPU. هذه أرقام صحة وتشغيل.
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Known limitations:** لا اختبار DDP فعلي متعدد العمليات (يحتاج torchrun أو mp.spawn). DDP paths مختبرة عبر عدم تهيئة process group. CUDA path غير مختبر (لا GPU). الوكيل أجرى القياس بنفسه.
+- **Roadmap section updated:** §2.1 G3، §2.2، §12
+- **Next unblocked task:** P3-08 (تحقق عددي، seeds ثابتة، استكمال من checkpoint، اختبارات unit/integration/numerical)
+- **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P3-07. DeviceWrapper من P3-06 كان single-device فقط؛ هذا التوسيع يضيف GPU وDDP.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -1058,5 +1078,6 @@ Limitations:
 | 1.10.0 | 2026-09-30 | P1-06 منجزة: تعريفات T1–T6 (المقياس، والعتبة دون تغيير، ونوع المرجع، ومصدر التقييم) في `eval/targets.yaml` schema v2 مع مدقّق؛ نجاح T1 مشروط بـ T2؛ لا أرقام مرجعية قبل P1-06a. | P1-06 |
 | 1.11.0 | 2026-09-30 | P1-08 منجزة: Atlas بـ 224 سجلًا متحققًا ممنوعًا من التدريب؛ إصلاح تصنيف الامتناع إلى FT-13 دون تغيير أي مقياس T؛ G1 أصبحت PENDING_REVIEW. | P1-08 |
 | 1.12.0 | 2026-09-30 | P3-06 منجزة: مدرّب كامل (optimizer/scheduler/checkpoint/resume/gradient accumulation/mixed precision/metrics/budget guard)؛ تفصيل P3-06..P3-08 إلى P3-06 وP3-07..P3-08؛ `make train` مُنفّذ. لم يُغيَّر أي هدف أو معيار. | P3-06، EXP-0012 |
+| 1.13.0 | 2026-09-30 | P3-07 منجزة: DistributedConfig وDeviceWrapper (GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، rank-0 save/log)؛ تفصيل P3-07..P3-08 إلى P3-07 وP3-08. لم يُغيَّر أي هدف أو معيار. | P3-07، EXP-0013 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
