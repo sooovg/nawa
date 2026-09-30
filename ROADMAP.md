@@ -128,7 +128,7 @@ Core Model
 | البوابة | الحالة | آخر تحديث | الدليل |
 |---|---|---|---|
 | G0 الميثاق والحدود وCI مبدئي (P0) | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
-| G1 القياس والمرجع الداخلي (P1) | IN_PROGRESS | 2026-09-30 | P1-01 وP1-02 وP1-03 وP1-07 منجزة؛ P1-04 وP1-05 SUPERSEDED (ADR-0003)؛ P1-06 منجزة (تعريفات الأهداف، ADR-0004)؛ P1-06a تنتظر أول نواة نصية وتخص G5؛ P1-08 مخطط |
+| G1 القياس والمرجع الداخلي (P1) | PENDING_REVIEW | 2026-09-30 | كل شروط G1 في §4 لها دليل: مراجع P1-07 ونواة P3-05 محفوظة (EXP-0008..0010)؛ frozen له hash ومكان خاص (P1-03)؛ لا بيانات تدريب نصية بعد، وسجلات Atlas المشتقة من التقييم ممنوعة من التدريب (P1-08)؛ أمر إعادة التقرير موجود (P1-07). P1-01..P1-03 وP1-06 وP1-07 وP1-08 منجزة؛ P1-04 وP1-05 SUPERSEDED؛ P1-02a محجوبة بـ OD-01 وليست شرطًا لـ G1؛ P1-06a شرط لـ G5 (ADR-0004). تنتظر مراجعة المالك (§0: قاعدة استقلال الحكم) |
 | G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | — | — |
 | G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (`4fc691e`)؛ P3-05 منجزة: "XOR ينجح" و"tiny LM يتعلم" مثبتان (EXP-0008، EXP-0009)؛ باقي شرطا الاستئناف (P3-06/P3-08) والـ Tokenizer (P3-01..P3-03)؛ لا يُغلق G3 قبل G0–G2 |
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
@@ -167,7 +167,7 @@ Core Model
 | P1-06 | DONE | agent-P1-06 | تعريفات T1–T6 مثبتة في `eval/targets.yaml` (schema v2): المقياس، والعتبة (أرقام §1.3 دون تغيير)، ونوع المرجع، ومصدر التقييم؛ T1 مشروط بـ T2؛ مدقّق `nawa.evaluation.targets`؛ الأرقام في P1-06a (ADR-0004) | 2026-09-30 |
 | P1-06a | PLANNED | — | تثبيت أرقام T1 وT2 وT5 وT6 على أول نواة NAWA مدربة على نص حقيقي؛ تنتظر أول مرشح من P5؛ شرط لـ G5 (ADR-0004) | 2026-09-30 |
 | P1-07 | DONE | bootstrap-agent | `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/{runner,report}.py`؛ `make eval` و`make report` و`make repro`؛ `tests/test_eval_runner.py` (10 اختبارات) | 2026-09-30 |
-| P1-08 | PLANNED | — | — | — |
+| P1-08 | DONE | agent-P1-08 | أول 224 سجلًا في Atlas (`data_pipeline/atlas/incoming/`)، كلها متحققة حتميًا وممنوعة من التدريب؛ `nawa.atlas` (schema، ingest، validate)؛ إصلاح تصنيف الامتناع إلى FT-13 | 2026-09-30 |
 | P2-01..P2-08 | PLANNED | — | — | — |
 | P3-01..P3-03 | PLANNED | — | — | — |
 | P3-04 | DONE | agent-P3-04 | `src/nawa/model/{config,layers,decoder}.py` (نواة decoder مرجعية من الصفر، مكوّنات قابلة للتبديل لتجارب P4)؛ `configs/base_model.yaml`؛ `tests/test_reference_decoder.py` (49 اختبارًا)؛ EXP-0006 | 2026-09-30 |
@@ -407,6 +407,26 @@ Core Model
 - **Roadmap section updated:** §2.1 G1، §2.2، §2.3، §12
 - **Next unblocked task:** P1-08 (تسجيل أول حالات فشل في Atlas)، ثم P3-06 وفق ترتيب الخارطة.
 - **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P1-06. `eval/targets.yaml` وسّعته هذه المهمة بدل إنشاء ملف أهداف جديد.
+
+### P1-08 — أول حالات فشل في Atlas بإجابات متحققة (2026-09-30)
+
+- **Task ID:** P1-08
+- **Owner:** agent-P1-08
+- **Status:** DONE
+- **Scope:** بناء Atlas بمواصفات `AGENTS.md` §9، وتسجيل أول حالات الفشل مع إجاباتها المتحققة. المصدر الوحيد المتاح اليوم، دون نموذج خارجي ودون نواة نصية، هو المرجع الداخلي `always_abstain` (P1-07) على dev. لم يُشغَّل أي نموذج خارجي. `oracle` لا يفشل، فلا سجلات له.
+- **اكتشاف وإصلاح أثناء المهمة:** مصححات المجموعات كانت تعطي الامتناع على سؤال قابل للإجابة فئة المجموعة الافتراضية. مثال ذلك FT-03 (خطأ حساب) لامتناع في reasoning_math، وFT-15 وFT-09 وFT-10 وFT-05 وFT-08 وFT-16 وFT-06 في مجموعات أخرى. وكان 16 فشلًا في code بلا فئة أصلًا. في تشغيل `always_abstain` بلغ الخطأ 133 تصنيفًا خاطئًا و16 فشلًا بلا فئة من 224. الإصلاح في `suites.attribute_abstention`، ويطبقه `runner`: الامتناع الخاطئ على سؤال قابل للإجابة يُصنف FT-13 (امتناع زائد)، والفئة الأصلية تُحفظ في `failure_suite_default` للتتبع. `correct` لم يتغير، ولم يتغير أي مقياس من مقاييس T1–T6، والاختبار `test_recorded_trivial_references_match_a_fresh_run` يثبت ذلك.
+- **قواعد Atlas:** الفئة لا بد أن تكون من `docs/failure_taxonomy.md`، والفشل بلا فئة يُرفض ولا تُخمَّن له فئة. حالة `verified` تعني فحصًا حتميًا مستقلًا: الإجابة المرجعية تُصحَّح صحيحة، والمخرج السيئ يُصحَّح خاطئًا. **السجلات المشتقة من التقييم ممنوعة من التدريب** (`train_eligible: false`) لمنع التسرب، و`content_hash` يمكّن P2-05 من استبعادها. frozen وتشغيلات `--limit` مرفوضة. الملفات تُضاف ولا يُكتب فوقها. المراجع مسجَّل كـ `automated:deterministic-scorer (no human review yet)`، لأن أحدًا لم يراجعها يدويًا.
+- **Files created:** `src/nawa/atlas.py`، `data_pipeline/atlas/README.md`، `data_pipeline/atlas/incoming/2026-09-30-dev-always-abstain.jsonl`، `tests/test_atlas.py`
+- **Files modified:** `src/nawa/evaluation/suites/__init__.py`، `src/nawa/evaluation/runner.py`، `eval/suites/README.md`، `ROADMAP.md`، `experiments/log.jsonl` (EXP-0011)
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `python -m nawa.atlas validate data_pipeline/atlas/incoming/*.jsonl`، `pre-commit run --all-files`، `detect-secrets-hook`
+- **Test results:** 184 passed / 0 failed (14 اختبارًا جديدًا). السجلات: 224 صالحة.
+- **Metrics (EXP-0011):** التشغيل `dev-always-abstain-20260930T150139Z` على commit `5f7913b` (نظيف). عدد السجلات 224، كلها verified وكلها FT-13، موزعة على المجموعات: faithfulness 30، وfactual 30، وreasoning_math 30، وarabic 30، وregression_general 25، وtool_use 24، وrobustness 24، وcode 16، وabstention 15. العدد 243 − 224 = 19 عنصرًا نجح فيها الامتناع، وهي 15 توأمًا بلا دليل و4 فخاخ حزم وهمية.
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Known limitations:** كل السجلات من نمط فشل واحد (امتناع زائد) لمرجع تافه، فهي تثبت خط الإدخال والتحقق لا تنوع الأخطاء. أول إخفاقات متنوعة لنواة NAWA تأتي بعد وجود نواة نصية، أو عبر P2-01 (`mine.py`). علامات الامتناع (`ABSTAIN_MARKERS`) قد تصنّف إجابة خاطئة تحتوي عبارة مثل "غير موجود" على أنها امتناع. لا توجد مراجعة بشرية بعد.
+- **Roadmap section updated:** §2.1 G1 (PENDING_REVIEW)، §2.2، §2.3، §12
+- **Next unblocked task:** P3-06 (المدرّب الكامل: optimizer وscheduler وcheckpoint وresume على CPU). ومراجعة المالك لـ G1.
+- **Duplicate-work check:** لا يوجد `data_pipeline/atlas/` ولا فرع أو PR سابق لـ P1-08. P2-01 (`mine.py`) وP2-02 (`verify.py`) مهمتان مختلفتان: هذه المهمة تبني السجل والتحقق الحتمي من تشغيلات التقييم فقط.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -1010,5 +1030,6 @@ Limitations:
 | 1.8.0 | 2026-09-30 | P3-05 منجزة (EXP-0007 FAILED، وEXP-0008 وEXP-0009 PASSED بمعايير مسجلة مسبقًا)؛ تفصيل P3-05..P3-08 إلى P3-05 وP3-06..P3-08؛ الإبلاغ عن تعارض اعتمادية P1-06 دون تغييرها. لم يُغيَّر أي هدف أو معيار. | P3-05 |
 | 1.9.0 | 2026-09-30 | R-04: فك حلقة اعتمادية P1-06. P1-06 أصبحت تثبيت تعريفات T1–T6 (تعتمد على P1-07، شرط G1)، وأُضيفت P1-06a لتثبيت الأرقام على أول نواة نصية (شرط جديد لـ G5). لم يُخفض أي هدف، ولم تُحذف أي مهمة، ولم يُغيَّر أي معرف. | R-04، ADR-0004 |
 | 1.10.0 | 2026-09-30 | P1-06 منجزة: تعريفات T1–T6 (المقياس، والعتبة دون تغيير، ونوع المرجع، ومصدر التقييم) في `eval/targets.yaml` schema v2 مع مدقّق؛ نجاح T1 مشروط بـ T2؛ لا أرقام مرجعية قبل P1-06a. | P1-06 |
+| 1.11.0 | 2026-09-30 | P1-08 منجزة: Atlas بـ 224 سجلًا متحققًا ممنوعًا من التدريب؛ إصلاح تصنيف الامتناع إلى FT-13 دون تغيير أي مقياس T؛ G1 أصبحت PENDING_REVIEW. | P1-08 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

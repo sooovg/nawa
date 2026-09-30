@@ -15,7 +15,7 @@ python -m nawa.evaluation.build --split calib --out eval/build
 - **Verifiable gold.** Every item has a machine-checkable answer. Numbers are computed, code is executed against tests computed from a reference solution, and context answers come from a generated context.
 - **Fictional entities.** Context-based suites use invented towns, rivers, and people built from syllables (`synth.py`). A model cannot answer from memory, so a correct answer must come from the context, and a wrong one is a hallucination.
 - **No overlap.** Items are de-duplicated by `content_hash` (a hash of the messages). calib excludes dev, and frozen excludes dev and calib.
-- **Taxonomy-linked failures.** Every failed item carries an FT-xx id from `docs/failure_taxonomy.md`.
+- **Taxonomy-linked failures.** Every failed item carries an FT-xx id from `docs/failure_taxonomy.md`. A wrong abstention on an answerable item is FT-13 (over-abstention) whatever the suite; the scorer's own default is kept in `failure_suite_default` (`suites.attribute_abstention`, P1-08).
 - **Tests guard the scorers.** The oracle must score 100%, and noise answers (empty, random, "42") must score at most 5% (0% for tool_use). See `tests/test_eval_suites.py`.
 
 ## Suites
