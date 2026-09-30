@@ -108,7 +108,7 @@ Core Model
 
 | البوابة | الحالة | آخر تحديث | الدليل |
 |---|---|---|---|
-| G0 الميثاق | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 منجزتان؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
+| G0 الميثاق | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
 | G1 المستودع وCI | PLANNED | — | — |
 | G2 baseline والتقييم | PLANNED | — | — |
 | G3 البيانات وأطلس الإخفاقات | PLANNED | — | — |
@@ -132,7 +132,7 @@ Core Model
 | P0-05 | DONE | bootstrap-agent | بنية المستودع، `AGENTS.md`، `.gitignore`؛ `tests/test_repository_structure.py` (30 اختبارًا ناجحًا) | 2026-09-30 |
 | P0-06 | DONE | bootstrap-agent | 8 مستودعات HF خاصة وفارغة تحت `vuuuv`؛ `configs/hf_repos.yaml`؛ `tests/test_config_loading.py` (5 اختبارات ناجحة) | 2026-09-30 |
 | P0-07 | BLOCKED | — | `configs/budget.yaml` يحتاج أرقام المالك (ساعات GPU، التكلفة) | 2026-09-30 |
-| P0-08 | IN_PROGRESS | bootstrap-agent | `ROADMAP.md` وسجل الحالة و`.github/CODEOWNERS` و`ci.yml`؛ حماية `main` بعد الدفع الأول | 2026-09-30 |
+| P0-08 | DONE | bootstrap-agent | `ROADMAP.md` وسجل الحالة و`.github/CODEOWNERS` و`ci.yml`؛ CI نجح على `d34f3f1`؛ `main` محمي (PR إلزامي، فحص `test`، منع force push والحذف، enforce_admins) | 2026-09-30 |
 | P1-01..P1-08 | PLANNED | — | — | — |
 | P2-01..P2-08 | PLANNED | — | — | — |
 | P3-01..P3-10 | PLANNED | — | — | — |
@@ -148,7 +148,7 @@ Core Model
 
 ## 2.3 تقارير إنجاز المهام
 
-### P0-05 + P0-06 — تأسيس المستودع وربط HF (2026-09-30)
+### P0-05 + P0-06 + P0-08 — تأسيس المستودع وربط HF وحماية main (2026-09-30)
 
 - **Task ID:** P0-05، P0-06 (ومساهمات جزئية في P0-01..P0-04 وP0-08)
 - **Owner:** bootstrap-agent
@@ -159,12 +159,12 @@ Core Model
 - **Tests executed:** `python -m pytest` و`detect-secrets-hook --baseline .secrets.baseline` و`pre-commit run --all-files`
 - **Test results:** 35 passed / 0 failed؛ detect-secrets نظيف؛ جميع hooks الـ pre-commit نجحت
 - **Metrics:** لا يوجد. مرحلة تأسيس بلا نموذج.
-- **Git commit:** الـ commit الأول على `main` (`chore: initialize NAWA project structure`)؛ يُسجَّل الـ hash في PR المتابعة
+- **Git commit:** `d34f3f1374bdc036474c22bf53da667ef1082567` على `main` (`chore: initialize NAWA project structure`)؛ CI `test`: success
 - **HF repository/revision:** `vuuuv/nawa-data`، `vuuuv/nawa-eval` (dataset)؛ `vuuuv/nawa-core`، `vuuuv/nawa-practical-baseline`، `vuuuv/nawa-verifier`، `vuuuv/nawa-gguf`، `vuuuv/nawa-adapters` (model)؛ `vuuuv/nawa-demo` (space، static). جميعها `private=true` وفارغة، ولم يُرفع إليها شيء.
 - **Dataset version:** لا يوجد
 - **Known limitations:** انظر ADR-0001: C1 مستودع GitHub عام، C2 وجود `vuuuv/nawa` سابقًا، C3 ملفات قالب Space، C4 وC5 تعارضات داخل الخارطة، C6 `RISK_REGISTER.md` و`budget.yaml` غير منشأين.
 - **Roadmap section updated:** §2.1، §2.2، §2.3، §12
-- **Next unblocked task:** P0-08 (حماية `main` وتشغيل CI)، ثم P1-01 (`docs/failure_taxonomy.md`). المهام P0-01 وP0-03 وP0-07 مجمدة بانتظار قرارات المالك.
+- **Next unblocked task:** P1-01 (`docs/failure_taxonomy.md`). المهام P0-01 وP0-03 وP0-07 مجمدة بانتظار قرارات المالك.
 - **Duplicate-work check:** المستودع البعيد `sooovg/nawa` كان فارغًا (size 0، بلا commits). مستودعات HF الثمانية لم تكن موجودة قبل الإنشاء. لا فروع ولا PRs سابقة.
 
 ---
@@ -732,5 +732,6 @@ Limitations:
 |---|---|---|---|
 | 1.0.0-unified | 2026-09-30 | دمج خارطة المشروع، دستور الوكلاء، مساري S/B، Atlas، gates، frozen eval، Git/HF، وعدم التكرار | الحزمة المرفقة + الخارطة السابقة |
 | 1.0.1 | 2026-09-30 | تفصيل صف P0 إلى مهام فردية، تحديث G0، إضافة §2.3 تقارير الإنجاز. لم تُعدَّل الأهداف ولا المعرفات. | P0-05، P0-06، ADR-0001 |
+| 1.0.2 | 2026-09-30 | تسجيل commit التأسيس `d34f3f1`، ونجاح CI، وحماية `main`، وإغلاق P0-08. | P0-08 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
