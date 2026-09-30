@@ -78,3 +78,17 @@ def test_owner_decision_register_exists() -> None:
 def test_changelog_has_entries() -> None:
     log = ROADMAP[ROADMAP.index("# 12. سجل التغييرات"):]
     assert len(re.findall(r"^\| \d+\.\d+\.\d+", log, flags=re.M)) >= 2
+
+
+def test_p1_06_is_not_circular_and_anchoring_is_a_g5_condition() -> None:
+    """R-04 / ADR-0004: P1-06 must not wait for a model that cannot read text, and the numeric anchoring
+    (P1-06a) must block G5, not G1, so there is no G1 <-> P5 loop."""
+    rows = {r[0]: r for r in status_rows()}
+    assert "P1-06" in rows and "P1-06a" in rows
+    assert "P3-05" not in rows["P1-06"][3], rows["P1-06"]
+    assert "ADR-0004" in rows["P1-06"][3] and "G5" in rows["P1-06a"][3]
+    phases = section("# 4. مراحل التنفيذ والبوابات", "# 5. قواعد Git")
+    g1 = phases[phases.index("### G1"):phases.index("## P2")]
+    g5 = phases[phases.index("### G5"):phases.index("## P6")]
+    assert "P1-06a" not in g1 and "P1-06a" in g5
+    assert (ROOT / "docs/decisions/ADR-0004-p1-06-dependency.md").is_file()
