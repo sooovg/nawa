@@ -154,7 +154,7 @@ Core Model
 | P1-04 | PLANNED | — | — | — |
 | P1-05 | PLANNED | — | — | — |
 | P1-06 | PLANNED | — | — | — |
-| P1-07 | PLANNED | — | — | — |
+| P1-07 | DONE | bootstrap-agent | `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/{runner,report}.py`؛ `make eval` و`make report` و`make repro`؛ `tests/test_eval_runner.py` (10 اختبارات) | 2026-09-30 |
 | P1-08 | PLANNED | — | — | — |
 | P2-01..P2-08 | PLANNED | — | — | — |
 | P3-01..P3-08 | PLANNED | — | — | — |
@@ -263,6 +263,25 @@ Core Model
 - **Roadmap section updated:** §2.2، §2.3، §12
 - **Next unblocked task:** P1-07 (المشغّل والتقرير)، ثم P1-04
 - **Duplicate-work check:** لم يكن في `nawa-eval` سوى `.gitattributes`، ولم يكن يوجد `FROZEN.sha256`.
+
+### P1-07 — مشغّل التقييم والتقرير (2026-09-30)
+
+- **Task ID:** P1-07
+- **Owner:** bootstrap-agent
+- **Status:** DONE
+- **Scope:** مشغّل تقييم بثلاث واجهات (oracle، always_abstain، hf)، وتقرير بفواصل ثقة Wilson 95% وسجل نسب كامل، وملف أهداف آلي، وأمر إعادة إنتاج واحد.
+- **Files created:** `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/runner.py`، `src/nawa/evaluation/report.py`، `tests/test_eval_runner.py`
+- **Files modified:** `Makefile` (`eval`، `report`، `repro`)، `ROADMAP.md`
+- **Tests executed:** `python -m pytest`، `make repro`، تجربة دخان على Qwen2.5-0.5B (`--limit 2`، غير محفوظة)
+- **Test results:** 83 passed / 0 failed؛ oracle يحقق 100% على 243 عنصرًا؛ always_abstain يحقق abstention_recall 100% وanswerable_accuracy 0%، فيسقط في T2
+- **Metrics:** لا أرقام baseline بعد (P1-04)
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Dataset version:** dev (243)
+- **Known limitations:** التقرير يحفظ المقاييس المجمعة فقط، والتنبؤات تبقى في `eval/runs/` المتجاهل. ملاحظة للمهمة P1-06: T1 وحده يمكن التحايل عليه بالامتناع الدائم (0% هلوسة)، فيجب قراءته مع الدقة ومع T2. أتمتة `make gate` لم تُنفذ بعد وتبقى رافضة.
+- **Roadmap section updated:** §2.2، §2.3، §12
+- **Next unblocked task:** P1-04
+- **Duplicate-work check:** لم يكن يوجد مشغّل أو تقرير سابق، وكانت أهداف `make eval/repro` تُرجع not_implemented.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -854,5 +873,6 @@ Limitations:
 | 1.2.0 | 2026-09-30 | تفصيل صفوف P1 إلى مهام فردية؛ P1-01 منجزة. | P1-01 |
 | 1.3.0 | 2026-09-30 | P1-02 منجزة لتسع مجموعات؛ إضافة المهمة الفرعية P1-02a (`domain`) وهي BLOCKED بقرار OD-01. | P1-02 |
 | 1.4.0 | 2026-09-30 | P1-03 منجزة: frozen v1 خاص على HF (`frozen-v1`) ومثبت بالـ hash في Git. | P1-03 |
+| 1.5.0 | 2026-09-30 | P1-07 منجزة: المشغّل والتقرير وملف الأهداف وأمر `make repro`. بقي `make gate` رافضًا: رسالته أصبحت تنسب الفحص الآلي للبوابات إلى P10-05، ولم تُحذف أي مهمة. | P1-07 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
