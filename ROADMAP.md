@@ -147,7 +147,14 @@ Core Model
 | P0-07a | DONE | bootstrap-agent | `configs/budget.yaml` بسقوف `null` وعتبة 80%؛ `src/nawa/budget.py` يمنع العمل على GPU والعمل المدفوع؛ اختباران | 2026-09-30 |
 | P0-08 | DONE | bootstrap-agent | `ROADMAP.md` وسجل الحالة و`.github/CODEOWNERS` و`ci.yml`؛ CI نجح على `d34f3f1`؛ `main` محمي (PR إلزامي، فحص `test`، منع force push والحذف، enforce_admins) | 2026-09-30 |
 | R-01 | DONE | bootstrap-agent | اتساق الخارطة: ADR-0002، `tests/test_roadmap_consistency.py` | 2026-09-30 |
-| P1-01..P1-08 | PLANNED | — | — | — |
+| P1-01 | DONE | bootstrap-agent | `docs/failure_taxonomy.md`: FT-01..FT-16، منها 11 فئة تطلبها P1-01؛ `src/nawa/evaluation/taxonomy.py`؛ `tests/test_failure_taxonomy.py` (4 اختبارات) | 2026-09-30 |
+| P1-02 | PLANNED | — | — | — |
+| P1-03 | PLANNED | — | — | — |
+| P1-04 | PLANNED | — | — | — |
+| P1-05 | PLANNED | — | — | — |
+| P1-06 | PLANNED | — | — | — |
+| P1-07 | PLANNED | — | — | — |
+| P1-08 | PLANNED | — | — | — |
 | P2-01..P2-08 | PLANNED | — | — | — |
 | P3-01..P3-08 | PLANNED | — | — | — |
 | P4-01..P4-08 | PLANNED | — | — | — |
@@ -198,6 +205,25 @@ Core Model
 - **Roadmap section updated:** §2.2، §2.3، §4 (P0-07a)، §12
 - **Next unblocked task:** P1-01
 - **Duplicate-work check:** لم يسبق إنشاء `RISK_REGISTER.md` ولا `budget.yaml`؛ هذه المهام لم تُحجز في أي فرع آخر.
+
+### P1-01 — تصنيف الإخفاقات (2026-09-30)
+
+- **Task ID:** P1-01
+- **Owner:** bootstrap-agent
+- **Status:** DONE
+- **Scope:** تصنيف الإخفاقات بمعرفات ثابتة قابلة للقراءة الآلية، لتستخدمه مجموعات التقييم والأطلس.
+- **Files created:** `docs/failure_taxonomy.md`، `src/nawa/evaluation/{__init__,taxonomy}.py`، `tests/test_failure_taxonomy.py`
+- **Files modified:** `ROADMAP.md`
+- **Tests executed:** `python -m pytest`، `pre-commit run --all-files`
+- **Test results:** 53 passed / 0 failed
+- **Metrics:** 16 فئة (FT-01..FT-16)؛ الفئات الـ 11 المطلوبة في P1-01 كلها موجودة
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Dataset version:** لا شيء
+- **Known limitations:** FT-12..FT-16 إضافات تقيسها مجموعات AGENTS §10 مباشرة؛ الإضافة لا تغير أي معيار.
+- **Roadmap section updated:** §2.2، §2.3، §12
+- **Next unblocked task:** P1-02
+- **Duplicate-work check:** لم يكن الملف موجودًا، ولا فرع أو PR سابق للمهمة P1-01.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -785,5 +811,6 @@ Limitations:
 | 1.0.2 | 2026-09-30 | تسجيل commit التأسيس `d34f3f1`، ونجاح CI، وحماية `main`، وإغلاق P0-08. | P0-08 |
 | 1.1.0 | 2026-09-30 | اتساق الخارطة: مواءمة §2.1 مع بوابات §4 وإضافة G10؛ مواءمة نطاقات §2.2 مع قوائم §4 (P3 وP4 وP5 وP6)؛ إضافة §2.4 لسجل قرارات المالك؛ إضافة قواعد التشغيل المعتمدة في §0؛ إضافة `RISK_REGISTER.md` إلى §3.1؛ توحيد أسماء مجموعات التقييم في P1-02؛ ترتيب تنفيذ P1. لم تُحذف أي مهمة، ولم يُغيَّر أي هدف أو معيار. | ADR-0002، PR لمهمة R-01 |
 | 1.1.1 | 2026-09-30 | P0-03 وP0-04 وP0-07a منجزة؛ P0-01 وP0-02 وP0-07 محجوبة بقرارات المالك؛ إضافة المهمة الفرعية P0-07a. | P0-02..P0-07a |
+| 1.2.0 | 2026-09-30 | تفصيل صفوف P1 إلى مهام فردية؛ P1-01 منجزة. | P1-01 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
