@@ -1,6 +1,6 @@
 # Failure Atlas (AGENTS.md §9, ROADMAP P1-08)
 
-`incoming/*.jsonl`: one failure per line, validated by `python -m nawa.atlas validate data_pipeline/atlas/incoming/*.jsonl`
+`incoming/*.jsonl`: one failure per line. **These files are data and are not committed to Git** (`tests/test_repository_structure.py`: data lives on Hugging Face). Git pins every batch in `manifest.yaml` by a content digest, and `tests/test_atlas.py` re-creates the batch from a fresh run and checks it. Upload to the private HF repo `nawa-data` is P2-08, after data rights (OD-03). Validated by `python -m nawa.atlas validate data_pipeline/atlas/incoming/*.jsonl`
 (also run by `tests/test_atlas.py`). Files are append-only: a new batch is a new file, and an existing file is never overwritten.
 
 ## Record fields
@@ -20,6 +20,4 @@ The AGENTS.md §9 fields (`category`, `prompt`, `bad_output`, `model`, `model_re
 
 ## Batches
 
-| file | model | split | records | verified | categories | reproduce |
-|---|---|---|---|---|---|---|
-| `2026-09-30-dev-always-abstain.jsonl` | `always_abstain` (NAWA trivial reference, P1-07) | dev | see ROADMAP §2.3 P1-08 | all | FT-13 | `python eval/run_eval.py --model always_abstain --split dev` then `python -m nawa.atlas ingest --run eval/runs/<run_id> --out <file> --created-utc <ts>` |
+See `manifest.yaml` (records, verified count, categories, digest, reproduce command).

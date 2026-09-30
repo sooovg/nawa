@@ -34,8 +34,6 @@ outputs/
 
 # Exception: the small, append-only experiment registry required by AGENTS.md §7/§8.
 !experiments/log.jsonl
-# Exception: Atlas incoming records (AGENTS.md §9, P1-08). Only public dev/calib-derived records; nawa.atlas refuses frozen.
-!data_pipeline/atlas/incoming/*.jsonl
 
 # --- OS / editors ---
 .DS_Store

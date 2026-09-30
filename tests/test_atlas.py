@@ -93,12 +93,18 @@ def test_invalid_records_are_rejected(abstain_run: Path, mutate) -> None:
         validate_record(r)
 
 
-def test_committed_atlas_is_valid_and_reproducible(abstain_run: Path) -> None:
-    files = sorted(INCOMING.glob("*.jsonl"))
-    assert files, "P1-08 must commit the first Atlas records"
-    recs = read(files)
-    validate_all(recs)
-    fresh = {r["id"] for r in records_from_run(abstain_run, TS)}
-    first = [r for r in recs if r["model"] == "always_abstain" and r["split"] == "dev"]
-    assert {r["id"] for r in first} == fresh  # same failures, same ids, from a fresh run
-    assert all(r["id"] == record_id(r["model"], r["item_id"], r["bad_output"]) for r in recs)
+def test_manifest_batch_is_reproduced_exactly(abstain_run: Path) -> None:
+    """Records are not in Git; the manifest pins them by digest, and a fresh run must reproduce it exactly."""
+    import yaml
+    from nawa.atlas import REPO, digest
+    man = yaml.safe_load((REPO / "data_pipeline" / "atlas" / "manifest.yaml").read_text(encoding="utf-8"))
+    batch = next(b for b in man["batches"] if b["model"] == "always_abstain" and b["split"] == "dev")
+    recs = records_from_run(abstain_run, TS)
+    assert len(recs) == batch["records"] and sum(r["status"] == "verified" for r in recs) == batch["verified"]
+    assert sum(r["train_eligible"] for r in recs) == batch["train_eligible"]
+    assert digest(recs) == batch["digest"]
+    local = sorted(INCOMING.glob("*.jsonl"))  # present on the machine that ingested; absent in CI
+    if local:
+        on_disk = read(local)
+        validate_all(on_disk)
+        assert all(r["id"] == record_id(r["model"], r["item_id"], r["bad_output"]) for r in on_disk)

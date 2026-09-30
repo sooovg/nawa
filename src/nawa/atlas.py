@@ -11,6 +11,12 @@ its items are private (P1-03) and must not be copied into Git.
 
     python -m nawa.atlas ingest --run eval/runs/<run_id> --out data_pipeline/atlas/incoming/<name>.jsonl
     python -m nawa.atlas validate data_pipeline/atlas/incoming/*.jsonl
+    python -m nawa.atlas digest data_pipeline/atlas/incoming/*.jsonl
+
+Records are data, so they are NOT committed to Git (tests/test_repository_structure.py; data lives on HF). Git pins
+each batch in data_pipeline/atlas/manifest.yaml by a content digest over the deterministic fields, and CI
+re-creates the batch from a fresh run and checks the digest. Upload to the private HF repo `nawa-data` is P2-08
+(after data rights, OD-03).
 """
 
 from __future__ import annotations
@@ -131,6 +137,18 @@ def records_from_run(run_dir: Path, created_utc: str) -> list[dict[str, Any]]:
     return out
 
 
+DIGEST_FIELDS = ("id", "category", "status", "verified_truth", "bad_output", "suite", "item_id", "content_hash",
+                 "model", "split", "train_eligible")
+
+
+def digest(recs: list[dict[str, Any]]) -> str:
+    """Content digest over the fields that do not depend on when or at which commit the run happened."""
+    h = hashlib.sha256()
+    for r in sorted(recs, key=lambda x: x["id"]):
+        h.update(json.dumps({k: r[k] for k in DIGEST_FIELDS}, ensure_ascii=False, sort_keys=True).encode("utf-8") + b"\n")
+    return h.hexdigest()
+
+
 def read(paths: Iterable[Path]) -> list[dict[str, Any]]:
     recs = []
     for path in paths:
@@ -157,6 +175,8 @@ def main() -> None:
     ing.add_argument("--created-utc", required=True)
     val = sub.add_parser("validate")
     val.add_argument("paths", type=Path, nargs="+")
+    dig = sub.add_parser("digest")
+    dig.add_argument("paths", type=Path, nargs="+")
     a = ap.parse_args()
     if a.cmd == "ingest":
         recs = records_from_run(a.run, a.created_utc)
@@ -167,7 +187,9 @@ def main() -> None:
             for r in recs:
                 fh.write(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n")
         ver = sum(r["status"] == "verified" for r in recs)
-        print(f"{len(recs)} records ({ver} verified) -> {a.out}")
+        print(f"{len(recs)} records ({ver} verified) -> {a.out}\ndigest {digest(recs)}")
+    elif a.cmd == "digest":
+        print(digest(read(a.paths)))
     else:
         recs = read(a.paths)
         validate_all(recs)
