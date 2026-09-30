@@ -4,10 +4,10 @@
 
 PYTHON ?= python3
 
-.PHONY: help setup test secrets ci data train eval report gate repro push-model push-data
+.PHONY: help setup test secrets ci data train eval report gate repro sanity push-model push-data
 
 help:
-	@echo "Implemented: setup test secrets ci eval report repro"
+	@echo "Implemented: setup test secrets ci eval report repro sanity"
 	@echo "Not yet implemented (see ROADMAP.md): data train gate push-model push-data"
 
 setup:
@@ -44,6 +44,8 @@ repro:  ## rebuild dev/calib, check the pipeline end-to-end with the oracle back
 	python -m nawa.evaluation.build --split calib --out eval/build
 	python eval/run_eval.py --model oracle --split dev
 	python -m pytest -q
+sanity:  ## P3-05: XOR + tiny char LM on the reference decoder, local CPU (about 3 min)
+	python -m nawa.training.sanity
 push-model:
 	$(call not_implemented,push-model,P4-08 / P5-09 (requires manifest + gate))
 push-data:
