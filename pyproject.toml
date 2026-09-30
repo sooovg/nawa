@@ -14,6 +14,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Reference decoder (P3-04). PyTorch is a tensor/autograd library only; no external weights are loaded.
+model = [
+    "torch>=2.2",
+]
 dev = [
     "pytest>=8.0",
     "pre-commit>=3.5",

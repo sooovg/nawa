@@ -130,7 +130,7 @@ Core Model
 | G0 الميثاق والحدود وCI مبدئي (P0) | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
 | G1 القياس والمرجع الداخلي (P1) | IN_PROGRESS | 2026-09-30 | P1-01 وP1-02 وP1-03 وP1-07 منجزة؛ P1-04 وP1-05 SUPERSEDED (ADR-0003)؛ P1-06 ينتظر P3-05؛ P1-08 مخطط |
 | G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | — | — |
-| G3 Tokenizer ونواة مرجعية (P3) | PLANNED | — | — |
+| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (النواة المرجعية من الصفر، 49 اختبار صحة)؛ P3-05 التالية؛ لا يُغلق G3 قبل G0–G2 |
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | — | — |
@@ -167,7 +167,9 @@ Core Model
 | P1-07 | DONE | bootstrap-agent | `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/{runner,report}.py`؛ `make eval` و`make report` و`make repro`؛ `tests/test_eval_runner.py` (10 اختبارات) | 2026-09-30 |
 | P1-08 | PLANNED | — | — | — |
 | P2-01..P2-08 | PLANNED | — | — | — |
-| P3-01..P3-08 | PLANNED | — | — | — |
+| P3-01..P3-03 | PLANNED | — | — | — |
+| P3-04 | DONE | agent-P3-04 | `src/nawa/model/{config,layers,decoder}.py` (نواة decoder مرجعية من الصفر، مكوّنات قابلة للتبديل لتجارب P4)؛ `configs/base_model.yaml`؛ `tests/test_reference_decoder.py` (49 اختبارًا)؛ EXP-0006 | 2026-09-30 |
+| P3-05..P3-08 | PLANNED | — | — | — |
 | P4-01..P4-08 | PLANNED | — | — | — |
 | P5-01..P5-10 | PLANNED | — | — | — |
 | P6-01..P6-09 | PLANNED | — | — | — |
@@ -312,6 +314,27 @@ Core Model
 - **Roadmap section updated:** §0، §1.3، §2.1، §2.2، §2.3، §2.4، §3.1، §4، §11، §12
 - **Next unblocked task:** P3-04 (Transformer decoder مرجعي من الصفر)، ثم P3-05
 - **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ R-02؛ P1-05 مدمجة في P3-04/P3-05 لمنع العمل الموازي.
+
+### P3-04 — نواة decoder مرجعية من الصفر (2026-09-30)
+
+- **Task ID:** P3-04
+- **Owner:** agent-P3-04
+- **Status:** DONE
+- **Scope:** نواة Transformer decoder مرجعية لـ NAWA مكتوبة من الصفر (المسار S): embeddings، normalization، attention، MLP، positional، block، lm_head، model. لا أوزان خارجية ولا تحميل لأي نموذج. كل خيار معماري حقل مُتحقَّق منه في `DecoderConfig` بـ `config_hash` ثابت، كي تغيّر تجارب P4 خيارًا واحدًا في كل مرة. هذه **مرجع داخلي** وليست الحجم ولا المعمارية النهائية؛ الإعدادات الافتراضية لا تدّعي أنها الأفضل.
+- **المكونات:** `RMSNorm` و`LayerNorm` مكتوبتان صراحة؛ RoPE أو positional متعلَّم أو بدونه؛ attention سببي مكتوب صراحة (scores ← mask ← softmax ← مجموع موزون) مع دعم grouped-query heads؛ MLP من نوع SwiGLU أو GELU بعدد معاملات متقارب؛ block بترتيب pre-norm؛ lm_head مربوط بالـ embeddings اختياريًا؛ تهيئة N(0, 0.02) مع تصغير إسقاطات residual بمعامل 1/√(2·n_layers)؛ توليد greedy أو بالعيّنة بمولّد قابل لإعادة الإنتاج، دون KV cache (مؤجل إلى P4-05/P8-04).
+- **Files created:** `src/nawa/model/__init__.py`، `src/nawa/model/config.py`، `src/nawa/model/layers.py`، `src/nawa/model/decoder.py`، `configs/base_model.yaml`، `tests/test_reference_decoder.py`
+- **Files modified:** `pyproject.toml` (extra اختياري `model` = `torch>=2.2`)، `.github/workflows/ci.yml` (تثبيت torch CPU و`NAWA_REQUIRE_TORCH=1` كي يفشل CI ولا يتخطى الاختبارات إذا غاب torch)، `ARCHITECTURE.md` (سطر الحالة)، `experiments/log.jsonl` (EXP-0006)، `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
+- **Test results:** 143 passed / 0 failed (94 سابقة + 49 جديدة). تشمل: السببية في 12 تركيبة (norm × mlp × positional)؛ مطابقة attention للمرجع المستقل `F.scaled_dot_product_attention`؛ تكافؤ GQA مع MHA بأوزان k/v مكررة؛ مطابقة RMSNorm وLayerNorm للصيغة؛ اعتماد درجات RoPE على الإزاحة النسبية وحفظها للطول؛ مطابقة عدد المعاملات للصيغة المغلقة `expected_num_parameters` في 24 تركيبة؛ gradcheck بدقة float64؛ وصول تدرج غير صفري لكل معامل؛ استبعاد `ignore_index` من الخسارة؛ الحتمية بالبذرة؛ رفض الإعدادات غير الصالحة.
+- **فشل مسجَّل أثناء التطوير:** اختبار RoPE فشل أولًا بحد تسامح 1e-9. السبب أن جداول cos/sin مخزنة بدقة float32، والفرق النسبي المقاس نحو 2e-8. ضُبط الحد على 1e-6 ووُثق السبب داخل الاختبار. لم يُغيَّر سلوك الكود.
+- **Metrics (EXP-0006، `configs/base_model.yaml`, seed 42, CPU بنواتين، torch 2.14.0+cpu، Python 3.14.3):** config_hash `918f4cf4877c0cca`؛ المعاملات 3,229,952 (منها 3,164,416 خارج الـ embeddings) وتطابق الصيغة المغلقة؛ خسارة التهيئة 5.6431 مقابل ln(256)=5.5452؛ زمن forward بحجم 8×128 نحو 56.9 ms. هذه أرقام صحة وتشغيل، لا أرقام جودة.
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء (لا أوزان مدربة)
+- **Dataset version:** لا شيء
+- **Known limitations:** `vocab_size=256` placeholder بمستوى البايت حتى يُختار الـ tokenizer (P3-03). لا KV cache ولا kernel مدمج. لا تدريب؛ إثبات التعلم (XOR وtiny LM) هو P3-05. PyTorch مكتبة tensors/autograd فقط ولا يُحمَّل منها أي نموذج. أجرى الوكيل القياس بنفسه، فالمراجعة المستقلة مطلوبة قبل إغلاق G3 (قاعدة استقلال الحكم).
+- **Roadmap section updated:** §2.1 (G3)، §2.2، §2.3، §12
+- **Next unblocked task:** P3-05 (XOR وtiny character LM على هذه النواة، CPU محلي). بعد وجود نموذج NAWA يُنتج أخطاء، تصبح P1-08 ممكنة من إخفاقاته هو.
+- **Duplicate-work check:** لا يوجد `src/nawa/model/` سابق، ولا فرع أو PR لـ P3-04 (فُحصت الفروع البعيدة الثمانية وPRs #1–#8، وكلها مدموجة). P1-05 مدمجة في هذه المهمة بقرار ADR-0003، فلم تُنشأ نسخة موازية.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -909,5 +932,6 @@ Limitations:
 | 1.4.0 | 2026-09-30 | P1-03 منجزة: frozen v1 خاص على HF (`frozen-v1`) ومثبت بالـ hash في Git. | P1-03 |
 | 1.5.0 | 2026-09-30 | P1-07 منجزة: المشغّل والتقرير وملف الأهداف وأمر `make repro`. بقي `make gate` رافضًا: رسالته أصبحت تنسب الفحص الآلي للبوابات إلى P10-05، ولم تُحذف أي مهمة. | P1-07 |
 | 1.6.0 | 2026-09-30 | توجيه المالك (ADR-0003): هدف NAWA نظام أصلي لا مقارنة نماذج؛ baseline تعني مرجعًا داخليًا؛ P1-04 وP1-05 SUPERSEDED (التقارير محفوظة دون اعتماد)؛ T3 اختياري وليس شرطًا لأي بوابة (الرقم باقٍ)؛ مهام P5 للمسار B اختيارية؛ إضافة R-02 وR-03 وOD-10 و`configs/model_registry.yaml`. لم يُخفض أي معيار ولم تُحذف أي مهمة أو نتيجة. | R-02، ADR-0003 |
+| 1.7.0 | 2026-09-30 | P3-04 منجزة: نواة decoder مرجعية من الصفر (المسار S)؛ G3 أصبحت IN_PROGRESS؛ تفصيل صف P3 إلى P3-01..P3-03 وP3-04 وP3-05..P3-08 دون تغيير أي معرف. لم يُغيَّر أي هدف أو معيار. | P3-04، EXP-0006 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

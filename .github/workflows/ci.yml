@@ -18,8 +18,12 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install
-        run: python -m pip install -e ".[dev]"
-      - name: Foundation tests (structure, secrets, large files, configs)
+        run: |
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2"
+          python -m pip install -e ".[dev]"
+      - name: Foundation and model tests (structure, secrets, large files, configs, reference decoder)
+        env:
+          NAWA_REQUIRE_TORCH: "1"   # P3-04 tests must fail, not skip, if torch is missing
         run: python -m pytest
       - name: detect-secrets
         run: git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
