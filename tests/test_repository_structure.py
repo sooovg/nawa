@@ -26,6 +26,8 @@ REQUIRED_FILES = [
     ".gitignore",
     ".pre-commit-config.yaml",
     "configs/hf_repos.yaml",
+    "configs/budget.yaml",
+    "RISK_REGISTER.md",
 ]
 REQUIRED_DIRS = [
     "configs", "src", "training", "eval", "tests",

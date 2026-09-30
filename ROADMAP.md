@@ -137,13 +137,14 @@ Core Model
 
 | Task ID | الحالة | المالك | المخرج/الدليل | آخر تحديث |
 |---|---|---|---|---|
-| P0-01 | IN_PROGRESS | bootstrap-agent | `PROJECT_CHARTER.md` مسودة؛ بنود `[OWNER DECISION REQUIRED]` مفتوحة | 2026-09-30 |
-| P0-02 | IN_PROGRESS | bootstrap-agent | `ARCHITECTURE.md` مسودة مبدئية؛ بانتظار اعتماد المالك | 2026-09-30 |
-| P0-03 | IN_PROGRESS | bootstrap-agent | `SUCCESS_CRITERIA.md` ينقل T1–T6 دون أرقام جديدة؛ التثبيت في P1-06 | 2026-09-30 |
-| P0-04 | IN_PROGRESS | bootstrap-agent | `SECURITY.md` أُنشئ؛ `RISK_REGISTER.md` لم يُنشأ (ADR-0001 C6) | 2026-09-30 |
+| P0-01 | BLOCKED | bootstrap-agent | `PROJECT_CHARTER.md` مسودة كاملة البنية؛ تنتظر OD-01 وOD-02 وOD-03 وOD-04 وOD-09 | 2026-09-30 |
+| P0-02 | BLOCKED | bootstrap-agent | `ARCHITECTURE.md` يغطي مكونات §1.1 ويعرّف Core مقابل Runtime (`tests/test_governance_docs.py`)؛ الاعتماد ينتظر OD-09 | 2026-09-30 |
+| P0-03 | DONE | bootstrap-agent | `SUCCESS_CRITERIA.md`: T1–T6 مطابقة رقميًا لـ §1.3 (`test_success_criteria_carries_every_roadmap_target_number`)؛ التثبيت الرقمي النهائي في P1-06 | 2026-09-30 |
+| P0-04 | DONE | bootstrap-agent | `SECURITY.md` و`RISK_REGISTER.md` (15 خطرًا، `test_risk_register_is_well_formed`) | 2026-09-30 |
 | P0-05 | DONE | bootstrap-agent | بنية المستودع، `AGENTS.md`، `.gitignore`؛ `tests/test_repository_structure.py` (30 اختبارًا ناجحًا) | 2026-09-30 |
 | P0-06 | DONE | bootstrap-agent | 8 مستودعات HF خاصة وفارغة تحت `vuuuv`؛ `configs/hf_repos.yaml`؛ `tests/test_config_loading.py` (5 اختبارات ناجحة) | 2026-09-30 |
-| P0-07 | BLOCKED | — | `configs/budget.yaml` يحتاج أرقام المالك (ساعات GPU، التكلفة) | 2026-09-30 |
+| P0-07 | BLOCKED | — | السقوف تنتظر OD-05 | 2026-09-30 |
+| P0-07a | DONE | bootstrap-agent | `configs/budget.yaml` بسقوف `null` وعتبة 80%؛ `src/nawa/budget.py` يمنع العمل على GPU والعمل المدفوع؛ اختباران | 2026-09-30 |
 | P0-08 | DONE | bootstrap-agent | `ROADMAP.md` وسجل الحالة و`.github/CODEOWNERS` و`ci.yml`؛ CI نجح على `d34f3f1`؛ `main` محمي (PR إلزامي، فحص `test`، منع force push والحذف، enforce_admins) | 2026-09-30 |
 | R-01 | DONE | bootstrap-agent | اتساق الخارطة: ADR-0002، `tests/test_roadmap_consistency.py` | 2026-09-30 |
 | P1-01..P1-08 | PLANNED | — | — | — |
@@ -179,6 +180,24 @@ Core Model
 - **Roadmap section updated:** §2.1، §2.2، §2.3، §12
 - **Next unblocked task:** P1-01 (`docs/failure_taxonomy.md`). المهام P0-01 وP0-03 وP0-07 مجمدة بانتظار قرارات المالك.
 - **Duplicate-work check:** المستودع البعيد `sooovg/nawa` كان فارغًا (size 0، بلا commits). مستودعات HF الثمانية لم تكن موجودة قبل الإنشاء. لا فروع ولا PRs سابقة.
+
+### P0-02 + P0-03 + P0-04 + P0-07a — وثائق الحوكمة وحارس الميزانية (2026-09-30)
+
+- **Task ID:** P0-02 (BLOCKED)، P0-03 (DONE)، P0-04 (DONE)، P0-07a (DONE)، P0-07 (BLOCKED)
+- **Owner:** bootstrap-agent
+- **Scope:** ربط وثائق P0 بالخارطة باختبارات آلية، وسجل المخاطر، وإطار الميزانية دون أرقام المالك.
+- **Files created:** `RISK_REGISTER.md`، `configs/budget.yaml`، `src/nawa/budget.py`، `tests/test_governance_docs.py`
+- **Files modified:** `PROJECT_CHARTER.md` (سطر الميزانية)، `tests/test_repository_structure.py` (ملفات مطلوبة)، `ROADMAP.md`
+- **Tests executed:** `python -m pytest`، `pre-commit run --all-files`
+- **Test results:** 49 passed / 0 failed
+- **Metrics:** n/a
+- **Git commit:** PR لهذه المهام (squash)
+- **HF repository/revision:** لا شيء
+- **Dataset version:** لا شيء
+- **Known limitations:** P0-01 وP0-02 وP0-07 تنتظر قرارات المالك في §2.4؛ لذلك لا يمكن إغلاق G0.
+- **Roadmap section updated:** §2.2، §2.3، §4 (P0-07a)، §12
+- **Next unblocked task:** P1-01
+- **Duplicate-work check:** لم يسبق إنشاء `RISK_REGISTER.md` ولا `budget.yaml`؛ هذه المهام لم تُحجز في أي فرع آخر.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -307,6 +326,7 @@ nawa/
 - **P0-05 [Git]** إنشاء بنية المستودع و`AGENTS.md` و`.gitignore`.
 - **P0-06 [HF]** إنشاء المستودعات الخاصة، ثم تسجيل `repo_id` في `configs/hf_repos.yaml`.
 - **P0-07 [Git]** تحديد `configs/budget.yaml`: ساعات GPU، الذاكرة، التكلفة، والحد عند 80%.
+  - **P0-07a [Git]** إطار الميزانية وحارسها: `configs/budget.yaml` بسقوف فارغة حتى OD-05، و`src/nawa/budget.py` يمنع العمل على GPU والعمل المدفوع ما دام السقف فارغًا.
 - **P0-08 [Git]** إنشاء `ROADMAP.md` وسجل الحالة وCODEOWNERS.
 
 ### G0 — لا عبور قبل
@@ -764,5 +784,6 @@ Limitations:
 | 1.0.1 | 2026-09-30 | تفصيل صف P0 إلى مهام فردية، تحديث G0، إضافة §2.3 تقارير الإنجاز. لم تُعدَّل الأهداف ولا المعرفات. | P0-05، P0-06، ADR-0001 |
 | 1.0.2 | 2026-09-30 | تسجيل commit التأسيس `d34f3f1`، ونجاح CI، وحماية `main`، وإغلاق P0-08. | P0-08 |
 | 1.1.0 | 2026-09-30 | اتساق الخارطة: مواءمة §2.1 مع بوابات §4 وإضافة G10؛ مواءمة نطاقات §2.2 مع قوائم §4 (P3 وP4 وP5 وP6)؛ إضافة §2.4 لسجل قرارات المالك؛ إضافة قواعد التشغيل المعتمدة في §0؛ إضافة `RISK_REGISTER.md` إلى §3.1؛ توحيد أسماء مجموعات التقييم في P1-02؛ ترتيب تنفيذ P1. لم تُحذف أي مهمة، ولم يُغيَّر أي هدف أو معيار. | ADR-0002، PR لمهمة R-01 |
+| 1.1.1 | 2026-09-30 | P0-03 وP0-04 وP0-07a منجزة؛ P0-01 وP0-02 وP0-07 محجوبة بقرارات المالك؛ إضافة المهمة الفرعية P0-07a. | P0-02..P0-07a |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
