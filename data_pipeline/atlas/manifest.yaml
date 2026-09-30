@@ -1,0 +1,18 @@
+# Failure Atlas batches (P1-08). Records are data and are NOT in Git (tests/test_repository_structure.py).
+# Each batch is pinned by a content digest over deterministic fields (nawa.atlas.DIGEST_FIELDS) and is
+# re-created and checked by tests/test_atlas.py. HF upload to the private `nawa-data` repo: P2-08 (after OD-03).
+batches:
+  - file: data_pipeline/atlas/incoming/2026-09-30-dev-always-abstain.jsonl
+    task: P1-08
+    experiment: EXP-0011
+    model: always_abstain
+    split: dev
+    records: 224
+    verified: 224
+    train_eligible: 0
+    categories: {FT-13: 224}
+    digest: dd89a1015f9875a36744bd231cd6fe22b1204b894460e6006b017289b378a9db  # pragma: allowlist secret (content digest, not a secret)
+    reproduce: >-
+      python eval/run_eval.py --model always_abstain --split dev &&
+      python -m nawa.atlas ingest --run eval/runs/<run_id> --out data_pipeline/atlas/incoming/2026-09-30-dev-always-abstain.jsonl --created-utc <ts>
+    hf: null   # P2-08
