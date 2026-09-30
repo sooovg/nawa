@@ -1,0 +1,17 @@
+NAWA — Native Arabic Weighted Architecture
+Copyright (c) 2026 The NAWA project owner. All rights reserved.
+
+[OWNER DECISION REQUIRED] — PLACEHOLDER LICENSE
+
+The project owner has not yet chosen an open-source or proprietary license
+for this repository (see PROJECT_CHARTER.md, "Data and licensing policy",
+and AGENTS.md section 13: choosing the license is an owner decision).
+
+Until a license is chosen and recorded in docs/decisions/, no permission is
+granted to use, copy, modify, merge, publish, distribute, sublicense, or sell
+any part of this repository, except as permitted by applicable law or by the
+terms of the hosting platform on which it is viewed.
+
+This placeholder applies to the code and documentation in this Git repository
+only. Model weights, datasets, and other artifacts hosted on Hugging Face will
+carry their own licenses, recorded in their model/data cards.

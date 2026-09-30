@@ -1,0 +1,8 @@
+# Default owner for everything until teams from AGENTS.md §6 are staffed.
+* @sooovg
+
+# Governance files: owner review always required.
+/AGENTS.md          @sooovg
+/ROADMAP.md         @sooovg
+/PROJECT_CHARTER.md @sooovg
+/configs/hf_repos.yaml @sooovg

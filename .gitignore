@@ -1,0 +1,41 @@
+# --- Python / environments ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# --- Secrets (never commit) ---
+.env
+.env.*
+!.env.example
+
+# --- Data and training outputs (live on Hugging Face, not Git) ---
+data/raw/
+data/processed/
+checkpoints/
+runs/
+outputs/
+
+# --- Weights and large artifacts ---
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+*.parquet
+*.jsonl
+*.sqlite
+*.db
+
+# Exception: the small, append-only experiment registry required by AGENTS.md §7/§8.
+!experiments/log.jsonl
+
+# --- OS / editors ---
+.DS_Store
+.idea/
+.vscode/

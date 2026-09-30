@@ -1,0 +1,30 @@
+# Hugging Face artifact repositories for NAWA (ROADMAP P0-06).
+# Created 2026-09-30 as PRIVATE and EMPTY (only HF default files).
+# Never put tokens here: HF_TOKEN comes from the environment only (SECURITY.md).
+owner: "vuuuv"
+
+repos:
+  data: "vuuuv/nawa-data"                               # dataset — approved datasets and versions
+  eval: "vuuuv/nawa-eval"                               # dataset — dev/calib/frozen eval sets
+  core: "vuuuv/nawa-core"                               # model   — NAWA Core weights (Track S)
+  practical_baseline: "vuuuv/nawa-practical-baseline"   # model   — Track B only
+  verifier: "vuuuv/nawa-verifier"                       # model   — independent verifier
+  gguf: "vuuuv/nawa-gguf"                               # model   — compressed builds
+  adapters: "vuuuv/nawa-adapters"                       # model   — domain adapters
+  demo: "vuuuv/nawa-demo"                               # space   — demo, only after release gate
+
+repo_types:
+  data: dataset
+  eval: dataset
+  core: model
+  practical_baseline: model
+  verifier: model
+  gguf: model
+  adapters: model
+  demo: space
+
+policy:
+  all_private_until_release_gate: true
+  public_release_requires_owner_approval: true
+  push_to_main_requires_owner_approval: true
+  default_upload_revision: "dev"
