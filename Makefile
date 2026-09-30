@@ -7,8 +7,8 @@ PYTHON ?= python3
 .PHONY: help setup test secrets ci data train eval report gate repro sanity push-model push-data
 
 help:
-	@echo "Implemented: setup test secrets ci eval report repro sanity"
-	@echo "Not yet implemented (see ROADMAP.md): data train gate push-model push-data"
+	@echo "Implemented: setup test secrets ci eval report repro sanity train"
+	@echo "Not yet implemented (see ROADMAP.md): data gate push-model push-data"
 
 setup:
 	$(PYTHON) -m pip install -e ".[dev]"
@@ -28,8 +28,8 @@ endef
 
 data:
 	$(call not_implemented,data,P2-05..P2-08)
-train:
-	$(call not_implemented,train,P3-06 / P5)
+train:  ## P3-06: train with the NAWA trainer (CPU default). Usage: make train CONFIG=configs/train_sft.yaml
+	$(PYTHON) -m nawa.training.trainer $(TRAIN_ARGS)
 MODEL ?= oracle
 SPLIT ?= dev
 SUITE ?= all
