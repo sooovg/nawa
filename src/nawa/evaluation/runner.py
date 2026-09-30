@@ -27,6 +27,7 @@ from nawa.evaluation.schema import SUITES, Item
 
 REPO = Path(__file__).resolve().parents[3]
 ABSTAIN = "غير موجود في السياق"
+DTYPES = ("float32", "bfloat16")  # bfloat16 only to fit larger baselines in RAM; recorded in lineage + config_hash
 
 
 def load_items(split: str, frozen_dir: Path | None = None) -> dict[str, list[Item]]:
@@ -75,7 +76,7 @@ class AbstainBackend(Backend):
 class HFBackend(Backend):
     """Greedy decoding with a local transformers model. Imports torch lazily (not needed in CI)."""
 
-    def __init__(self, path: str, batch_size: int = 8, threads: int | None = None):
+    def __init__(self, path: str, batch_size: int = 8, threads: int | None = None, dtype: str = "float32"):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
         if threads:
@@ -85,7 +86,9 @@ class HFBackend(Backend):
         self.tok.padding_side = "left"
         if self.tok.pad_token is None:
             self.tok.pad_token = self.tok.eos_token
-        self.model = AutoModelForCausalLM.from_pretrained(path, torch_dtype=torch.float32)
+        if dtype not in DTYPES:
+            raise ValueError(f"dtype must be one of {DTYPES}")
+        self.model = AutoModelForCausalLM.from_pretrained(path, torch_dtype=getattr(torch, dtype))
         self.model.eval()
         self.batch_size = batch_size
         cfg = json.loads((Path(path) / "config.json").read_text())
@@ -93,7 +96,7 @@ class HFBackend(Backend):
         parts = [x for x in Path(path).parts if x.startswith("models--")]
         name = parts[0][len("models--"):].replace("--", "/") if parts else (cfg.get("_name_or_path") or str(path))
         super().__init__(name=name, revision=rev,
-                         info={"path": str(path), "dtype": "float32", "params": sum(p.numel() for p in self.model.parameters()),
+                         info={"path": str(path), "dtype": dtype, "params": sum(p.numel() for p in self.model.parameters()),
                                "batch_size": batch_size, "threads": torch.get_num_threads(),
                                "torch": torch.__version__, "transformers": __import__("transformers").__version__})
 
@@ -145,13 +148,13 @@ class HFBackend(Backend):
                 "max_new_tokens": max_new_tokens}
 
 
-def make_backend(spec: str, batch_size: int = 8, threads: int | None = None) -> Backend:
+def make_backend(spec: str, batch_size: int = 8, threads: int | None = None, dtype: str = "float32") -> Backend:
     if spec == "oracle":
         return OracleBackend("oracle")
     if spec == "always_abstain":
         return AbstainBackend("always_abstain")
     if spec.startswith("hf:"):
-        return HFBackend(spec[3:], batch_size=batch_size, threads=threads)
+        return HFBackend(spec[3:], batch_size=batch_size, threads=threads, dtype=dtype)
     raise ValueError(f"unknown backend {spec}")
 
 
@@ -189,7 +192,7 @@ def run(backend: Backend, split: str, suite_names: list[str] | None = None, froz
         "run_id": run_id, "split": split, "suites": names, "limit": limit,
         "split_sha256": split_digest({k: items[k] for k in names}),
         "model": backend.name, "model_revision": backend.revision, "backend_info": backend.info,
-        "decoding": {"do_sample": False, "num_beams": 1, "max_new_tokens": "per item"},
+        "decoding": {"do_sample": False, "num_beams": 1, "max_new_tokens": "per item", "dtype": backend.info.get("dtype")},
         "git": git_state(), "created_utc": stamp, "wall_seconds": round(time.time() - t0, 1),
         "peak_rss_mb": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 1),
         "hardware": {"machine": platform.machine(), "cpus": os.cpu_count(), "gpu": None,
