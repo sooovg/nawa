@@ -82,7 +82,7 @@ def test_targets_match_roadmap_numbers() -> None:
     assert t["T2"]["min_abstention_recall"] == 0.80 and t["T2"]["max_answerable_relative_drop"] == 0.05
     assert t["T4"]["max_memory_gb"] == 3.0
     assert t["T5"]["max_relative_drop"] == 0.03
-    assert t["T3"]["status"] == "BLOCKED"
+    assert t["T3"]["status"] == "OPTIONAL"  # ADR-0003: not a gate condition
 
 
 def test_frozen_run_requires_eval_role(monkeypatch, tmp_path) -> None:

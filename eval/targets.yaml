@@ -1,8 +1,8 @@
 # NAWA success targets (ROADMAP §1.3, SUCCESS_CRITERIA.md). Machine-readable form for eval/report.py (P1-07).
-# P1-06 fixes the numbers after the dev baselines. Targets may only be RAISED, never lowered (ROADMAP §1.3, AGENTS.md).
+# P1-06 fixes the numbers after measuring NAWA's INTERNAL reference (ADR-0003: no external baseline is a gate condition). Targets may only be RAISED, never lowered (ROADMAP §1.3, AGENTS.md).
 # Thresholds are calibrated on dev/calib only, never on frozen.
 status: provisional            # becomes "fixed" in P1-06
-baseline_reference: null       # P1-06: run_id of the reference baseline report
+baseline_reference: null       # P1-06: run_id of the internal reference report (NAWA reference core, P3-05)
 targets:
   T1:
     description: relative hallucination reduction vs the same baseline, on faithfulness + factual
@@ -16,7 +16,7 @@ targets:
   T3:
     description: match or exceed a 4-8x larger model on the first domain
     metric: suites.domain.accuracy
-    status: BLOCKED            # OD-01 (first domain) -> P1-02a
+    status: OPTIONAL           # ADR-0003: not a gate condition; also needs OD-01 (first domain) -> P1-02a
   T4:
     description: local build with memory <= 3GB and a target CPU speed
     max_memory_gb: 3.0

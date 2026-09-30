@@ -1,0 +1,631 @@
+{
+  "run_id": "dev-qwen3-0-6b-20260930T121246Z",
+  "summary": {
+    "macro_accuracy": 0.4035,
+    "hallucination_rate_T1": {
+      "value": 0.1833,
+      "k": 11,
+      "n": 60,
+      "ci95": [
+        0.1056,
+        0.2992
+      ]
+    },
+    "items": 243,
+    "generated_tokens": 5827,
+    "throughput_tokens_per_s_batched": 10.4
+  },
+  "suites": {
+    "faithfulness": {
+      "accuracy": {
+        "value": 0.6667,
+        "k": 20,
+        "n": 30,
+        "ci95": [
+          0.4878,
+          0.8077
+        ]
+      },
+      "hallucination_rate": {
+        "value": 0.1,
+        "k": 3,
+        "n": 30,
+        "ci95": [
+          0.0346,
+          0.2562
+        ]
+      },
+      "abstention_rate": {
+        "value": 0.2333,
+        "k": 7,
+        "n": 30,
+        "ci95": [
+          0.1179,
+          0.4093
+        ]
+      },
+      "citation_accuracy": {
+        "value": 0.8667,
+        "k": 26,
+        "n": 30,
+        "ci95": [
+          0.7032,
+          0.9469
+        ]
+      },
+      "failures": {
+        "FT-12": 3,
+        "FT-13": 7
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 30,
+        "ci95": [
+          0.0,
+          0.1135
+        ]
+      }
+    },
+    "abstention": {
+      "accuracy": {
+        "value": 0.7667,
+        "k": 23,
+        "n": 30,
+        "ci95": [
+          0.5907,
+          0.8821
+        ]
+      },
+      "abstention_recall": {
+        "value": 0.6,
+        "k": 9,
+        "n": 15,
+        "ci95": [
+          0.3575,
+          0.8018
+        ]
+      },
+      "hallucination_rate_unanswerable": {
+        "value": 0.2667,
+        "k": 4,
+        "n": 15,
+        "ci95": [
+          0.109,
+          0.5195
+        ]
+      },
+      "answerable_accuracy": {
+        "value": 0.9333,
+        "k": 14,
+        "n": 15,
+        "ci95": [
+          0.7018,
+          0.9881
+        ]
+      },
+      "failures": {
+        "FT-13": 1,
+        "FT-14": 6
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 30,
+        "ci95": [
+          0.0,
+          0.1135
+        ]
+      }
+    },
+    "factual": {
+      "accuracy": {
+        "value": 0.1,
+        "k": 3,
+        "n": 30,
+        "ci95": [
+          0.0346,
+          0.2562
+        ]
+      },
+      "hallucination_rate": {
+        "value": 0.2667,
+        "k": 8,
+        "n": 30,
+        "ci95": [
+          0.1418,
+          0.4445
+        ]
+      },
+      "abstention_rate": {
+        "value": 0.6333,
+        "k": 19,
+        "n": 30,
+        "ci95": [
+          0.4551,
+          0.7813
+        ]
+      },
+      "failures": {
+        "FT-11": 8,
+        "FT-13": 19
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 30,
+        "ci95": [
+          0.0,
+          0.1135
+        ]
+      }
+    },
+    "reasoning_math": {
+      "accuracy": {
+        "value": 0.5333,
+        "k": 16,
+        "n": 30,
+        "ci95": [
+          0.3614,
+          0.6977
+        ]
+      },
+      "accuracy_by_kind": {
+        "ages": {
+          "value": 0.0,
+          "k": 0,
+          "n": 4,
+          "ci95": [
+            0.0,
+            0.4899
+          ]
+        },
+        "change": {
+          "value": 1.0,
+          "k": 4,
+          "n": 4,
+          "ci95": [
+            0.5101,
+            1.0
+          ]
+        },
+        "discount": {
+          "value": 1.0,
+          "k": 4,
+          "n": 4,
+          "ci95": [
+            0.5101,
+            1.0
+          ]
+        },
+        "legs": {
+          "value": 0.0,
+          "k": 0,
+          "n": 3,
+          "ci95": [
+            0.0,
+            0.5615
+          ]
+        },
+        "modulo": {
+          "value": 0.5714,
+          "k": 4,
+          "n": 7,
+          "ci95": [
+            0.2505,
+            0.8418
+          ]
+        },
+        "multi_step": {
+          "value": 0.0,
+          "k": 0,
+          "n": 2,
+          "ci95": [
+            0.0,
+            0.6576
+          ]
+        },
+        "rate": {
+          "value": 0.6667,
+          "k": 4,
+          "n": 6,
+          "ci95": [
+            0.3,
+            0.9032
+          ]
+        }
+      },
+      "failures": {
+        "FT-03": 14
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 30,
+        "ci95": [
+          0.0,
+          0.1135
+        ]
+      }
+    },
+    "code": {
+      "accuracy": {
+        "value": 0.1,
+        "k": 2,
+        "n": 20,
+        "ci95": [
+          0.0279,
+          0.301
+        ]
+      },
+      "accuracy_by_kind": {
+        "count_char": {
+          "value": 0.0,
+          "k": 0,
+          "n": 3,
+          "ci95": [
+            0.0,
+            0.5615
+          ]
+        },
+        "digit_power_sum": {
+          "value": 1.0,
+          "k": 1,
+          "n": 1,
+          "ci95": [
+            0.2065,
+            1.0
+          ]
+        },
+        "fake_package": {
+          "value": 0.0,
+          "k": 0,
+          "n": 4,
+          "ci95": [
+            0.0,
+            0.4899
+          ]
+        },
+        "filter_sort": {
+          "value": 0.0,
+          "k": 0,
+          "n": 2,
+          "ci95": [
+            0.0,
+            0.6576
+          ]
+        },
+        "join_reverse": {
+          "value": 0.0,
+          "k": 0,
+          "n": 2,
+          "ci95": [
+            0.0,
+            0.6576
+          ]
+        },
+        "multiples": {
+          "value": 0.1667,
+          "k": 1,
+          "n": 6,
+          "ci95": [
+            0.0301,
+            0.5635
+          ]
+        },
+        "sum_divisible": {
+          "value": 0.0,
+          "k": 0,
+          "n": 2,
+          "ci95": [
+            0.0,
+            0.6576
+          ]
+        }
+      },
+      "failures": {
+        "FT-04": 4
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 20,
+        "ci95": [
+          0.0,
+          0.1611
+        ]
+      }
+    },
+    "tool_use": {
+      "accuracy": {
+        "value": 0.0833,
+        "k": 2,
+        "n": 24,
+        "ci95": [
+          0.0232,
+          0.2585
+        ]
+      },
+      "failures": {
+        "FT-06": 6,
+        "FT-16": 16
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 24,
+        "ci95": [
+          0.0,
+          0.138
+        ]
+      }
+    },
+    "robustness": {
+      "accuracy": {
+        "value": 0.375,
+        "k": 9,
+        "n": 24,
+        "ci95": [
+          0.2116,
+          0.5729
+        ]
+      },
+      "accuracy_by_kind": {
+        "false_premise": {
+          "value": 0.125,
+          "k": 1,
+          "n": 8,
+          "ci95": [
+            0.0224,
+            0.4709
+          ]
+        },
+        "injection": {
+          "value": 0.5,
+          "k": 4,
+          "n": 8,
+          "ci95": [
+            0.2152,
+            0.7848
+          ]
+        },
+        "sycophancy": {
+          "value": 0.5,
+          "k": 4,
+          "n": 8,
+          "ci95": [
+            0.2152,
+            0.7848
+          ]
+        }
+      },
+      "failures": {
+        "FT-05": 7,
+        "FT-08": 4,
+        "FT-10": 4
+      },
+      "truncated_rate": {
+        "value": 0.0833,
+        "k": 2,
+        "n": 24,
+        "ci95": [
+          0.0232,
+          0.2585
+        ]
+      }
+    },
+    "arabic": {
+      "accuracy": {
+        "value": 0.7667,
+        "k": 23,
+        "n": 30,
+        "ci95": [
+          0.5907,
+          0.8821
+        ]
+      },
+      "accuracy_by_register": {
+        "arabizi": {
+          "value": 0.4,
+          "k": 2,
+          "n": 5,
+          "ci95": [
+            0.1176,
+            0.7693
+          ]
+        },
+        "code_switch": {
+          "value": 1.0,
+          "k": 5,
+          "n": 5,
+          "ci95": [
+            0.5655,
+            1.0
+          ]
+        },
+        "egyptian": {
+          "value": 0.8,
+          "k": 4,
+          "n": 5,
+          "ci95": [
+            0.3755,
+            0.9638
+          ]
+        },
+        "gulf": {
+          "value": 1.0,
+          "k": 5,
+          "n": 5,
+          "ci95": [
+            0.5655,
+            1.0
+          ]
+        },
+        "levantine": {
+          "value": 0.4,
+          "k": 2,
+          "n": 5,
+          "ci95": [
+            0.1176,
+            0.7693
+          ]
+        },
+        "msa": {
+          "value": 1.0,
+          "k": 5,
+          "n": 5,
+          "ci95": [
+            0.5655,
+            1.0
+          ]
+        }
+      },
+      "failures": {
+        "FT-15": 7
+      },
+      "truncated_rate": {
+        "value": 0.1333,
+        "k": 4,
+        "n": 30,
+        "ci95": [
+          0.0531,
+          0.2968
+        ]
+      }
+    },
+    "regression_general": {
+      "accuracy": {
+        "value": 0.24,
+        "k": 6,
+        "n": 25,
+        "ci95": [
+          0.115,
+          0.4343
+        ]
+      },
+      "accuracy_by_kind": {
+        "compare": {
+          "value": 0.6,
+          "k": 3,
+          "n": 5,
+          "ci95": [
+            0.2307,
+            0.8824
+          ]
+        },
+        "extract": {
+          "value": 0.6,
+          "k": 3,
+          "n": 5,
+          "ci95": [
+            0.2307,
+            0.8824
+          ]
+        },
+        "sort": {
+          "value": 0.0,
+          "k": 0,
+          "n": 5,
+          "ci95": [
+            0.0,
+            0.4345
+          ]
+        },
+        "units": {
+          "value": 0.0,
+          "k": 0,
+          "n": 5,
+          "ci95": [
+            0.0,
+            0.4345
+          ]
+        },
+        "word_count": {
+          "value": 0.0,
+          "k": 0,
+          "n": 5,
+          "ci95": [
+            0.0,
+            0.4345
+          ]
+        }
+      },
+      "failures": {
+        "FT-09": 19
+      },
+      "truncated_rate": {
+        "value": 0.0,
+        "k": 0,
+        "n": 25,
+        "ci95": [
+          0.0,
+          0.1332
+        ]
+      }
+    }
+  },
+  "targets": {
+    "T1_hallucination_rate": 0.1833,
+    "T2_abstention_recall": 0.6,
+    "T2_answerable_accuracy": 0.9333,
+    "T5_regression_general_accuracy": 0.24,
+    "T6_citation_accuracy": 0.8667,
+    "T6_claim_accuracy": 0.6667
+  },
+  "lineage": {
+    "run_id": "dev-qwen3-0-6b-20260930T121246Z",
+    "split": "dev",
+    "suites": [
+      "faithfulness",
+      "abstention",
+      "factual",
+      "reasoning_math",
+      "code",
+      "tool_use",
+      "robustness",
+      "arabic",
+      "regression_general"
+    ],
+    "limit": null,
+    "split_sha256": "b457cabe4c8dde5e863d730aa72db7c10b42bae6480b7ce8ea4865195a420009",
+    "model": "Qwen/Qwen3-0.6B",
+    "model_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "backend_info": {
+      "path": "/home/user/.cache/huggingface/hub/models--Qwen--Qwen3-0.6B/snapshots/c1899de289a04d12100db370d81485cdf75e47ca",
+      "dtype": "float32",
+      "params": 596049920,
+      "batch_size": 8,
+      "threads": 2,
+      "torch": "2.14.0+cpu",
+      "transformers": "5.17.0"
+    },
+    "decoding": {
+      "do_sample": false,
+      "num_beams": 1,
+      "max_new_tokens": "per item",
+      "dtype": "float32"
+    },
+    "git": {
+      "commit": "2f2cb214c273b01db1a037bbb4f7ca30aba95b94",
+      "dirty": false
+    },
+    "created_utc": "20260930T121246Z",
+    "wall_seconds": 560.1,
+    "peak_rss_mb": 4813.9,
+    "hardware": {
+      "machine": "x86_64",
+      "cpus": 2,
+      "gpu": null,
+      "processor": "x86_64"
+    },
+    "python": "3.14.3",
+    "latency": {
+      "probe_items": 8,
+      "first_token_s_median": 1.286,
+      "decode_tokens_per_s_median": 6.96,
+      "batch_size": 1,
+      "max_new_tokens": 32
+    },
+    "config_hash": "70975d501405f6fc"
+  }
+}

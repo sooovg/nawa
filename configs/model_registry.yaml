@@ -1,0 +1,74 @@
+# Open-weight model registry (ADR-0003 D1/D2). Every open-weight model used OR rejected by NAWA is justified here.
+# Enforced by tests/test_model_registry.py: every model in eval/reports/*.json must be registered with
+# the same revision and non-empty answers to the six questions. Allowed status: used | superseded | rejected.
+# No model is currently "used". The P1-04 entries are SUPERSEDED by the owner (ADR-0003, Directive 2):
+# their justifications are kept as a historical record, and their numbers feed no target or gate.
+# Licenses were read from the Hub model tags on 2026-09-30 (HfApi.model_info). No weights are stored in Git.
+policy_adr: ADR-0003
+default: do_not_use            # open-weight models are not used unless an entry below justifies them
+
+models:
+  - repo_id: HuggingFaceTB/SmolLM2-360M-Instruct
+    revision: a10cc1512eabd3dde888204e902eca88bddb4951
+    track: B
+    task: P1-04
+    status: superseded
+    license: apache-2.0
+    need: "Smallest size point of the P1-04 baseline sweep. T1/T2/T5 are relative to a measured baseline, and the size sweep shows how capability changes with parameters."
+    why_not_others: "API models cannot be pinned to a revision, cannot be run offline for reproduction, and cannot give T4 memory/latency numbers. NAWA Core does not exist yet (P3)."
+    nawa_part: "Evaluation baseline only (P1-04 -> P1-06 target fixing)."
+    affects_final_product: false
+    license_limits: "Apache-2.0: keep license and NOTICE when redistributing; no trademark rights. We do not redistribute weights."
+    fallback: "Drop this size point; the sweep keeps the 0.5B-1.5B points."
+
+  - repo_id: Qwen/Qwen2.5-0.5B-Instruct
+    revision: 7ae557604adf67be50417f59c2c2f167def9a775
+    track: B
+    task: P1-04
+    status: superseded
+    license: apache-2.0
+    need: "0.5B size point of the baseline sweep; the same family as the 1.5B point, so the size effect is isolated from the family effect."
+    why_not_others: "Same as above: a pinned, local, reproducible baseline is required, and T4 needs local measurements."
+    nawa_part: "Evaluation baseline only."
+    affects_final_product: false
+    license_limits: "Apache-2.0: keep license and NOTICE when redistributing; no trademark rights. We do not redistribute weights."
+    fallback: "Use the Qwen3-0.6B point for the ~0.5B scale."
+
+  - repo_id: Qwen/Qwen3-0.6B
+    revision: c1899de289a04d12100db370d81485cdf75e47ca
+    track: B
+    task: P1-04
+    status: superseded
+    license: apache-2.0
+    need: "A newer generation at almost the same size as Qwen2.5-0.5B, so the training-recipe effect can be separated from the size effect."
+    why_not_others: "Same as above."
+    nawa_part: "Evaluation baseline only; candidate reference baseline for P1-06."
+    affects_final_product: false
+    license_limits: "Apache-2.0: keep license and NOTICE when redistributing; no trademark rights. We do not redistribute weights."
+    fallback: "Use Qwen2.5-0.5B-Instruct as the reference baseline."
+
+  - repo_id: Qwen/Qwen2.5-1.5B-Instruct
+    revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+    track: B
+    task: P1-04
+    status: superseded
+    license: apache-2.0
+    need: "Larger size point of the same family as the 0.5B point (3x parameters), which measures what scale alone buys on these suites."
+    why_not_others: "Same as above."
+    nawa_part: "Evaluation baseline only."
+    affects_final_product: false
+    license_limits: "Apache-2.0: keep license and NOTICE when redistributing; no trademark rights. We do not redistribute weights. Run in bfloat16 to fit 7 GB RAM (recorded in lineage)."
+    fallback: "The sweep stops at 0.6B; the scale question moves to P4-01 on NAWA's own models."
+
+  - repo_id: Qwen/Qwen3-1.7B
+    revision: 70d244cc86ccca08cf5af4e1e306ecf908b1ad5e
+    track: B
+    task: P1-04
+    status: rejected
+    license: apache-2.0
+    need: "Proposed as a 'larger reference model'."
+    why_not_others: "Not needed now: the only target that needs a 4-8x larger reference is T3, which is blocked by OD-01."
+    nawa_part: "None at this time."
+    affects_final_product: false
+    license_limits: "Apache-2.0."
+    fallback: "Reconsider when T3 is unblocked and target hardware is fixed (OD-01, OD-05, OD-06). Also blocked in practice: about 4 GB of weights did not fit the sandbox disk, and bfloat16 CPU decoding takes hours per run."
