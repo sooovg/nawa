@@ -1,6 +1,6 @@
 # ADR-0001: Bootstrap open issues and conflicts found during P0
 
-- **Status:** PROPOSED (needs owner decision)
+- **Status:** PARTIALLY RESOLVED — see ADR-0002 for the resolution of each item
 - **Date:** 2026-09-30
 - **Task:** P0-05 / P0-06 (bootstrap)
 - **Author:** bootstrap agent
