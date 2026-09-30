@@ -150,7 +150,7 @@ Core Model
 | P1-01 | DONE | bootstrap-agent | `docs/failure_taxonomy.md`: FT-01..FT-16، منها 11 فئة تطلبها P1-01؛ `src/nawa/evaluation/taxonomy.py`؛ `tests/test_failure_taxonomy.py` (4 اختبارات) | 2026-09-30 |
 | P1-02 | DONE | bootstrap-agent | 9 مجموعات في `src/nawa/evaluation/suites/` + `eval/suites/README.md` + `factual_bank.yaml`؛ dev=243 وcalib=128 عنصرًا؛ `tests/test_eval_suites.py` (15 اختبارًا) | 2026-09-30 |
 | P1-02a | BLOCKED | — | مجموعة `domain` تنتظر OD-01 (المجال الأول) | 2026-09-30 |
-| P1-03 | PLANNED | — | — | — |
+| P1-03 | DONE | bootstrap-agent | frozen v1: 243 عنصرًا في HF `vuuuv/nawa-eval` الخاص (tag `frozen-v1`، commit `5eb6594`)؛ `eval/FROZEN.sha256`، `eval/frozen_item_hashes.txt`، `eval/frozen_manifest.yaml`؛ `tests/test_frozen_eval.py` (5 اختبارات) | 2026-09-30 |
 | P1-04 | PLANNED | — | — | — |
 | P1-05 | PLANNED | — | — | — |
 | P1-06 | PLANNED | — | — | — |
@@ -244,6 +244,25 @@ Core Model
 - **Roadmap section updated:** §2.2، §2.3، §2.4 (OD-01)، §4 (P1-02a)، §12
 - **Next unblocked task:** P1-03
 - **Duplicate-work check:** لم تكن توجد مجموعات تقييم أو فرع سابق لها.
+
+### P1-03 — فصل التقييم وتجميد frozen (2026-09-30)
+
+- **Task ID:** P1-03
+- **Owner:** bootstrap-agent (Eval role)
+- **Status:** DONE
+- **Scope:** فصل dev/calib/frozen، وبناء frozen من بذرة سرية تُستخدم مرة واحدة، وتثبيته بالـ hash، ورفعه إلى HF خاص، وحارس دور Eval.
+- **Files created:** `src/nawa/evaluation/frozen.py`، `eval/FROZEN.sha256`، `eval/frozen_item_hashes.txt`، `eval/frozen_manifest.yaml`، `tests/test_frozen_eval.py`
+- **Files modified:** `ROADMAP.md`
+- **Tests executed:** `python -m pytest`؛ `NAWA_ROLE=eval python -m nawa.evaluation.frozen verify` على نسخة نُزّلت من HF
+- **Test results:** 73 passed / 0 failed؛ النسخة المنزلة من `frozen-v1` تطابق `FROZEN.sha256`
+- **Metrics:** frozen: 243 عنصرًا؛ التقاطع مع dev (243) وcalib (128) صفر
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** `vuuuv/nawa-eval` (dataset، private)، الفرع `dev`، الـ tag `frozen-v1`، الـ commit `5eb6594823f88b2bd998a1387adc2f5505cf53cd`؛ لا شيء على `main`
+- **Dataset version:** eval frozen v1
+- **Known limitations:** البذرة غير محفوظة عمدًا، فالمرجع هو الملف المثبت بالـ hash. بنك factual الخاص كتبه الوكيل ويحتاج مراجعة بشرية. الوكيل نفسه أدى دور Eval في البناء (RISK-08).
+- **Roadmap section updated:** §2.2، §2.3، §12
+- **Next unblocked task:** P1-07 (المشغّل والتقرير)، ثم P1-04
+- **Duplicate-work check:** لم يكن في `nawa-eval` سوى `.gitattributes`، ولم يكن يوجد `FROZEN.sha256`.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -834,5 +853,6 @@ Limitations:
 | 1.1.1 | 2026-09-30 | P0-03 وP0-04 وP0-07a منجزة؛ P0-01 وP0-02 وP0-07 محجوبة بقرارات المالك؛ إضافة المهمة الفرعية P0-07a. | P0-02..P0-07a |
 | 1.2.0 | 2026-09-30 | تفصيل صفوف P1 إلى مهام فردية؛ P1-01 منجزة. | P1-01 |
 | 1.3.0 | 2026-09-30 | P1-02 منجزة لتسع مجموعات؛ إضافة المهمة الفرعية P1-02a (`domain`) وهي BLOCKED بقرار OD-01. | P1-02 |
+| 1.4.0 | 2026-09-30 | P1-03 منجزة: frozen v1 خاص على HF (`frozen-v1`) ومثبت بالـ hash في Git. | P1-03 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

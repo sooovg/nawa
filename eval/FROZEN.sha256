@@ -1,0 +1,10 @@
+# NAWA frozen eval v1 — sha256 of files in HF vuuuv/nawa-eval (private), path frozen/v1/
+648016e06cfa4bd81e42b740dd5369dcda097575e171e732e7dc5b7e3f6e489e  frozen/v1/abstention.jsonl
+e84cd4c29a73f9ccc7b93973bed57c267cd06bfa8a1289d34614eab31e48f1f7  frozen/v1/arabic.jsonl
+5a0652c64694ca3fc7b1dc578f3951c791f7ac480fc911a52da8eee0cb958477  frozen/v1/code.jsonl
+fe8ee14d3b06a831101629e6cba0338628a6ff64f79d7fae524b1e94b81e0b54  frozen/v1/factual.jsonl
+666b214ca327ea4e2e00c404bdad28f05cb07997653f5f969722a760d1d6e3af  frozen/v1/faithfulness.jsonl
+e4d469061f814e77c549065a77621e19dc60bed7829d917e2c95ae9381a45a56  frozen/v1/reasoning_math.jsonl
+e3aa3af740a9e10c183fd9037ce0b8039c02cb09557b058e65e14ed9c77c5cd3  frozen/v1/regression_general.jsonl
+58c85578e7d4c4dce43cc938bdd6be5c06771c10d1bcac02f08a1b31054c4f99  frozen/v1/robustness.jsonl
+b4939aba75d2d92638a70625985ac8756f697468474b1fc9e71fe5f82142b383  frozen/v1/tool_use.jsonl
