@@ -130,7 +130,7 @@ Core Model
 | G0 الميثاق والحدود وCI مبدئي (P0) | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
 | G1 القياس والمرجع الداخلي (P1) | PENDING_REVIEW | 2026-09-30 | كل شروط G1 في §4 لها دليل: مراجع P1-07 ونواة P3-05 محفوظة (EXP-0008..0010)؛ frozen له hash ومكان خاص (P1-03)؛ لا بيانات تدريب نصية بعد، وسجلات Atlas المشتقة من التقييم ممنوعة من التدريب (P1-08)؛ أمر إعادة التقرير موجود (P1-07). P1-01..P1-03 وP1-06 وP1-07 وP1-08 منجزة؛ P1-04 وP1-05 SUPERSEDED؛ P1-02a محجوبة بـ OD-01 وليست شرطًا لـ G1؛ P1-06a شرط لـ G5 (ADR-0004). تنتظر مراجعة المالك (§0: قاعدة استقلال الحكم) |
 | G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | — | — |
-| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04 منجزة (`4fc691e`)؛ P3-05 منجزة: "XOR ينجح" و"tiny LM يتعلم" مثبتان (EXP-0008، EXP-0009)؛ P3-06 منجزة: trainer كامل مع checkpoint/resume وgradient accumulation وmixed precision (`tests/test_trainer.py`، 35 اختبارًا)؛ P3-07 منجزة: DeviceWrapper وDistributedConfig لدعم CPU/GPU/multi-GPU (`tests/test_device_support.py`، 28 اختبارًا)؛ باقي شرط الاستئناف العددي (P3-08) والـ Tokenizer (P3-01..P3-03)؛ لا يُغلق G3 قبل G0–G2 |
+| G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04..P3-08 منجزة: decoder مرجعي + XOR/tiny LM + trainer كامل + device support + numerical verification (266 اختبارًا)؛ باقي الـ Tokenizer (P3-01..P3-03) ويحتاج مدونة عربية مرخصة (مشروطة بـ P2/G2)؛ لا يُغلق G3 قبل G0–G2 |
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | — | — |
@@ -174,7 +174,7 @@ Core Model
 | P3-05 | DONE | agent-P3-05 | `src/nawa/training/sanity.py` (XOR + tiny character LM على مصدر ماركوف عربي اصطناعي بإنتروبيا محسوبة بدقة)؛ `make sanity`؛ `tests/test_sanity_training.py` (9 اختبارات)؛ EXP-0007 (FAILED) وEXP-0008 وEXP-0009 (PASSED) | 2026-09-30 |
 | P3-06 | DONE | agent-P3-06 | `src/nawa/training/trainer.py` (Trainer، TrainerConfig، CheckpointState، DeviceWrapper، scheduler، optimizer، gradient accumulation، mixed precision، metrics، budget guard)؛ `Makefile` (`make train`)؛ `tests/test_trainer.py` (35 اختبارًا)؛ EXP-0012 | 2026-09-30 |
 | P3-07 | DONE | agent-P3-07 | `src/nawa/training/trainer.py` (DistributedConfig، DeviceWrapper: GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، should_save/should_log، init/cleanup_distributed)؛ `tests/test_device_support.py` (28 اختبارًا، 1 تخطي)؛ EXP-0013 | 2026-09-30 |
-| P3-08 | PLANNED | — | — | — |
+| P3-08 | DONE | agent-P3-08 | `tests/test_numerical_verification.py` (19 اختبارًا: determinism, checkpoint resume identity, gradient accumulation equivalence, numerical stability, checkpoint integrity, integration)؛ EXP-0014 | 2026-09-30 |
 | P4-01..P4-08 | PLANNED | — | — | — |
 | P5-01..P5-10 | PLANNED | — | — | — |
 | P6-01..P6-09 | PLANNED | — | — | — |
@@ -473,6 +473,25 @@ Core Model
 - **Roadmap section updated:** §2.1 G3، §2.2، §12
 - **Next unblocked task:** P3-08 (تحقق عددي، seeds ثابتة، استكمال من checkpoint، اختبارات unit/integration/numerical)
 - **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P3-07. DeviceWrapper من P3-06 كان single-device فقط؛ هذا التوسيع يضيف GPU وDDP.
+
+### P3-08 — التحقق العددي واختبارات checkpoint resume (2026-09-30)
+
+- **Task ID:** P3-08
+- **Owner:** agent-P3-08
+- **Status:** DONE
+- **Scope:** اختبارات رسمية لشروط G3 العددية: نفس البذرة تعطي نفس النتائج، الاستئناف من checkpoint يعطي مسارًا متطابقًا، تراكم التدرجات عدديًا مكافئ للباتش الكبير، الحسابات مستقرة، وحدة checkpoint كاملة، واختبار تكاملي.
+- **Files created:** `tests/test_numerical_verification.py`، `experiments/log.jsonl` (EXP-0014)
+- **Files modified:** `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
+- **Test results:** 266 passed / 0 failed / 1 skipped (247 + 19 جديدة؛ 1 تخطي: CUDA not available). تشمل: same seed identical weights، different seed different weights، same config same seed identical trajectory، different seed different trajectory، resume identical continuation، resume restores optimizer state، resume restores scheduler state، resume restores step count، resume restores RNG state، loss finite throughout، grad norm non-negative، LR positive، gradient accumulation numerical equivalence، checkpoint all required fields، checkpoint config hash matches model، checkpoint model config saved، full pipeline train→checkpoint→resume→eval، forward deterministic، backward deterministic.
+- **فشل مسجَّل أثناء التطوير:** اختبار تراكم التدرجات فشل أولًا لأن `zero_grad` كان يُستدعى بين الميكرو-باتشات، ممسحًا التدرجات المتراكمة. الإصلاح: نقل `zero_grad` قبل الحلقة. لم يُغيَّر سلوك الكود؛ صُحِّح الاختبار.
+- **Metrics (EXP-0014):** 30 خطوة تدريب على CPU بنواتين. هذه أرقام صحة وتشغيل.
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Known limitations:** جميع الاختبارات على CPU (لا GPU). اختبار الاستئناف يستخدم batch_fn معتمدة على الخطوة (step-seeded) بدلًا من generator متقدم، لأن الـ Trainer لا يلتقط حالة batch_fn. الوكيل أجرى القياس بنفسه.
+- **Roadmap section updated:** §2.1 G3، §2.2، §12
+- **Next unblocked task:** لا توجد مهام P3 غير محجوبة متبقية (P3-01..P3-03 تحتاج مدونة عربية مرخصة مشروطة بـ P2/G2). R-03 (منظومة المراجعة متعددة النماذج) مخططة. المهام التالية غير المحجوبة هي في P2 (أطلس الإخفاقات ومصنع البيانات) لكنها تحتاج إغلاق G0 وG1 أولاً.
+- **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P3-08. P3-06 وP3-07 بنتا البنية التحتية، وهذه المهمة تضيف التحقق العددي الرسمي.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -1079,5 +1098,6 @@ Limitations:
 | 1.11.0 | 2026-09-30 | P1-08 منجزة: Atlas بـ 224 سجلًا متحققًا ممنوعًا من التدريب؛ إصلاح تصنيف الامتناع إلى FT-13 دون تغيير أي مقياس T؛ G1 أصبحت PENDING_REVIEW. | P1-08 |
 | 1.12.0 | 2026-09-30 | P3-06 منجزة: مدرّب كامل (optimizer/scheduler/checkpoint/resume/gradient accumulation/mixed precision/metrics/budget guard)؛ تفصيل P3-06..P3-08 إلى P3-06 وP3-07..P3-08؛ `make train` مُنفّذ. لم يُغيَّر أي هدف أو معيار. | P3-06، EXP-0012 |
 | 1.13.0 | 2026-09-30 | P3-07 منجزة: DistributedConfig وDeviceWrapper (GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، rank-0 save/log)؛ تفصيل P3-07..P3-08 إلى P3-07 وP3-08. لم يُغيَّر أي هدف أو معيار. | P3-07، EXP-0013 |
+| 1.14.0 | 2026-09-30 | P3-08 منجزة: تحقق عددي (determinism، checkpoint resume identity، gradient accumulation equivalence، numerical stability، checkpoint integrity، integration)؛ 19 اختبارًا. لم يُغيَّر أي هدف أو معيار. | P3-08، EXP-0014 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
