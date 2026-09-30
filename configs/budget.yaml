@@ -1,0 +1,21 @@
+# NAWA compute & money budget (ROADMAP P0-07).
+# Caps are OWNER DECISIONS (ROADMAP §2.4, OD-05). While a cap is null, the matching
+# class of work is DENIED by src/nawa/budget.py. Only zero-cost local CPU work is allowed.
+owner_decision: OD-05
+
+caps:
+  gpu_hours: null          # [OWNER DECISION REQUIRED]
+  money_usd: null          # [OWNER DECISION REQUIRED]
+
+stop_at_fraction: 0.8      # AGENTS.md §13: stop and ask the owner at 80% of any cap
+
+spent:                     # updated by every experiment that consumes budget
+  gpu_hours: 0.0
+  money_usd: 0.0
+
+known_hardware:
+  agent_sandbox:           # measured 2026-09-30 (nproc, free -g)
+    cpus: 2
+    ram_gb: 7
+    gpu: none
+    cost: zero-marginal    # no paid service is used
