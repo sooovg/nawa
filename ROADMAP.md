@@ -131,7 +131,7 @@ Core Model
 | G1 القياس والمرجع الداخلي (P1) | PENDING_REVIEW | 2026-09-30 | كل شروط G1 في §4 لها دليل: مراجع P1-07 ونواة P3-05 محفوظة (EXP-0008..0010)؛ frozen له hash ومكان خاص (P1-03)؛ لا بيانات تدريب نصية بعد، وسجلات Atlas المشتقة من التقييم ممنوعة من التدريب (P1-08)؛ أمر إعادة التقرير موجود (P1-07). P1-01..P1-03 وP1-06 وP1-07 وP1-08 منجزة؛ P1-04 وP1-05 SUPERSEDED؛ P1-02a محجوبة بـ OD-01 وليست شرطًا لـ G1؛ P1-06a شرط لـ G5 (ADR-0004). تنتظر مراجعة المالك (§0: قاعدة استقلال الحكم) |
 | G2 أطلس الإخفاقات ومصنع البيانات (P2) | IN_PROGRESS | 2026-10-01 | P2-02 منجزة (`verify.py`، EXP-0016). P2-05 منجزة (أدوات التنظيف، EXP-0018)؛ P2-03 منجزة (توائم الامتناع، EXP-0019)؛ P2-04 منجزة (أزواج التفضيل، EXP-0021)؛ كشف التسرب الجزئي إلى frozen ينتظر P2-05a. ADR-0005: مهام الكود P2-02..P2-05 غير محجوبة (أدوات واختبارات على مدخلات اصطناعية، لا بيانات تدريب ولا رفع)؛ P2-01 وP2-06..P2-08 BLOCKED بقرارات المالك؛ شروط G2 لم تتغير، ولا تُغلق قبل G0 وG1 |
 | G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-10-01 | P3-04..P3-08 منجزة: decoder مرجعي + XOR/tiny LM + trainer كامل + device support + numerical verification (266 اختبارًا)؛ P3-01 وP3-02 منجزتان: 5 مرشحين وأداة قياس على نص اصطناعي (EXP-0022، ADR-0006)؛ P3-03 (الاختيار) BLOCKED حتى توجد مدونة حقيقية مرخصة (OD-03)؛ لا يُغلق G3 قبل G0–G2 |
-| G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
+| G4 دراسات الكفاءة والابتكار (P4) | PLANNED | 2026-10-01 | ADR-0007: مهام الكود P4-02..P4-07 غير محجوبة (تنفيذ واختبارات صحة على النواة المرجعية ومصادر اصطناعية، دون اعتماد أي تقنية)؛ P4-01 وP4-02a..P4-05a وP4-08 BLOCKED؛ شروط G4 لم تُخفَّف (أضيف شرط ablations على نص حقيقي)، ولا تُغلق قبل P4-01 وP4-02a..P4-05a وG0–G3 |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | — | — |
 | G7 الخبراء والمحولات والذاكرة (P7) | PLANNED | — | — |
@@ -169,6 +169,7 @@ Core Model
 | P1-07 | DONE | bootstrap-agent | `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/{runner,report}.py`؛ `make eval` و`make report` و`make repro`؛ `tests/test_eval_runner.py` (10 اختبارات) | 2026-09-30 |
 | P1-08 | DONE | agent-P1-08 | أول 224 سجلًا في Atlas، كلها متحققة حتميًا وممنوعة من التدريب، ومثبتة ببصمة في `data_pipeline/atlas/manifest.yaml` (البيانات خارج Git)؛ `nawa.atlas` (schema، ingest، validate)؛ إصلاح تصنيف الامتناع إلى FT-13 | 2026-09-30 |
 | R-05 | DONE | agent-R-05 | تحديد مهام P2 القابلة للتنفيذ قبل إغلاق G0/G1 وفق قاعدة §0: كود فقط، دون بيانات تدريب أو رفع؛ ADR-0005 (ACCEPTED بتوجيه المالك 2026-10-01)؛ `tests/test_roadmap_consistency.py`؛ PR #18 | 2026-10-01 |
+| R-06 | DONE | agent-R-06 | نطاق P4 قبل إغلاق G3: فصل صف P4 إلى P4-01..P4-08؛ مهام الكود P4-02..P4-07 غير محجوبة دون اعتماد أي تقنية، وP4-01 وP4-08 BLOCKED؛ ADR-0007؛ استكمال مراجع commit/PR الناقصة في تقارير §2.3؛ `tests/test_roadmap_consistency.py` | 2026-10-01 |
 | P2-01 | BLOCKED | — | `mine.py` يحتاج نموذجًا نصيًا: نواة NAWA نصية (P5) أو أدوات خارجية مصرحًا بها (OD-10)؛ مسار تشغيلات التقييم الحتمي مغطى في P1-08 (ADR-0005) | 2026-10-01 |
 | P2-02 | DONE | agent-P2-02 | `src/nawa/data_verify.py` و`data_pipeline/atlas/verify.py` و`configs/verification.yaml`: تحقق مستقل بأربع طرق (حساب، تنفيذ في sandbox، مصدر مرخص، مراجعة خبير بشري) وبوابة أهلية التدريب (G2 ودفعات التقييم وبصمات frozen)؛ `tests/test_data_verify.py` (40 اختبارًا)؛ EXP-0016 | 2026-10-01 |
 | P2-03 | DONE | agent-P2-03 | `src/nawa/data/twins.py`: منشئ ومدقق توائم الامتناع (سفن خيالية، قوالب ومحث نظام مستقلان عن التقييم، مشتت يملك الخاصية المسؤول عنها)؛ `tests/test_twins.py` (24 اختبارًا)؛ EXP-0019 | 2026-10-01 |
@@ -186,7 +187,18 @@ Core Model
 | P3-06 | DONE | agent-P3-06 | `src/nawa/training/trainer.py` (Trainer، TrainerConfig، CheckpointState، DeviceWrapper، scheduler، optimizer، gradient accumulation، mixed precision، metrics، budget guard)؛ `Makefile` (`make train`)؛ `tests/test_trainer.py` (35 اختبارًا)؛ EXP-0012 | 2026-09-30 |
 | P3-07 | DONE | agent-P3-07 | `src/nawa/training/trainer.py` (DistributedConfig، DeviceWrapper: GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، should_save/should_log، init/cleanup_distributed)؛ `tests/test_device_support.py` (28 اختبارًا، 1 تخطي)؛ EXP-0013 | 2026-09-30 |
 | P3-08 | DONE | agent-P3-08 | `tests/test_numerical_verification.py` (19 اختبارًا: determinism, checkpoint resume identity, gradient accumulation equivalence, numerical stability, checkpoint integrity, integration)؛ EXP-0014 | 2026-09-30 |
-| P4-01..P4-08 | PLANNED | — | — | — |
+| P4-01 | BLOCKED | — | منحنيات التوسع تصف البيانات التي تُقاس عليها؛ تنتظر مدونة حقيقية مرخصة (OD-03، P2-06..P2-08) واختيار الـ Tokenizer (P3-03) (ADR-0007) | 2026-10-01 |
+| P4-02 | PLANNED | — | Dense مقابل Sparse MoE مقابل Hybrid: تنفيذ واختبارات صحة فقط، والأرقام الاصطناعية دليل لا اختيار (ADR-0007) | 2026-10-01 |
+| P4-03 | PLANNED | — | أوزان ثلاثية بـ QAT مع fallback إلى 4-bit: تنفيذ واختبارات صحة فقط (ADR-0007) | 2026-10-01 |
+| P4-04 | PLANNED | — | كتل attention + convolution/hybrid: تنفيذ واختبارات صحة فقط، لا نسبة قبل ablation (ADR-0007) | 2026-10-01 |
+| P4-05 | PLANNED | — | KV cache وspeculative decoding (greedy) وcompilation: تكافؤ مع الحساب الكامل ضمن حد تسامح يُسجَّل قبل التشغيل؛ weight sharing وlow-rank وsparsity تغيّر النموذج، فلها اختبارات صحة فقط (عدد المعاملات، الشكل، التدرج، السببية) (ADR-0007) | 2026-10-01 |
+| P4-06 | PLANNED | — | سجل تجربة P4 الإلزامي (config، commit، seed، hardware، metrics، failure، conclusion) ومدقق آلي له؛ أول مهمة في ترتيب ADR-0007 D5 | 2026-10-01 |
+| P4-07 | PLANNED | — | `docs/ablations.md`: ما نجح وما فشل، تحدّثه كل مهمة P4 (ADR-0007) | 2026-10-01 |
+| P4-02a | BLOCKED | — | مقارنة Dense/MoE/Hybrid على نص حقيقي؛ ablation شرط لـ G4؛ تنتظر OD-03 وP3-03 (ADR-0007) | 2026-10-01 |
+| P4-03a | BLOCKED | — | مقارنة الأوزان الثلاثية و4-bit بالمرجع على نص حقيقي؛ ablation شرط لـ G4؛ تنتظر OD-03 وP3-03 (ADR-0007) | 2026-10-01 |
+| P4-04a | BLOCKED | — | مقارنة كتل attention + convolution/hybrid على نص حقيقي؛ ablation شرط لـ G4؛ تنتظر OD-03 وP3-03 (ADR-0007) | 2026-10-01 |
+| P4-05a | BLOCKED | — | قياس أثر weight sharing وlow-rank وsparsity على الجودة على نص حقيقي؛ ablation شرط لـ G4؛ تنتظر OD-03 وP3-03 (ADR-0007) | 2026-10-01 |
+| P4-08 | BLOCKED | — | رفع checkpoints تجريبية إلى `nawa-core/dev` ينتظر تشغيل P4 على نص حقيقي ينتج checkpoint قابلًا لإعادة الإنتاج مع manifest؛ لا رفع بموجب ADR-0007 | 2026-10-01 |
 | P5-01..P5-10 | PLANNED | — | — | — |
 | P6-01..P6-09 | PLANNED | — | — | — |
 | P7-01..P7-08 | PLANNED | — | — | — |
@@ -227,7 +239,7 @@ Core Model
 - **Tests executed:** `python -m pytest`، `pre-commit run --all-files`
 - **Test results:** 49 passed / 0 failed
 - **Metrics:** n/a
-- **Git commit:** PR لهذه المهام (squash)
+- **Git commit:** PR #3، squash `e3b5caf` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** لا شيء
 - **Known limitations:** P0-01 وP0-02 وP0-07 تنتظر قرارات المالك في §2.4؛ لذلك لا يمكن إغلاق G0.
@@ -246,7 +258,7 @@ Core Model
 - **Tests executed:** `python -m pytest`، `pre-commit run --all-files`
 - **Test results:** 53 passed / 0 failed
 - **Metrics:** 16 فئة (FT-01..FT-16)؛ الفئات الـ 11 المطلوبة في P1-01 كلها موجودة
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #4، squash `a403c2f` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** لا شيء
 - **Known limitations:** FT-12..FT-16 إضافات تقيسها مجموعات AGENTS §10 مباشرة؛ الإضافة لا تغير أي معيار.
@@ -265,7 +277,7 @@ Core Model
 - **Tests executed:** `python -m pytest`، `pre-commit run --all-files`، بناء dev وcalib
 - **Test results:** 68 passed / 0 failed؛ الـ oracle يحقق 100% في كل المجموعات؛ الضوضاء ≤ 5%
 - **Metrics:** dev: 243 عنصرًا، calib: 128 عنصرًا، بلا تداخل (content_hash)
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #5، squash `67e33a1` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** dev/calib تُبنى حتميًا من البذرتين 1001 و2002 (غير محفوظة في Git)
 - **Known limitations:** المطابقة نصية متساهلة؛ القوالب مشتركة بين الأقسام؛ بنك factual يحتاج مراجعة بشرية؛ sandbox على مستوى العملية فقط.
@@ -284,7 +296,7 @@ Core Model
 - **Tests executed:** `python -m pytest`؛ `NAWA_ROLE=eval python -m nawa.evaluation.frozen verify` على نسخة نُزّلت من HF
 - **Test results:** 73 passed / 0 failed؛ النسخة المنزلة من `frozen-v1` تطابق `FROZEN.sha256`
 - **Metrics:** frozen: 243 عنصرًا؛ التقاطع مع dev (243) وcalib (128) صفر
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #6، squash `bdefe9c` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** `vuuuv/nawa-eval` (dataset، private)، الفرع `dev`، الـ tag `frozen-v1`، الـ commit `5eb6594823f88b2bd998a1387adc2f5505cf53cd`؛ لا شيء على `main`
 - **Dataset version:** eval frozen v1
 - **Known limitations:** البذرة غير محفوظة عمدًا، فالمرجع هو الملف المثبت بالـ hash. بنك factual الخاص كتبه الوكيل ويحتاج مراجعة بشرية. الوكيل نفسه أدى دور Eval في البناء (RISK-08).
@@ -303,7 +315,7 @@ Core Model
 - **Tests executed:** `python -m pytest`، `make repro`، تجربة دخان على Qwen2.5-0.5B (`--limit 2`، غير محفوظة)
 - **Test results:** 83 passed / 0 failed؛ oracle يحقق 100% على 243 عنصرًا؛ always_abstain يحقق abstention_recall 100% وanswerable_accuracy 0%، فيسقط في T2
 - **Metrics:** لا أرقام baseline بعد (P1-04)
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #7، squash `91e5817` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** dev (243)
 - **Known limitations:** التقرير يحفظ المقاييس المجمعة فقط، والتنبؤات تبقى في `eval/runs/` المتجاهل. ملاحظة للمهمة P1-06: T1 وحده يمكن التحايل عليه بالامتناع الدائم (0% هلوسة)، فيجب قراءته مع الدقة ومع T2. أتمتة `make gate` لم تُنفذ بعد وتبقى رافضة.
@@ -323,7 +335,7 @@ Core Model
 - **Tests executed:** `python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`
 - **Test results:** 94 passed / 0 failed
 - **Metrics:** لا شيء. نتائج P1-04 الملغاة لا تُستخدم في أي هدف أو بوابة، بتوجيه المالك.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #8، squash `2a489d8` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** لا شيء
 - **Known limitations:** R-03 (منظومة المراجعة متعددة النماذج) مخطط ولم يُنفَّذ. OD-10 مفتوح. P1-06 ينتظر P3-05.
@@ -344,7 +356,7 @@ Core Model
 - **Test results:** 143 passed / 0 failed (94 سابقة + 49 جديدة). تشمل: السببية في 12 تركيبة (norm × mlp × positional)؛ مطابقة attention للمرجع المستقل `F.scaled_dot_product_attention`؛ تكافؤ GQA مع MHA بأوزان k/v مكررة؛ مطابقة RMSNorm وLayerNorm للصيغة؛ اعتماد درجات RoPE على الإزاحة النسبية وحفظها للطول؛ مطابقة عدد المعاملات للصيغة المغلقة `expected_num_parameters` في 24 تركيبة؛ gradcheck بدقة float64؛ وصول تدرج غير صفري لكل معامل؛ استبعاد `ignore_index` من الخسارة؛ الحتمية بالبذرة؛ رفض الإعدادات غير الصالحة.
 - **فشل مسجَّل أثناء التطوير:** اختبار RoPE فشل أولًا بحد تسامح 1e-9. السبب أن جداول cos/sin مخزنة بدقة float32، والفرق النسبي المقاس نحو 2e-8. ضُبط الحد على 1e-6 ووُثق السبب داخل الاختبار. لم يُغيَّر سلوك الكود.
 - **Metrics (EXP-0006، `configs/base_model.yaml`, seed 42, CPU بنواتين، torch 2.14.0+cpu، Python 3.14.3):** config_hash `918f4cf4877c0cca`؛ المعاملات 3,229,952 (منها 3,164,416 خارج الـ embeddings) وتطابق الصيغة المغلقة؛ خسارة التهيئة 5.6431 مقابل ln(256)=5.5452؛ زمن forward بحجم 8×128 نحو 56.9 ms. هذه أرقام صحة وتشغيل، لا أرقام جودة.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #9، squash `4fc691e` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء (لا أوزان مدربة)
 - **Dataset version:** لا شيء
 - **Known limitations:** `vocab_size=256` placeholder بمستوى البايت حتى يُختار الـ tokenizer (P3-03). لا KV cache ولا kernel مدمج. لا تدريب؛ إثبات التعلم (XOR وtiny LM) هو P3-05. PyTorch مكتبة tensors/autograd فقط ولا يُحمَّل منها أي نموذج. أجرى الوكيل القياس بنفسه، فالمراجعة المستقلة مطلوبة قبل إغلاق G3 (قاعدة استقلال الحكم).
@@ -374,7 +386,7 @@ Core Model
 
   النموذج: 102,528 معاملًا (d_model=64، طبقتان، 4 رؤوس)، config_hash `f7ed143b5dd98f46`، نحو 134 ثانية على CPU بنواتين (266 ثانية في EXP-0009 بسبب تشغيل متزامن). تكلفة صفرية، بلا GPU.
 - **الفشل والتشخيص (EXP-0007):** تجاوز شرط H1 وسقط في شرط الفجوة. الفرضية الأولى كانت أن البيانات (200 ألف حرف) لا تكفي، و**نقضها القياس**: مقدّر العدّ على الحجم نفسه يبلغ 2.426. السبب الفعلي نقص التدريب (3.07 مليون رمز، وخسارة التدريب ما زالت 2.52). الإصلاح: رفع الرموز المرئية إلى 12.3 مليون (3000 خطوة × 64 × 64) والبيانات إلى 2 مليون حرف، دون تغيير المعايير أو النموذج. اختبار CI القصير فشل أيضًا في محاولته الأولى (400 خطوة، حد أشد مما تسمح به الخطوات)؛ ضُبط إلى 600 خطوة بحدود مأخوذة من منحنى EXP-0007 المقاس، وهو اختبار دخان وليس المعيار المسجل.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #10، squash `813dc98` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء (لا تُحفظ أوزان؛ النماذج تُعاد بأمر واحد)
 - **Dataset version:** مصدر اصطناعي يُولَّد من الكود ببذرة (`MarkovSource.make(k=29, seed)`)
 - **Reproduce:** `make sanity` (EXP-0008)؛ `python -m nawa.training.sanity --xor-seeds 3 4 --lm-seed 7` (EXP-0009)
@@ -395,7 +407,7 @@ Core Model
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`
 - **Test results:** 153 passed / 0 failed (اختبار جديد: `test_p1_06_is_not_circular_and_anchoring_is_a_g5_condition`)
 - **Metrics:** لا شيء. تغيير حوكمة.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #11، squash `e41af10` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Known limitations:** ADR-0003 لم يُعدَّل لأنه قرار مقبول؛ ADR-0004 يعدّل صف P1-06 فيه. `configs/model_registry.yaml` يذكر P1-06 في سجلات تاريخية SUPERSEDED، وتُركت كما هي.
 - **Roadmap section updated:** §1.3، §2.1، §2.2، §2.3، §4، §12
@@ -414,7 +426,7 @@ Core Model
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`
 - **Test results:** 170 passed / 0 failed. الاختبارات الجديدة (17) ترفض: تخفيف أي عتبة من العتبات الخمس، وتثبيت رقم قبل P1-06a، ومرجعًا غير داخلي لهدف بوابة، والمعايرة على frozen، وحذف شرط T1، وجعل T3 إلزاميًا، وحذف أي هدف. وتقبل رفع العتبة، وتعيد قياس المرجعين التافهين وتطابقهما مع الأرقام المسجلة.
 - **Metrics (EXP-0010، المراجع التافهة، commit `e41af10`):** dev (243 عنصرًا، split `b457cabe4c8dde5e`) وcalib (128 عنصرًا، split `80484b78d2f758d9`). `oracle`: كل مقاييس T تساوي 1.0، والهلوسة 0.0. `always_abstain`: الهلوسة 0.0، والامتناع 1.0، ودقة الإجابة 0.0، وT5 وT6 تساوي 0.0. هذه أرقام حدود للمقاييس، وليست مراجع لتثبيت الأهداف.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #12، squash `99a5574` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء (لم يُستخدم frozen)
 - **Known limitations:** سرعة T4 ما زالت محجوبة بقرار OD-06. عتبتا T6 تنتظران P1-06a. `compare` لا يقيّم T4 وT6 بعد، لأن تقييمهما مطلق ويُضاف مع أرقامهما في P1-06a.
 - **Roadmap section updated:** §2.1 G1، §2.2، §2.3، §12
@@ -434,7 +446,7 @@ Core Model
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `python -m nawa.atlas validate data_pipeline/atlas/incoming/*.jsonl`، `pre-commit run --all-files`، `detect-secrets-hook`
 - **Test results:** 184 passed / 0 failed (14 اختبارًا جديدًا). السجلات: 224 صالحة.
 - **Metrics (EXP-0011):** التشغيل `dev-always-abstain-20260930T150139Z` على commit `5f7913b` (نظيف). عدد السجلات 224، كلها verified وكلها FT-13، موزعة على المجموعات: faithfulness 30، وfactual 30، وreasoning_math 30، وarabic 30، وregression_general 25، وtool_use 24، وrobustness 24، وcode 16، وabstention 15. العدد 243 − 224 = 19 عنصرًا نجح فيها الامتناع، وهي 15 توأمًا بلا دليل و4 فخاخ حزم وهمية.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #13، squash `5740067` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **فشلان في CI مسجَّلان:**
   1. المحاولة الأولى على PR #13 فشلت في `test_committed_atlas_is_valid_and_reproducible`. السبب أن `.gitignore` يستثني `*.jsonl`، فلم يُرفع ملف السجلات، بينما نجح الاختبار محليًا لأن الملف موجود على القرص.
@@ -458,7 +470,7 @@ Core Model
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
 - **Test results:** 219 passed / 0 failed (184 سابقة + 35 جديدة). تشمل: التحقق من 9 إعدادات غير صالئة، round-trip التكوين، warmup وcosine وlinear وconstant، ثبات constant بعد warmup، warmup صفر، انخفاض loss، تتبع metrics، حساب tokens مع accumulation، gradient accumulation، checkpoint save/load round-trip، resume من checkpoint، رفض تكوين مختلف، كمال حالة checkpoint، capture/restore RNG، DeviceWrapper CPU وfp32 nullcontext وfp16 fallback، budget guard، AdamW وSGD، summary، CLI smoke test.
 - **Metrics (EXP-0012، `configs/base_model.yaml`، seed 42، CPU بنواتين، torch 2.14.1+cpu، Python 3.14.3):** config_hash `918f4cf4877c0cca`؛ smoke test نجح في 5 خطوات على بيانات اصطناعية. هذه أرقام صحة وتشغيل، لا أرقام جودة.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #14، squash `815e63c` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء (لا أوزان مدربة)
 - **Dataset version:** لا شيء (بيانات اصطناعية من الكود)
 - **Known limitations:** DeviceWrapper يدعم جهازًا واحدًا فقط (P3-07 يضيف multi-GPU/DDP). لا تحقق عددي رسمي لاستئناف checkpoint (P3-08). لا KV cache ولا kernel مدمج. لا تدريب على نص حقيقي (يحتاج P2 وP3-01..P3-03). الوكيل أجرى القياس بنفسه، فشرط G3 يحتاج مراجعة مستقلة.
@@ -478,7 +490,7 @@ Core Model
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
 - **Test results:** 247 passed / 0 failed / 1 skipped (184 + 35 + 28 جديدة؛ 1 تخطي: CUDA not available). تشمل: DistributedConfig defaults وddp valid وnon-zero rank و5 حالات غير صالحة وround-trip؛ DeviceWrapper CPU default وexplicit CPU وmove no-op وCUDA fallback وfp32 nullcontext وbf16 fallback وbarrier no-op وshould_save true/false وwrap_model no DDP without process group وunwrap strips DDP وunwrap passes through non-DDP؛ Trainer accepts distributed config وsummary includes distributed info وcheckpoint uses unwrapped model وtrain loop respects should_log؛ init_distributed noop وcleanup safe.
 - **Metrics (EXP-0013):** لا يوجد GPU؛ التجربة على CPU. هذه أرقام صحة وتشغيل.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #15، squash `5e7e850` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Known limitations:** لا اختبار DDP فعلي متعدد العمليات (يحتاج torchrun أو mp.spawn). DDP paths مختبرة عبر عدم تهيئة process group. CUDA path غير مختبر (لا GPU). الوكيل أجرى القياس بنفسه.
 - **Roadmap section updated:** §2.1 G3، §2.2، §12
@@ -497,7 +509,7 @@ Core Model
 - **Test results:** 266 passed / 0 failed / 1 skipped (247 + 19 جديدة؛ 1 تخطي: CUDA not available). تشمل: same seed identical weights، different seed different weights، same config same seed identical trajectory، different seed different trajectory، resume identical continuation، resume restores optimizer state، resume restores scheduler state، resume restores step count، resume restores RNG state، loss finite throughout، grad norm non-negative، LR positive، gradient accumulation numerical equivalence، checkpoint all required fields، checkpoint config hash matches model، checkpoint model config saved، full pipeline train→checkpoint→resume→eval، forward deterministic، backward deterministic.
 - **فشل مسجَّل أثناء التطوير:** اختبار تراكم التدرجات فشل أولًا لأن `zero_grad` كان يُستدعى بين الميكرو-باتشات، ممسحًا التدرجات المتراكمة. الإصلاح: نقل `zero_grad` قبل الحلقة. لم يُغيَّر سلوك الكود؛ صُحِّح الاختبار.
 - **Metrics (EXP-0014):** 30 خطوة تدريب على CPU بنواتين. هذه أرقام صحة وتشغيل.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #16، squash `87da334` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Known limitations:** جميع الاختبارات على CPU (لا GPU). اختبار الاستئناف يستخدم batch_fn معتمدة على الخطوة (step-seeded) بدلًا من generator متقدم، لأن الـ Trainer لا يلتقط حالة batch_fn. الوكيل أجرى القياس بنفسه.
 - **Roadmap section updated:** §2.1 G3، §2.2، §12
@@ -709,7 +721,7 @@ Core Model
   - **الفشل:** عنصر واحد من 2816 اختلف بمقدار 1.8e-6، والحد المسموح 1e-6.
   - **السبب:** الاختبار يقارن الأوزان بعد خطوة AdamW أولى. هذه الخطوة تقارب `lr·g/(|g|+eps)`، فتضخّم ضجيج جمع الأعداد العشرية في التدرجات القريبة من الصفر حتى قرابة lr.
   - **الإصلاح:** مقارنة الأوزان تستخدم الآن SGD، وتحديثه خطي في التدرج، فالتدرجات المتساوية يجب أن تعطي أوزانًا متساوية بالحد نفسه 1e-6. فحص تساوي التدرجات بقي كما هو، والحدود لم تُخفَّف.
-- **Git commit:** PR لهذه المهمة (squash)
+- **Git commit:** PR #23، squash `f368e0f` على `main` (سُجّل لاحقًا في R-06 من `git log`)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** لا شيء. النص يولده الكود ببذرة.
 - **Known limitations:**
@@ -722,6 +734,44 @@ Core Model
 - **Roadmap section updated:** §2.1، §2.2، §2.3، §12
 - **Next unblocked task:** لم تبقَ مهمة كود غير محجوبة واضحة في P2 وP3. P3-03 تنتظر OD-03، وP2-05a تنتظر دور التقييم، وP1-06a تنتظر نواة مدربة. أجزاء الكود في P4، مثل P4-03 (أوزان ثلاثية بـ QAT) وP4-05 (KV cache وweight sharing وlow-rank) على النواة المرجعية، قد تُنفذ بنطاق كود فقط على مهام sanity اصطناعية. لكن ذلك يحتاج ADR تحدد النطاق كما فعلت ADR-0005 وADR-0006، ولم يُبدأ.
 - **Duplicate-work check:** لا يوجد tokenizer سابق في `src/nawa/`؛ النواة تستخدم `vocab_size=256` placeholder. `src/nawa/training/sanity.py` يولّد نص ماركوف بأبجدية 29 رمزًا لـ P3-05 ولم يُنسخ. `pretok` و`corpus` جديدان.
+
+### R-06 — نطاق مهام P4 القابلة للتنفيذ قبل إغلاق G3 (2026-10-01)
+
+- **Task ID:** R-06
+- **Owner:** agent-R-06
+- **Status:** DONE
+- **Scope:** إصلاح تعارض داخلي. قال تقرير P3-01/02 إنه لا توجد مهمة كود غير محجوبة واضحة، وإن أجزاء الكود في P4 تحتاج ADR تحدد نطاقها. بينما كان صف `P4-01..P4-08` مجملًا وPLANNED دون نطاق. فبقي الوكيل التالي بلا مهمة قابلة للتنفيذ، مع أن قاعدة §0 تسمح بالمهام التي لا تعتمد على قرار معلّق. الحل في ADR-0007:
+  - فصل صف P4 إلى ثماني مهام دون تغيير أي معرف، وإضافة أربع مهام فرعية P4-02a..P4-05a للمقارنة على نص حقيقي (BLOCKED)، فلا تضيع المقارنة إذا أُغلقت مهمة الكود على دليل اصطناعي. وأضيف إلى G4 شرط إنجازها، وهذا تشديد لا تخفيف.
+  - مهام الكود P4-02..P4-07 غير محجوبة: تنفيذ من الصفر على النواة المرجعية مع اختبارات صحة نجاح/فشل. الأرقام الاصطناعية دليل لا اختيار، ولا تُعتمد أي تقنية.
+  - P4-01 (منحنيات التوسع) BLOCKED: المنحنى المقاس على نص اصطناعي يضلل قرار الحجم.
+  - P4-08 (الرفع إلى HF) BLOCKED: checkpoints المهام الاصطناعية تُعاد بأمر واحد، ولا قدرة فيها تستحق التخزين.
+  - "القرار التقني" في §4 لم يتغير. منع الاعتماد الصامت مفروض باختبار لا بنص: بصمة إعداد النواة `918f4cf4877c0cca` مثبتة، وحزم المسار S (`model` و`training` و`tokenizer`) ممنوعة من استيراد مكتبات النماذج الخارجية.
+  - استُكملت مراجع commit/PR في 15 تقريرًا في §2.3 كانت تقول "PR لهذه المهمة (squash)". أُخذت المراجع من `git log` و`gh pr list`، وعُلّم كل منها بـ "سُجّل لاحقًا في R-06". لم تتغير أي نتيجة.
+- **Files created:** `docs/decisions/ADR-0007-p4-code-scope.md`
+- **Files modified:** `ROADMAP.md` (§2.1 G4، §2.2، §2.3، §4 P4 وG4، §12)، `tests/test_roadmap_consistency.py` (3 اختبارات جديدة)، `tests/test_original_system_policy.py` (اختباران جديدان)، `experiments/log.jsonl` (EXP-0023)
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`، و7 اختبارات طفرة يدوية
+- **Test results:** المرجع على `main` (`f368e0f`): 452 passed / 1 skipped. بعد التغيير: 457 passed / 0 failed / 1 skipped (452 + 5 جديدة: `test_p4_code_scope_split_blocks_curves_and_upload_and_keeps_g4_unchanged` و`test_task_reports_record_a_commit_or_pr` و`test_p4_real_text_comparisons_are_tracked_and_g4_stays_open` و`test_reference_core_default_config_is_pinned` و`test_track_s_packages_import_no_external_model_libraries`؛ التخطي: CUDA not available). اختبارات الطفرة السبعة كلها أفشلت الاختبار المعني: P4-01 PLANNED، وحذف شرط "scaling curves موجودة"، وإعادة نص "PR لهذه المهمة (squash)"، وحذف شرط P4-02a..P4-05a من G4، وجعل G4 PENDING_REVIEW، وتغيير `mlp` في `configs/base_model.yaml`، وإضافة `import transformers` إلى `src/nawa/model/layers.py`.
+- **Metrics:** لا شيء. تغيير حوكمة.
+- **مراجعة متعددة النماذج (R-03):** راجع التغيير نموذج مستقل (Claude Opus 5.5، دور reviewer/error_hunter) على حمولة اجتازت `check_payload`. رُفضت الحمولة الأولى لأن سطور السياق تذكر اسم ملف بصمة frozen، فأُرسلت حمولة أصغر بلا تلك السطور. الحكم APPROVE_WITH_CHANGES بثلاث ملاحظات حاجبة، وتحقق الوكيل من كل منها في الكود قبل قبولها (ADR-0003 D4):
+  1. لا تعريف لإنجاز P4-02 وP4-04 يفصل الكود عن المقارنة: قُبلت، وأضيفت P4-02a..P4-05a.
+  2. صف P4-05 يدّعي تكافؤًا دقيقًا لبنود تغيّر النموذج: قُبلت، وفُصلت البنود، وصار حد التسامح يُسجَّل قبل التشغيل.
+  3. D4 مفروض بنص فقط: تأكدت بالفحص، فلا اختبار يثبت بصمة الإعداد ولا قاعدة استيراد. أضيف اختباران.
+  - من الملاحظات غير الحاجبة قُبلت فحص بقاء G4 مفتوحة وتصحيحات الصياغة. ورُفضت ملاحظة اشتراط بصمة الدمج في تقرير R-06 نفسه قبل وجودها، فرقم PR هو المرجع وتُسجل البصمة بعد الدمج.
+  - السجل: ADR-0007 قسم Review.
+- **Git commit:** PR #24 (squash بعد نجاح CI)
+- **HF repository/revision:** لا شيء
+- **Dataset version:** لا شيء
+- **فحص الأسرار والصلاحيات (بدون طباعة أي قيمة):** المتغيران `GITHUB_TOKEN` و`HF_TOKEN` غير موجودين كمتغيرات بيئة خام (`test -n` سلبي). الوصول يتم عبر مدير أسرار المنصة، الذي يحقن المصادقة عبر proxy، فلا تدخل القيمة إلى بيئة الوكيل ولا إلى أي ملف. سجّل المالك في 2026-10-01 اعتمادين جديدين عبر النموذج الآمن:
+  - **HF:** توكن fine-grained للمستخدم `vuuuv`، مقصور على مستودعات `vuuuv/nawa-*` الثمانية بصلاحيات `repo.access.read` و`repo.content.read` و`repo.write` فقط، بلا صلاحيات على مستوى الحساب. هذا يسد توصية R-05 (`AGENTS.md` §11). المستودعات الثمانية كلها `private=true`.
+  - **GitHub:** اعتماد محفوظ لـ `github.com`. عمليات Git في هذه الجلسة تمر عبر موصل GitHub للمنصة، وهو يقرأ ويكتب في `sooovg/nawa`.
+  - **الحماية:** `main` محمي (PR إلزامي، فحص `test`، منع force push والحذف، enforce_admins). مستودع GitHub ما زال عامًا (OD-07 ACCEPTED_TEMPORARY).
+- **Known limitations:**
+  - ADR-0007 قُبل بموجب قاعدة إصلاح الخارطة في §0، وللمالك أن يعكسه.
+  - ترتيب التنفيذ في D5 اختيار بحسب الاعتماديات: P4-06 قبل P4-02 لأنها السجل الذي تحتاجه كل تجارب P4.
+  - المراجع المستكملة في §2.3 تشير إلى commit الدمج، لا إلى commit الفرع المسجل أحيانًا في `experiments/log.jsonl`. السجل نفسه لم يُعدَّل.
+- **Roadmap section updated:** §2.1، §2.2، §2.3، §4، §12
+- **Next unblocked task:** P4-06 (سجل تجربة P4 الإلزامي ومدققه الآلي)، ثم P4-05 (KV cache بمعيار تكافؤ دقيق). ومراجعة المالك لـ G1 تبقى PENDING_REVIEW.
+- **Duplicate-work check:** لا يوجد ADR-0007 ولا R-06 ولا فرع أو PR يعالج نطاق P4. الفروع البعيدة التسعة عشر كلها لمهام مدموجة (PRs #1..#23)، ولا يوجد PR مفتوح. لا يوجد في `src/nawa/` تنفيذ لأي تقنية من P4، فالنواة بلا KV cache (مؤجل صراحة إلى P4-05/P8-04 في تقرير P3-04).
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -947,13 +997,19 @@ nawa/
 
 كل تقنية أدناه **فرضية تجريبية** وليست حقيقة مضمونة. تُقبل فقط إذا تجاوزت baseline على benchmark محدد.
 
+> **نطاق التنفيذ قبل إغلاق G3 (ADR-0007):** مهام الكود P4-02..P4-07 غير محجوبة، بشرط التنفيذ من الصفر على النواة المرجعية (المسار S)، وعلى CPU، ودون بيانات خارجية أو أوزان خارجية أو frozen أو رفع. معايير الصحة نجاح/فشل، والأرقام المقارنة على المصادر الاصطناعية دليل فقط. لا تُعتمد أي تقنية ولا يتغير الإعداد الافتراضي للنواة قبل "القرار التقني" أدناه. P4-01 وP4-08 محجوبتان، ومعهما المقارنات على نص حقيقي P4-02a..P4-05a. ترتيب التنفيذ: P4-06 ← P4-05 (البنود القابلة للتحقق بالتكافؤ أولًا) ← P4-03 ← P4-02 ← P4-04، وP4-07 مع كل منها. شروط G4 لم تُخفَّف، وأضيف إليها شرط P4-02a..P4-05a.
+
 ### المهام
 
 - **P4-01 [Git]** scaling curves: Tiny/Small/Medium وربط parameters/tokens/compute/loss/quality/memory/latency.
 - **P4-02 [Git]** مقارنة Dense مقابل Sparse MoE مقابل Hybrid على quality/active parameters/FLOP/memory/latency.
+  - **P4-02a [Git]** (ADR-0007) المقارنة نفسها على نص حقيقي مرخص بعد P3-03؛ BLOCKED حتى OD-03.
 - **P4-03 [Git]** اختبار الأوزان الثلاثية `{−1,0,+1}` بأسلوب QAT/التكميم التدريجي. لا تفترض تفوقًا؛ fallback إلى 4-bit إذا فشل.
+  - **P4-03a [Git]** (ADR-0007) قياس الأوزان الثلاثية و4-bit مقابل المرجع على نص حقيقي مرخص بعد P3-03؛ BLOCKED حتى OD-03.
 - **P4-04 [Git]** اختبار Attention + convolution/hybrid blocks. لا تعتمد 1:2 أو أي نسبة قبل ablation.
+  - **P4-04a [Git]** (ADR-0007) ablation الكتل الهجينة على نص حقيقي مرخص بعد P3-03؛ BLOCKED حتى OD-03.
 - **P4-05 [Git]** اختبار weight sharing، low-rank، sparsity، speculative decoding، KV cache، compilation.
+  - **P4-05a [Git]** (ADR-0007) قياس أثر weight sharing وlow-rank وsparsity على الجودة على نص حقيقي مرخص بعد P3-03؛ BLOCKED حتى OD-03.
 - **P4-06 [Git]** لكل تجربة ملف config، commit، seed، hardware، metrics، failure، conclusion.
 - **P4-07 [Git]** `docs/ablations.md` يوضح ما نجح وما فشل.
 - **P4-08 [HF]** رفع checkpoints التجريبية إلى `nawa-core` فرع `dev` فقط إذا كانت قابلة لإعادة الإنتاج، مع manifest.
@@ -966,6 +1022,7 @@ nawa/
 
 - scaling curves موجودة.
 - كل ادعاء معماري له ablation.
+- ablations المهام P4-02a وP4-03a وP4-04a وP4-05a على نص حقيقي منجزة؛ نتائج المصادر الاصطناعية (ADR-0007) لا تكفي لهذا الشرط.
 - لا تقنية مفروضة بسبب اسمها أو شهرتها.
 
 ---
@@ -1339,5 +1396,6 @@ Limitations:
 | 1.19.0 | 2026-10-01 | P2-03 منجزة: منشئ ومدقق توائم الامتناع، مفصول عن قوالب التقييم وأسمائه (EXP-0019). سُجلت فجوة G2: P2-02 لا يغطي البيانات الاصطناعية الصحيحة بالبناء. لم يُغيَّر أي هدف أو معيار أو شرط بوابة. | P2-03، EXP-0019 |
 | 1.20.0 | 2026-10-01 | P2-04 منجزة: schema ومنشئ ومدقق أزواج التفضيل، ومدخل للمخرجات الحقيقية (EXP-0020 FAILED ثم EXP-0021). اكتملت مهام الكود غير المحجوبة في P2. لم يُغيَّر أي هدف أو معيار أو شرط بوابة. | P2-04، EXP-0020، EXP-0021 |
 | 1.21.0 | 2026-10-01 | P3-01 وP3-02 منجزتان: 5 مرشحين للـ Tokenizer من الصفر وأداة قياس (EXP-0022). ADR-0006 تفصل صف P3-01..P3-03؛ P3-03 BLOCKED حتى توجد مدونة مرخصة. لم يُغيَّر أي هدف أو معيار أو شرط بوابة. | P3-01، P3-02، ADR-0006، EXP-0022 |
+| 1.22.0 | 2026-10-01 | R-06: فصل صف P4 إلى P4-01..P4-08. مهام الكود P4-02..P4-07 غير محجوبة دون اعتماد أي تقنية، وP4-01 وP4-08 BLOCKED؛ ترتيب تنفيذ P4؛ استكمال مراجع commit/PR في 15 تقريرًا في §2.3 من `git log`؛ تسجيل تضييق توكن HF على مستودعات NAWA. لم يُغيَّر أي هدف أو معيار أو شرط بوابة أو معرف، ولم تُحذف أي مهمة أو نتيجة. | R-06، ADR-0007، EXP-0023 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

@@ -50,3 +50,25 @@ def test_baseline_means_internal_reference() -> None:
 def test_agent_count_is_not_fixed() -> None:
     assert "176" not in AGENTS
     assert "عدد الوكلاء متغير" in AGENTS
+
+
+def test_reference_core_default_config_is_pinned() -> None:
+    """ADR-0007 D4: no P4 technique is adopted by silently changing the reference core default."""
+    import pytest
+    pytest.importorskip("torch")
+    from nawa.model import DecoderConfig
+    assert DecoderConfig.from_yaml(ROOT / "configs/base_model.yaml").config_hash() == "918f4cf4877c0cca"
+
+
+def test_track_s_packages_import_no_external_model_libraries() -> None:
+    """ADR-0007 D4 / AGENTS.md §3: Track S code (model, training, tokenizer) is written from scratch."""
+    import ast
+    banned = {"transformers", "huggingface_hub", "tokenizers", "sentencepiece", "tiktoken", "peft", "accelerate",
+              "datasets", "safetensors", "timm", "vllm", "llama_cpp", "bitsandbytes", "xformers"}
+    for pkg in ("model", "training", "tokenizer"):
+        for path in sorted((ROOT / "src/nawa" / pkg).rglob("*.py")):
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                names = ([a.name for a in node.names] if isinstance(node, ast.Import)
+                         else [node.module or ""] if isinstance(node, ast.ImportFrom) and node.level == 0 else [])
+                for name in names:
+                    assert name.split(".")[0] not in banned, f"{path.relative_to(ROOT)} imports {name}"
