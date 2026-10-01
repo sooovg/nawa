@@ -34,8 +34,11 @@ hold multiple roles, but each review instance assigns exactly one role.
 | `error_hunter` | Finds bugs, hallucinations, or failures in outputs | Does not verify; findings need independent verification |
 | `doc_writer` | Drafts documentation or comments | Does not approve; docs need review |
 
-A model not in the registry is not used. The registry is `src/nawa/review.py`
-and is enforced by `tests/test_multi_model_review.py`.
+A model not in the registry is not used. The registry is `ModelRegistry` in
+`src/nawa/review.py` and is enforced by `tests/test_multi_model_review.py`. Only the
+owner can authorize a model (`authorized_by: owner`, OD-10); an entry authorized by an
+agent is rejected. The registry for open-weight models that NAWA runs itself is a
+different file, `configs/model_registry.yaml` (ADR-0003 D2).
 
 ## 2. Isolation Rules
 
@@ -58,7 +61,9 @@ known patterns of secrets, tokens, and frozen references before sending.
 
 ## 3. Review Records
 
-Every review by an external model is logged in `experiments/log.jsonl` with:
+Every review by an external model is summarized in `experiments/log.jsonl` with the
+fields below. `ReviewLog` keeps the full append-only record in its own JSONL file
+(path chosen by the task; never a Git-tracked data file with secrets).
 
 ```json
 {
@@ -119,6 +124,12 @@ A model's output is a hypothesis. It becomes a project fact only through:
 
 The model that produced an artifact is never its sole reviewer.
 
+`can_decide()` enforces this: it refuses a decision when there is no review, when a
+reviewer is not registered for its role (if a registry is passed), when the producer
+model is the only reviewer, or when no deterministic check / executed test /
+measurement has passed. **Agreement between several models is never enough on its
+own** (review fix on PR #17, 2026-10-01).
+
 ## 6. Implementation
 
 The harness is implemented in `src/nawa/review.py`:
@@ -128,8 +139,9 @@ The harness is implemented in `src/nawa/review.py`:
 - `DisagreementRecord` — dataclass for a disagreement.
 - `ReviewLog` — append-only log of reviews and disagreements.
 - `check_payload` — scans payloads for secrets/frozen references.
-- `register_model` — adds a model to the registry.
-- `require_role` — validates that a model is registered for a role.
+- `ModelEntry` / `ModelRegistry` — owner-authorized models and their roles
+  (`ModelRegistry.register`, `ModelRegistry.require_role`).
+- `can_decide` — the decision gate in §5.
 
 ## 7. OD-10 Dependency
 

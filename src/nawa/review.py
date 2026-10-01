@@ -54,9 +54,19 @@ class ModelEntry:
     model_id: str                    # e.g. "openai/gpt-4o"
     provider: str                    # e.g. "openai"
     roles: frozenset[str]            # subset of ReviewRole values
-    authorized_by: str               # "owner" or "agent" (owner must confirm)
+    authorized_by: str               # must be "owner" (OD-10: the owner authorizes providers)
     date_added: str                  # ISO date
     notes: str = ""
+
+    def __post_init__(self) -> None:
+        if self.authorized_by != "owner":
+            raise ValueError(
+                f"model {self.model_id!r}: authorized_by must be 'owner', got {self.authorized_by!r}; "
+                "an agent cannot authorize an external model (OD-10, ADR-0003 D1)"
+            )
+        unknown = set(self.roles) - {r.value for r in ReviewRole}
+        if unknown:
+            raise ValueError(f"model {self.model_id!r}: unknown roles {sorted(unknown)}")
 
     def has_role(self, role: ReviewRole | str) -> bool:
         if isinstance(role, ReviewRole):
@@ -284,15 +294,10 @@ class ReviewLog:
         models = {r.model_id for r in self.get_reviews_for_artifact(artifact)}
         return len(models) >= 2
 
-    def can_decide(self, artifact: str) -> bool:
-        """Check if a decision can be made on an artifact.
-
-        A decision requires either:
-        - At least 2 models have reviewed it, OR
-        - 1 model has reviewed it AND a deterministic check exists (external).
-        This method checks the multi-model condition only.
-        """
-        return self.has_multiple_models_reviewed(artifact)
+    def can_decide(self, artifact: str, deterministic_check_passed: bool = False,
+                   producer_model: str | None = None) -> bool:
+        """Shortcut for the module-level :func:`can_decide` (ADR-0003 D4)."""
+        return can_decide(artifact, self, deterministic_check_passed, producer_model)[0]
 
     def _append(self, record_type: str, data: dict[str, Any]) -> None:
         if self.path is None:
@@ -401,36 +406,54 @@ def can_decide(
     artifact: str,
     review_log: ReviewLog,
     deterministic_check_passed: bool = False,
+    producer_model: str | None = None,
+    registry: ModelRegistry | None = None,
 ) -> tuple[bool, str]:
-    """Check if a decision can be made on an artifact.
+    """Check if a model-reviewed artifact may become a project decision.
 
-    A decision is allowed if:
-    1. At least 2 different models have reviewed it, OR
-    2. 1 model has reviewed it AND a deterministic check has passed.
+    ADR-0003 D4: "A model's opinion is a hypothesis. It becomes a project fact only
+    through a deterministic check, an executed test, a measurement with confidence
+    intervals, or independent reviewers followed by one of those checks. A model
+    that produced an artifact is never its sole reviewer."
 
-    This implements ADR-0003 D4: "A model's opinion is a hypothesis. It becomes
-    a project fact only through a deterministic check, an executed test, a
-    measurement with confidence intervals, or independent reviewers followed
-    by one of these checks."
+    So, in order:
+    1. at least one review must exist;
+    2. if ``registry`` is given, every reviewer must be registered for the role used;
+    3. at least one reviewer must differ from ``producer_model``;
+    4. a deterministic check (or executed test / measurement) must have passed.
+       Agreement between several models is never enough on its own.
 
     Returns (can_decide, reason).
     """
     reviews = review_log.get_reviews_for_artifact(artifact)
-    models = {r.model_id for r in reviews}
-
-    if len(models) >= 2:
-        return True, "multiple models reviewed the artifact"
-
-    if len(models) == 1 and deterministic_check_passed:
-        return True, "single model reviewed + deterministic check passed"
-
-    if len(models) == 0:
+    if not reviews:
         return False, "no model has reviewed this artifact"
 
-    return False, (
-        "single model reviewed without deterministic check; "
-        "a decision requires either 2+ models or 1 model + deterministic check"
-    )
+    if registry is not None:
+        for r in reviews:
+            entry = registry.get(r.model_id)
+            if entry is None or not entry.has_role(r.role):
+                return False, f"reviewer {r.model_id!r} is not registered for role {r.role.value!r}"
+
+    models = {r.model_id for r in reviews}
+    independent = models - {producer_model} if producer_model else models
+    if not independent:
+        return False, "the producer model is the sole reviewer; an independent reviewer is required"
+
+    if not deterministic_check_passed:
+        if len(independent) >= 2:
+            return False, (
+                "multiple models agree, but agreement is a hypothesis; a deterministic check, "
+                "executed test, or measurement must also pass (ADR-0003 D4)"
+            )
+        return False, (
+            "single model reviewed without deterministic check; a deterministic check, "
+            "executed test, or measurement must pass (ADR-0003 D4)"
+        )
+
+    if len(independent) >= 2:
+        return True, "multiple independent models reviewed + deterministic check passed"
+    return True, "single independent model reviewed + deterministic check passed"
 
 
 # ---------------------------------------------------------------------------

@@ -438,13 +438,66 @@ def test_can_decide_single_model_with_check():
     assert "deterministic check" in reason
 
 
-def test_can_decide_multiple_models():
+def test_can_decide_multiple_models_without_check_is_refused():
+    """ADR-0003 D4: agreement between models is a hypothesis, not a decision."""
     log = ReviewLog()
     log.add_review(make_review("EXP-1", "provider/a", "reviewer", "file.py"))
     log.add_review(make_review("EXP-2", "provider/b", "reviewer", "file.py"))
     can, reason = can_decide("file.py", log)
+    assert not can
+    assert "multiple models" in reason and "ADR-0003 D4" in reason
+    assert not log.can_decide("file.py")
+
+
+def test_can_decide_multiple_models_with_check():
+    log = ReviewLog()
+    log.add_review(make_review("EXP-1", "provider/a", "reviewer", "file.py"))
+    log.add_review(make_review("EXP-2", "provider/b", "reviewer", "file.py"))
+    can, reason = can_decide("file.py", log, deterministic_check_passed=True)
     assert can
-    assert "multiple models" in reason
+    assert "multiple independent models" in reason
+    assert log.can_decide("file.py", deterministic_check_passed=True)
+
+
+def test_can_decide_producer_as_sole_reviewer_is_refused_even_with_check():
+    log = ReviewLog()
+    log.add_review(make_review("EXP-1", "provider/a", "reviewer", "file.py"))
+    can, reason = can_decide("file.py", log, deterministic_check_passed=True, producer_model="provider/a")
+    assert not can
+    assert "producer" in reason
+
+
+def test_can_decide_producer_plus_independent_reviewer_with_check():
+    log = ReviewLog()
+    log.add_review(make_review("EXP-1", "provider/a", "reviewer", "file.py"))
+    log.add_review(make_review("EXP-2", "provider/b", "reviewer", "file.py"))
+    can, _ = can_decide("file.py", log, deterministic_check_passed=True, producer_model="provider/a")
+    assert can
+
+
+def test_can_decide_refuses_unregistered_reviewer_when_registry_given():
+    reg = ModelRegistry()
+    reg.register(ModelEntry(model_id="provider/a", provider="provider", roles=frozenset({"tester"}),
+                            authorized_by="owner", date_added="2026-10-01"))
+    log = ReviewLog()
+    log.add_review(make_review("EXP-1", "provider/a", "reviewer", "file.py"))
+    can, reason = can_decide("file.py", log, deterministic_check_passed=True, registry=reg)
+    assert not can and "not registered" in reason
+    log2 = ReviewLog()
+    log2.add_review(make_review("EXP-2", "provider/z", "tester", "file.py"))
+    assert not can_decide("file.py", log2, deterministic_check_passed=True, registry=reg)[0]
+    log3 = ReviewLog()
+    log3.add_review(make_review("EXP-3", "provider/a", "tester", "file.py"))
+    assert can_decide("file.py", log3, deterministic_check_passed=True, registry=reg)[0]
+
+
+def test_model_entry_requires_owner_authorization_and_known_roles():
+    with pytest.raises(ValueError, match="owner"):
+        ModelEntry(model_id="p/m", provider="p", roles=frozenset({"reviewer"}),
+                   authorized_by="agent", date_added="2026-10-01")
+    with pytest.raises(ValueError, match="unknown roles"):
+        ModelEntry(model_id="p/m", provider="p", roles=frozenset({"judge"}),
+                   authorized_by="owner", date_added="2026-10-01")
 
 
 def test_can_decide_same_model_twice_does_not_count():
