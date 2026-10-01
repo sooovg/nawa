@@ -94,7 +94,7 @@ def _train(model: NawaDecoder, train: torch.Tensor, seed: int, t: dict[str, Any]
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), t["grad_clip"])
         opt.step()
-        last = float(loss)
+        last = float(loss.detach())
     return model.eval(), last
 
 
