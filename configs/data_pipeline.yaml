@@ -1,0 +1,39 @@
+# Data cleaning pipeline (ROADMAP P2-05, ADR-0005). Read by src/nawa/data/.
+# Code-only stage: these tools are tested on code-generated fixtures. No external corpus is
+# ingested and nothing produced here is training data while G2 is open.
+
+schema_version: 1
+processing_version: "p2-05.1"
+
+# The approved-license list is NOT repeated here: the single list is
+# configs/verification.yaml `approved_licenses` (empty until OD-03).
+
+clean:
+  remove_tatweel: true          # kashida is typographic; diacritics are kept (they carry meaning)
+  min_chars: 20                 # shorter after cleaning -> dropped as `too_short`
+
+pii:
+  # Detected PII is replaced by a typed placeholder. Spans are reported without the value.
+  types: [email, phone, iban, card, national_id, ipv4, secret]
+
+dedup:
+  shingle_words: 5
+  num_perm: 128                 # MinHash permutations
+  bands: 32                     # LSH bands (rows = num_perm / bands = 4)
+  jaccard_threshold: 0.8        # near-duplicate if exact shingle Jaccard >= this (confirmed after LSH)
+  seed: 1234
+
+decontamination:
+  ngram_words: 8                # an 8-word overlap with an evaluation text marks contamination
+  # Public splits are rebuilt from code (P1-02). Frozen is never read: only its committed item
+  # hashes (eval/frozen_item_hashes.txt) are used, plus an optional hashed n-gram index file
+  # that only the Eval role can build (P2-05a).
+  public_splits: [dev, calib]
+
+quality:
+  min_score: 0.5
+  max_repeated_line_ratio: 0.3
+  max_symbol_ratio: 0.25
+  max_char_run: 12
+
+languages: [ar, en, mixed, unknown]
