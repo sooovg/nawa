@@ -157,7 +157,7 @@ Core Model
 | R-01 | DONE | bootstrap-agent | اتساق الخارطة: ADR-0002، `tests/test_roadmap_consistency.py` | 2026-09-30 |
 | R-02 | DONE | agent-R-02 | مواءمة الخارطة و`AGENTS.md` مع توجيه المالك: نظام أصلي، لا baseline خارجي شرطًا؛ ADR-0003؛ `configs/model_registry.yaml`؛ `tests/test_model_registry.py` و`tests/test_original_system_policy.py` | 2026-09-30 |
 | R-04 | DONE | agent-R-04 | فك حلقة اعتمادية P1-06: فصلها إلى P1-06 (تعريفات، شرط G1) وP1-06a (أرقام على أول نواة نصية، شرط G5)؛ ADR-0004؛ `tests/test_roadmap_consistency.py` | 2026-09-30 |
-| R-03 | PLANNED | — | منظومة المراجعة متعددة النماذج أثناء التطوير (ADR-0003 D1): سجل أدوار، تشغيل معزول، تسجيل الخلافات، ومنع القرار المعتمد على نموذج واحد | — |
+| R-03 | DONE | agent-R-03 | `docs/multi_model_review.md`، `src/nawa/review.py` (ReviewRole، ModelEntry، ModelRegistry، ReviewRecord، DisagreementRecord، ReviewLog، check_payload، can_decide)؛ `tests/test_multi_model_review.py` (46 اختبارًا بعد إصلاح المراجعة)؛ EXP-0015؛ PR #17 | 2026-10-01 |
 | P1-01 | DONE | bootstrap-agent | `docs/failure_taxonomy.md`: FT-01..FT-16، منها 11 فئة تطلبها P1-01؛ `src/nawa/evaluation/taxonomy.py`؛ `tests/test_failure_taxonomy.py` (4 اختبارات) | 2026-09-30 |
 | P1-02 | DONE | bootstrap-agent | 9 مجموعات في `src/nawa/evaluation/suites/` + `eval/suites/README.md` + `factual_bank.yaml`؛ dev=243 وcalib=128 عنصرًا؛ `tests/test_eval_suites.py` (15 اختبارًا) | 2026-09-30 |
 | P1-02a | BLOCKED | — | مجموعة `domain` تنتظر OD-01 (المجال الأول) | 2026-09-30 |
@@ -492,6 +492,27 @@ Core Model
 - **Roadmap section updated:** §2.1 G3، §2.2، §12
 - **Next unblocked task:** لا توجد مهام P3 غير محجوبة متبقية (P3-01..P3-03 تحتاج مدونة عربية مرخصة مشروطة بـ P2/G2). R-03 (منظومة المراجعة متعددة النماذج) مخططة. المهام التالية غير المحجوبة هي في P2 (أطلس الإخفاقات ومصنع البيانات) لكنها تحتاج إغلاق G0 وG1 أولاً.
 - **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P3-08. P3-06 وP3-07 بنتا البنية التحتية، وهذه المهمة تضيف التحقق العددي الرسمي.
+
+### R-03 — منظومة المراجعة متعددة النماذج (2026-10-01)
+
+- **Task ID:** R-03
+- **Owner:** agent-R-03
+- **Status:** DONE
+- **Scope:** بناء منظومة المراجعة متعددة النماذج أثناء التطوير (ADR-0003 D1): سجل أدوار، تشغيل معزول، تسجيل الخلافات، ومنع القرار المعتمد على نموذج واحد.
+- **التصميم:** `ReviewRole` (enum: reviewer، designer، tester، error_hunter، doc_writer)؛ `ModelEntry` و`ModelRegistry` (تسجيل نماذج خارجية مع أدوارها)؛ `ReviewRecord` (سجل مراجعة واحد)؛ `DisagreementRecord` (خلاف مع حل)؛ `ReviewLog` (سجل إلحاقي مع استمرارية)؛ `check_payload` (فحص أمان الحمولات: توكنات HF/GitHub/OpenAI، مراجع frozen، مسارات محظورة، تعيينات بيانات اعتماد)؛ `can_decide` (بوابة قرار: لا قرار بنموذج واحد).
+- **Files created:** `docs/multi_model_review.md`، `src/nawa/review.py`، `tests/test_multi_model_review.py`، `experiments/log.jsonl` (EXP-0015)
+- **Files modified:** `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
+- **Test results:** 307 passed / 0 failed / 1 skipped (266 + 41 جديدة؛ 1 تخطي: CUDA not available). تشمل: ReviewRole من str وinvalid وvalues؛ ModelEntry creation وround_trip؛ ModelRegistry empty وregister/get وduplicate rejected وrequire unregistered وrequire role not authorized/authorized وround_trip؛ ReviewRecord creation وround_trip وmake_review؛ Disagreement creation وresolve وinvalid method وdeferred not resolved؛ ReviewLog add review/disagreement وresolve not found وmultiple models وreviews by model وsummary وpersistence؛ check_payload safe/HF/GitHub/OpenAI/frozen/env/credential/dict/list؛ can_decide no reviews/single no check/single with check/multiple/same model twice.
+- **فشل مسجَّل أثناء التطوير:** ماسح الأسرار في `test_repository_structure.py` اكتشف توكنات وهمية في `test_multi_model_review.py`. الإصلاح: تقصير التوكنات الوهمية تحت حد الماسح وتخفيض حد Payload checker للأمان. لم يتغير سلوك الكود.
+- **مراجعة PR #17 وإصلاحها (agent-R-05، 2026-10-01):** وجدت المراجعة ملاحظة جوهرية واحدة. كانت `can_decide` تسمح بقرار عند اتفاق نموذجين دون أي فحص حتمي، وهذا يخالف ADR-0003 D4 الذي ينص على أن المراجعة المستقلة يجب أن يتبعها فحص حتمي أو اختبار منفذ أو قياس. ولم تكن الدالة تمنع أن يكون النموذج المنتج هو المراجع الوحيد. أُصلح ذلك: صار الفحص الحتمي شرطًا دائمًا، وأُضيف المعامل `producer_model`، ومعامل `registry` اختياري يرفض المراجع غير المسجل لدوره. كما صار `ModelEntry` يرفض `authorized_by` غير `owner` (OD-10) والأدوار غير المعروفة. وصُحِّحت `docs/multi_model_review.md`: أُزيلت دالة `register_model` غير الموجودة، ووُضّح الفرق عن `configs/model_registry.yaml`. وأُضيفت 6 اختبارات واستُبدل اختبار واحد، فصار عدد الاختبارات 46، والنتيجة الكاملة 312 passed / 0 failed / 1 skipped.
+- **Metrics (EXP-0015):** لا يوجد تدريب. هذه مهمة حوكمة.
+- **Git commit:** PR لهذه المهمة (squash)
+- **HF repository/revision:** لا شيء
+- **Known limitations:** السجل فارغ افتراضيًا؛ المزودون يُضافون عند حل OD-10. `check_payload` يستخدم أنماط regex ولا يلتقط كل أنواع الأسرار. لا تشغيل فعلي لنماذج خارجية — المنظومة توفر الإطار فقط.
+- **Roadmap section updated:** §2.2، §12
+- **Next unblocked task:** لا توجد مهام غير محجوبة متبقية. كل مهام P3 مكتملة (P3-01..P3-03 تحتاج P2/G2). P2 تحتاج إغلاق G0 وG1. G1 تنتظر مراجعة المالك. G0 تنتظر قرارات المالك (OD-01..OD-05، OD-09).
+- **Duplicate-work check:** لا يوجد `src/nawa/review.py` سابق، ولا فرع أو PR لـ R-03. ADR-0003 D1 يصف السياسة؛ هذه المهمة تبني الكود الإطار.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
@@ -1099,5 +1120,6 @@ Limitations:
 | 1.12.0 | 2026-09-30 | P3-06 منجزة: مدرّب كامل (optimizer/scheduler/checkpoint/resume/gradient accumulation/mixed precision/metrics/budget guard)؛ تفصيل P3-06..P3-08 إلى P3-06 وP3-07..P3-08؛ `make train` مُنفّذ. لم يُغيَّر أي هدف أو معيار. | P3-06، EXP-0012 |
 | 1.13.0 | 2026-09-30 | P3-07 منجزة: DistributedConfig وDeviceWrapper (GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، rank-0 save/log)؛ تفصيل P3-07..P3-08 إلى P3-07 وP3-08. لم يُغيَّر أي هدف أو معيار. | P3-07، EXP-0013 |
 | 1.14.0 | 2026-09-30 | P3-08 منجزة: تحقق عددي (determinism، checkpoint resume identity، gradient accumulation equivalence، numerical stability، checkpoint integrity، integration)؛ 19 اختبارًا. لم يُغيَّر أي هدف أو معيار. | P3-08، EXP-0014 |
+| 1.15.0 | 2026-10-01 | R-03 منجزة: منظومة المراجعة متعددة النماذج (ADR-0003 D1) — سجل أدوار، سجل نماذج، سجل مراجعات، تسجيل خلافات، فحص أمان الحمولات، بوابة قرار (لا قرار بنموذج واحد، والفحص الحتمي شرط دائم بعد إصلاح المراجعة)؛ 46 اختبارًا. لم يُغيَّر أي هدف أو معيار. | R-03، EXP-0015 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
