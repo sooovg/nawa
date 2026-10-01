@@ -53,3 +53,12 @@ A distractor entity with the asked attribute stays in both. `check_pair` enforce
 write a malformed pair. Twins use fictional ships, their own templates and system prompt, and names built only from
 consonants absent from the evaluation generator, so they share no name and no 8-gram with dev/calib. Records are
 never `train_eligible`; P2-02's methods do not yet cover synthetic-by-construction data.
+
+## Preference pairs (P2-04)
+
+`python -m nawa.data.preference build --n <twins> --seed <s> --out <new file>` (code: `src/nawa/data/preference.py`).
+A pair is `{prompt, chosen, rejected, rejected_failure}` where `rejected_failure` is an FT code from
+`docs/failure_taxonomy.md`. Synthetic pairs come from P2-03 twins with known failures (FT-01, FT-02, FT-07, FT-12,
+FT-13, FT-14). `judge` grades any response deterministically from the prompt and gold, and `check_pair` requires
+chosen correct, rejected wrong with exactly the labeled failure. `from_model_outputs` is the entry point for real
+outputs (P2-01/P5): it returns a pair only when one output is correct and another fails, never a guess.
