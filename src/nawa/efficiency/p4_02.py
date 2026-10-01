@@ -7,6 +7,14 @@
 learning-sanity check per variant (held-out loss clearly below H1, as in P3-05 and P4-03). Quality gaps, parameter
 bytes, FLOPs, latency and expert load are **evidence only**: synthetic data cannot rank the variants or support
 adoption (ADR-0007 D2, D4). The quality comparison is P4-02a (BLOCKED: OD-03, P3-03).
+
+Amendment to the pre-registration (commit after 093a367, before the registered run): a development smoke run
+(20 steps, seed 1, not recorded) found 1 strict causality "violation" of 1.5e-8 in the sparse dispatch path, while
+the dense masked path (``SparseMoE.dense_forward``) had 0. The cause is float32 rounding: changing a later token can
+change how many rows an expert's matmul receives, and the BLAS result for an unchanged row can differ in the last bit.
+No information flows backward. ``moe_causality_violations == 0`` is therefore replaced by two criteria that are
+together stricter in substance: exact causality (0 violations) of the routing and experts through the dense path,
+and a dispatch-path difference <= TOL. The strict dispatch count is kept as evidence. No other criterion changed.
 """
 
 from __future__ import annotations
@@ -46,7 +54,8 @@ CRITERIA: dict[str, Any] = {
     "equal_experts_identity_max_abs_diff": {"op": "<=", "value": TOL},
     "expert_assignments_equal_topk_times_tokens": {"op": "==", "value": True},
     "moe_batch_invariance_max_abs_diff": {"op": "<=", "value": TOL},
-    "moe_causality_violations": {"op": "==", "value": 0},
+    "moe_dense_path_causality_violations": {"op": "==", "value": 0},
+    "moe_dispatch_causality_max_abs_diff": {"op": "<=", "value": TOL},
     "moe_gradients_ok": {"op": "==", "value": True},
     "aux_loss_checks_ok": {"op": "==", "value": True},
     "reference_core_config_unchanged": {"op": "==", "value": True},
@@ -240,6 +249,33 @@ def aux_checks(seed: int) -> bool:
     return bool(ok)
 
 
+@torch.no_grad()
+def causality_probe(model: NawaDecoder, seq_len: int, seed: int, dense_path: bool, trials: int = 8) -> tuple[int, float]:
+    """(positions whose logits change at all, max change) when only later tokens change. ``dense_path`` routes every
+    SparseMoE through ``dense_forward`` (fixed shapes), which isolates information flow from matmul rounding."""
+    layers = moe_layers_of(model)
+    saved = [layer.forward for layer in layers]
+    if dense_path:
+        for layer in layers:
+            layer.forward = layer.dense_forward
+    try:
+        model.eval()
+        g = torch.Generator().manual_seed(seed)
+        bad, worst = 0, 0.0
+        for _ in range(trials):
+            x = torch.randint(0, model.cfg.vocab_size, (1, seq_len), generator=g)
+            cut = int(torch.randint(1, seq_len, (1,), generator=g))
+            y = x.clone()
+            y[0, cut:] = (y[0, cut:] + 1) % model.cfg.vocab_size
+            d = (model(x).logits[0, :cut] - model(y).logits[0, :cut]).abs()
+            bad += int(d.amax(-1).gt(0).sum())
+            worst = max(worst, float(d.max()))
+    finally:
+        for layer, fwd in zip(layers, saved):
+            layer.forward = fwd
+    return bad, worst
+
+
 def reference_core_unchanged() -> bool:
     return DecoderConfig.from_yaml(ROOT / "configs" / "base_model.yaml").config_hash() == REFERENCE_CORE_HASH
 
@@ -307,8 +343,13 @@ def measure(seed: int, cfg: dict[str, Any]) -> tuple[dict[str, Any], str]:
     m.update(dispatch_checks(models, val, seed))
     m.update(identity_checks(seed))
     m["moe_batch_invariance_max_abs_diff"] = batch_invariance(models, val)
-    m["moe_causality_violations"] = sum(causality_violations(models[n], cfg["model"]["max_seq_len"], seed)
-                                        for n in ("moe", "hybrid"))
+    seq = cfg["model"]["max_seq_len"]
+    dense_path = [causality_probe(models[n], seq, seed, dense_path=True) for n in ("moe", "hybrid")]
+    dispatch = [causality_probe(models[n], seq, seed, dense_path=False) for n in ("moe", "hybrid")]
+    m["moe_dense_path_causality_violations"] = sum(b for b, _ in dense_path)
+    m["moe_dispatch_causality_max_abs_diff"] = max(w for _, w in dispatch)
+    m["moe_dispatch_causality_violations_strict_evidence"] = sum(b for b, _ in dispatch)
+    m["dense_causality_violations"] = causality_violations(models["dense"], seq, seed)
     grads = {n: gradient_report(build(mcfg, cfg["variants"][n], seed), p["seq_len"], seed) for n in ("moe", "hybrid")}
     m["gradients"] = grads
     m["moe_gradients_ok"] = all(all(g.values()) for g in grads.values())
