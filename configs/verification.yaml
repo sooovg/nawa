@@ -1,0 +1,25 @@
+# Independent verification of data candidates (ROADMAP P2-02, ADR-0005).
+# Read by src/nawa/data_verify.py. No secrets here.
+
+schema_version: 1
+verifier_version: "p2-02.1"
+
+# Licenses a `licensed_source` check may accept. EMPTY until the owner decides OD-03
+# (license of future data). While empty, every licensed_source check returns
+# `unverified`, so no unlicensed text can become a verified example.
+# Adding a license here is an owner decision (AGENTS.md §13) and needs an ADR.
+approved_licenses: []
+
+# Methods allowed by ROADMAP P2-02: calculation, execution, licensed source, expert review.
+methods: [calculation, execution, licensed_source, expert_review]
+
+# Expert review must be by a human. External models are development tools whose output
+# is a hypothesis (ADR-0003 D4), so a model can never be the expert of record.
+expert_reviewer_prefix: "human:"
+
+calculation:
+  max_exponent: 64        # refuse a ** b with |b| above this (no resource blow-up)
+  max_expression_chars: 512
+
+execution:
+  timeout_seconds: 10     # wall clock, on top of the sandbox CPU/memory rlimits
