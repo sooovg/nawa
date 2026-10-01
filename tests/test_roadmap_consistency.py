@@ -92,3 +92,21 @@ def test_p1_06_is_not_circular_and_anchoring_is_a_g5_condition() -> None:
     g5 = phases[phases.index("### G5"):phases.index("## P6")]
     assert "P1-06a" not in g1 and "P1-06a" in g5
     assert (ROOT / "docs/decisions/ADR-0004-p1-06-dependency.md").is_file()
+
+
+def test_p2_code_scope_split_keeps_data_production_blocked_and_g2_unchanged() -> None:
+    """R-05 / ADR-0005: P2 code tasks are unblocked under §0; data-production tasks stay BLOCKED;
+    G2 keeps every condition, so no gate is weakened."""
+    rows = {r[0]: r for r in status_rows()}
+    assert "P2-01..P2-08" not in rows
+    for tid in ("P2-01", "P2-06", "P2-07", "P2-08"):
+        assert rows[tid][1] == "BLOCKED", rows[tid]
+        assert "ADR-0005" in rows[tid][3], rows[tid]
+    for tid in ("P2-02", "P2-03", "P2-04", "P2-05"):
+        assert rows[tid][1] in {"PLANNED", "CLAIMED", "IN_PROGRESS", "DONE"}, rows[tid]
+    phases = section("# 4. مراحل التنفيذ والبوابات", "# 5. قواعد Git")
+    g2 = phases[phases.index("### G2"):phases.index("## P3")]
+    for condition in ("200 مثال", "صفر تسرب", "source/license/language/domain/quality/date/hash/processing_version",
+                      "لا بيانات غير مرخصة"):
+        assert condition in g2, condition
+    assert (ROOT / "docs/decisions/ADR-0005-p2-code-scope.md").is_file()
