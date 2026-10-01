@@ -362,9 +362,13 @@ def test_gradient_accumulation_numerical_equivalence():
     big_x = torch.cat([mb[0] for mb in micro_batches], dim=0)
     big_y = torch.cat([mb[1] for mb in micro_batches], dim=0)
 
-    # Train A: one step with large batch
+    # Train A: one step with large batch.
+    # SGD, not AdamW: SGD's update is linear in the gradient, so equal gradients must give equal weights.
+    # AdamW's first step is ~lr * g / (|g| + eps), which turns float-summation noise in near-zero gradients
+    # into differences up to ~lr; with AdamW this check failed on the CI runner (1 of 2816 elements, 1.8e-6)
+    # while passing locally (fixed during P3-01/02, PR #23). The gradient check below is unchanged.
     model_a.train()
-    opt_a = torch.optim.AdamW(model_a.parameters(), lr=1e-3)
+    opt_a = torch.optim.SGD(model_a.parameters(), lr=1e-2)
     loss_a = model_a(big_x, targets=big_y).loss
     opt_a.zero_grad(set_to_none=True)
     loss_a.backward()
@@ -372,7 +376,7 @@ def test_gradient_accumulation_numerical_equivalence():
 
     # Train B: 4 micro-steps with accumulation (do NOT zero grad between micro-steps)
     model_b.train()
-    opt_b = torch.optim.AdamW(model_b.parameters(), lr=1e-3)
+    opt_b = torch.optim.SGD(model_b.parameters(), lr=1e-2)
     opt_b.zero_grad(set_to_none=True)
     for mb_x, mb_y in micro_batches:
         loss_b = model_b(mb_x, targets=mb_y).loss / 4
@@ -384,7 +388,7 @@ def test_gradient_accumulation_numerical_equivalence():
         if p_a.grad is not None and p_b.grad is not None:
             torch.testing.assert_close(p_a.grad, p_b.grad, rtol=1e-5, atol=1e-6)
 
-    # After optimizer step, weights should be very close
+    # After the optimizer step, weights should be very close
     for p_a, p_b in zip(model_a.parameters(), model_b.parameters()):
         torch.testing.assert_close(p_a.data, p_b.data, rtol=1e-5, atol=1e-6)
 

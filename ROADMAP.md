@@ -695,7 +695,7 @@ Core Model
   - تضخم عدد الرموز في النص المشوش: تشكيل، وتطويل، وأخطاء طباعة، وتكرار حروف، وعربيزي.
   - حصة رموز البايت.
 - **Files created:** `src/nawa/tokenizer/{__init__,byte,pretok,bpe,unigram,corpus,metrics}.py`، `configs/tokenizer.yaml`، `docs/decisions/ADR-0006-p3-tokenizer-scope.md`، `tests/test_tokenizer.py`
-- **Files modified:** `src/nawa/__init__.py` (وصف قديم)، `experiments/log.jsonl` (EXP-0022)، `ROADMAP.md` (§2.1 G3، §2.2 تفصيل صف P3-01..P3-03، §2.3، §12)
+- **Files modified:** `src/nawa/__init__.py` (وصف قديم)، `tests/test_numerical_verification.py` (إصلاح اختبار P3-08 أدناه)، `experiments/log.jsonl` (EXP-0022)، `ROADMAP.md` (§2.1 G3، §2.2 تفصيل صف P3-01..P3-03، §2.3، §12)
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`، `python -m nawa.tokenizer.metrics`
 - **Test results:** 452 passed / 0 failed / 1 skipped (431 على `main` + 21 جديدة). pre-commit وdetect-secrets نظيفان.
 - **Metrics (EXP-0022، `configs/tokenizer.yaml` hash `e8ed80100d198897`، vocab 2048، مدونة تدريب 644 KB):**
@@ -705,6 +705,10 @@ Core Model
   - **F1 حدود الصرف:** bpe 0.47، وbpe_arabic 0.60، وunigram 0.53، وunigram_arabic 0.61.
   - **التضخم:** التشكيل الكامل يضاعف عدد الرموز 4.3 إلى 4.8 مرات، والعربيزي 2.2 إلى 2.6 مرة، لأن نص التدريب الاصطناعي يخلو منهما.
   - **Unicode النادر:** حصة رموز البايت نحو 0.66 إلى 0.70.
+- **إصلاح اختبار P3-08 (FAILED في CI ثم أُصلح):** فشل `test_gradient_accumulation_numerical_equivalence` في CI على PR #23، ونجح محليًا وعلى `main`. لم يُلمس كود النموذج أو التدريب.
+  - **الفشل:** عنصر واحد من 2816 اختلف بمقدار 1.8e-6، والحد المسموح 1e-6.
+  - **السبب:** الاختبار يقارن الأوزان بعد خطوة AdamW أولى. هذه الخطوة تقارب `lr·g/(|g|+eps)`، فتضخّم ضجيج جمع الأعداد العشرية في التدرجات القريبة من الصفر حتى قرابة lr.
+  - **الإصلاح:** مقارنة الأوزان تستخدم الآن SGD، وتحديثه خطي في التدرج، فالتدرجات المتساوية يجب أن تعطي أوزانًا متساوية بالحد نفسه 1e-6. فحص تساوي التدرجات بقي كما هو، والحدود لم تُخفَّف.
 - **Git commit:** PR لهذه المهمة (squash)
 - **HF repository/revision:** لا شيء
 - **Dataset version:** لا شيء. النص يولده الكود ببذرة.
