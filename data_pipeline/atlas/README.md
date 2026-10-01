@@ -43,3 +43,13 @@ dev/calib rebuilt from code, frozen item hashes, optional hashed n-gram index fr
 exact + MinHash/LSH near dedup confirmed by exact Jaccard → provenance stamp with the G2 fields. Every input ends
 in `kept.jsonl` or `dropped.jsonl` (id + reason, no text). Output is never train-eligible; P2-02 decides that.
 Person names and addresses are not detected by these rules.
+
+## Abstention twins (P2-03)
+
+`python -m nawa.data.twins build --n <pairs> --seed <s> --out <new file>` (code: `src/nawa/data/twins.py`).
+Each pair shares one question: the answerable twin keeps the evidence sentence and its target answers and cites
+it; the unanswerable twin removes only that sentence and its target says `غير موجود في السياق` plus what is missing.
+A distractor entity with the asked attribute stays in both. `check_pair` enforces all of this and the CLI refuses to
+write a malformed pair. Twins use fictional ships, their own templates and system prompt, and names built only from
+consonants absent from the evaluation generator, so they share no name and no 8-gram with dev/calib. Records are
+never `train_eligible`; P2-02's methods do not yet cover synthetic-by-construction data.
