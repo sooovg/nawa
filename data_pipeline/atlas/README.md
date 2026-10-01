@@ -31,3 +31,15 @@ arithmetic), `execution` (sandboxed code with tests by someone other than the pr
 until OD-03**), and `expert_review` (a named `human:` reviewer who is not the producer; a model is never the expert).
 Results are `verified`, `rejected`, or `unverified`. `train_eligibility()` keeps everything out of training while G2 is
 not DONE, and always for dev/calib/frozen items and frozen content hashes (ADR-0005 D2).
+
+## Cleaning pipeline (P2-05)
+
+`python -m nawa.data.pipeline run <in.jsonl> --out-dir <new dir>` (code: `src/nawa/data/`, settings:
+`configs/data_pipeline.yaml`). Steps: clean (NFC, presentation forms, bidi/zero-width/control removal, tatweel;
+diacritics and ZWNJ kept) → PII redaction to typed placeholders (email, phone, IBAN mod-97, card Luhn, Saudi ID
+checksum, IPv4, tokens; spans never carry the value) → language tag and rule-based quality score → license
+(single approved list in `configs/verification.yaml`, empty until OD-03) → decontamination (8-gram overlap with
+dev/calib rebuilt from code, frozen item hashes, optional hashed n-gram index from the Eval role — P2-05a) →
+exact + MinHash/LSH near dedup confirmed by exact Jaccard → provenance stamp with the G2 fields. Every input ends
+in `kept.jsonl` or `dropped.jsonl` (id + reason, no text). Output is never train-eligible; P2-02 decides that.
+Person names and addresses are not detected by these rules.
