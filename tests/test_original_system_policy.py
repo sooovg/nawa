@@ -65,7 +65,7 @@ def test_track_s_packages_import_no_external_model_libraries() -> None:
     import ast
     banned = {"transformers", "huggingface_hub", "tokenizers", "sentencepiece", "tiktoken", "peft", "accelerate",
               "datasets", "safetensors", "timm", "vllm", "llama_cpp", "bitsandbytes", "xformers"}
-    for pkg in ("model", "training", "tokenizer"):
+    for pkg in ("model", "training", "tokenizer", "efficiency"):
         for path in sorted((ROOT / "src/nawa" / pkg).rglob("*.py")):
             for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
                 names = ([a.name for a in node.names] if isinstance(node, ast.Import)
