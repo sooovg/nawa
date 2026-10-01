@@ -1,0 +1,20 @@
+# Tokenizer candidates and measurement (ROADMAP P3-01/P3-02, ADR-0006). Read by src/nawa/tokenizer/metrics.py.
+# Measurement only: P3-03 (the choice) waits for a licensed real corpus (OD-03). Nothing here selects a tokenizer,
+# and the reference core keeps vocab_size=256 (byte) until P3-03.
+
+schema_version: 1
+vocab_size: 2048            # learned candidates; small because the synthetic corpus is small (~0.6 MB)
+train_seed: 2026
+heldout_seed: 9001          # different seed: unseen text from the same generators
+candidates:
+  - {name: byte, type: byte}
+  - {name: bpe, type: bpe, pretok: default}
+  - {name: bpe_arabic, type: bpe, pretok: arabic}          # experimental Arabic-aware pre-segmentation
+  - {name: unigram, type: unigram, pretok: default}
+  - {name: unigram_arabic, type: unigram, pretok: arabic}  # experimental
+heldout:
+  docs_per_category: 60
+  morph_words: 2000
+  noisy_pairs: 250
+  seq_docs: 40
+  seq_chars: 2000
