@@ -110,3 +110,48 @@ def test_p2_code_scope_split_keeps_data_production_blocked_and_g2_unchanged() ->
                       "لا بيانات غير مرخصة"):
         assert condition in g2, condition
     assert (ROOT / "docs/decisions/ADR-0005-p2-code-scope.md").is_file()
+
+
+def test_p4_code_scope_split_blocks_curves_and_upload_and_keeps_g4_unchanged() -> None:
+    """R-06 / ADR-0007: P4 code tasks are unblocked under §0 without adopting any technique; scaling curves
+    (P4-01) and HF upload (P4-08) stay BLOCKED; G4 keeps every condition, so no gate is weakened."""
+    rows = {r[0]: r for r in status_rows()}
+    assert "P4-01..P4-08" not in rows
+    for tid in ("P4-01", "P4-08"):
+        assert rows[tid][1] == "BLOCKED", rows[tid]
+        assert "ADR-0007" in rows[tid][3], rows[tid]
+    for tid in ("P4-02", "P4-03", "P4-04", "P4-05", "P4-06", "P4-07"):
+        assert rows[tid][1] in {"PLANNED", "CLAIMED", "IN_PROGRESS", "DONE", "FAILED"}, rows[tid]
+    phases = section("# 4. مراحل التنفيذ والبوابات", "# 5. قواعد Git")
+    p4 = phases[phases.index("## P4"):phases.index("## P5")]
+    g4 = p4[p4.index("### G4"):]
+    for condition in ("scaling curves موجودة", "كل ادعاء معماري له ablation", "لا تقنية مفروضة"):
+        assert condition in g4, condition
+    assert "لا يصبح NAWA “ternary” أو “hybrid” أو “MoE” رسميًا إلا بعد أن تثبت بوابة مستقلة" in p4
+    assert "ADR-0007" in p4 and "لا تُعتمد أي تقنية" in p4
+    assert (ROOT / "docs/decisions/ADR-0007-p4-code-scope.md").is_file()
+
+
+def test_task_reports_record_a_commit_or_pr() -> None:
+    """R-06: every completion report in §2.3 names its commit or PR, not a placeholder."""
+    reports = section("## 2.3 تقارير إنجاز المهام", "## 2.4 ")
+    for part in re.split(r"(?m)^(?=### )", reports)[1:]:
+        m = re.search(r"\*\*Git commit:\*\* (.+)", part)
+        assert m, part.splitlines()[0]
+        assert re.search(r"PR #\d+|`[0-9a-f]{7,40}`", m[1]), part.splitlines()[0]
+
+
+def test_p4_real_text_comparisons_are_tracked_and_g4_stays_open() -> None:
+    """R-06 / ADR-0007 D1, D3: each comparison study has a real-text subtask that stays BLOCKED and is a G4 condition,
+    and G4 cannot be closed while P4-01 (scaling curves) is not done."""
+    rows = {r[0]: r for r in status_rows()}
+    for tid in ("P4-02a", "P4-03a", "P4-04a", "P4-05a"):
+        assert rows[tid][1] in {"BLOCKED", "PLANNED", "CLAIMED", "IN_PROGRESS", "DONE", "FAILED"}, rows[tid]
+        assert "ADR-0007" in rows[tid][3], rows[tid]
+    phases = section("# 4. مراحل التنفيذ والبوابات", "# 5. قواعد Git")
+    g4 = phases[phases.index("### G4"):phases.index("## P5")]
+    assert "P4-02a وP4-03a وP4-04a وP4-05a" in g4
+    gates = section("## 2.1 حالة البوابات", "## 2.2")
+    g4_status = re.search(r"^\| G4 [^|]*\| (\w+) \|", gates, flags=re.M)[1]
+    if rows["P4-01"][1] != "DONE" or any(rows[t][1] != "DONE" for t in ("P4-02a", "P4-03a", "P4-04a", "P4-05a")):
+        assert g4_status not in {"DONE", "PENDING_REVIEW"}, g4_status
