@@ -21,3 +21,13 @@ The AGENTS.md §9 fields (`category`, `prompt`, `bad_output`, `model`, `model_re
 ## Batches
 
 See `manifest.yaml` (records, verified count, categories, digest, reproduce command).
+
+## Independent verification (P2-02)
+
+`python data_pipeline/atlas/verify.py check <candidates.jsonl> --out <results.jsonl>` (implementation:
+`src/nawa/data_verify.py`, settings: `configs/verification.yaml`). Four methods: `calculation` (exact safe
+arithmetic), `execution` (sandboxed code with tests by someone other than the producer), `licensed_source`
+(answer inside a verbatim quote from a sha256-pinned source whose license is approved; **no license is approved
+until OD-03**), and `expert_review` (a named `human:` reviewer who is not the producer; a model is never the expert).
+Results are `verified`, `rejected`, or `unverified`. `train_eligibility()` keeps everything out of training while G2 is
+not DONE, and always for dev/calib/frozen items and frozen content hashes (ADR-0005 D2).
