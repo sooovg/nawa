@@ -157,7 +157,7 @@ Core Model
 | R-01 | DONE | bootstrap-agent | اتساق الخارطة: ADR-0002، `tests/test_roadmap_consistency.py` | 2026-09-30 |
 | R-02 | DONE | agent-R-02 | مواءمة الخارطة و`AGENTS.md` مع توجيه المالك: نظام أصلي، لا baseline خارجي شرطًا؛ ADR-0003؛ `configs/model_registry.yaml`؛ `tests/test_model_registry.py` و`tests/test_original_system_policy.py` | 2026-09-30 |
 | R-04 | DONE | agent-R-04 | فك حلقة اعتمادية P1-06: فصلها إلى P1-06 (تعريفات، شرط G1) وP1-06a (أرقام على أول نواة نصية، شرط G5)؛ ADR-0004؛ `tests/test_roadmap_consistency.py` | 2026-09-30 |
-| R-03 | PLANNED | — | منظومة المراجعة متعددة النماذج أثناء التطوير (ADR-0003 D1): سجل أدوار، تشغيل معزول، تسجيل الخلافات، ومنع القرار المعتمد على نموذج واحد | — |
+| R-03 | DONE | agent-R-03 | `docs/multi_model_review.md`، `src/nawa/review.py` (ReviewRole، ModelEntry، ModelRegistry، ReviewRecord، DisagreementRecord، ReviewLog، check_payload، can_decide)؛ `tests/test_multi_model_review.py` (46 اختبارًا بعد إصلاح المراجعة)؛ EXP-0015؛ PR #17 | 2026-10-01 |
 | P1-01 | DONE | bootstrap-agent | `docs/failure_taxonomy.md`: FT-01..FT-16، منها 11 فئة تطلبها P1-01؛ `src/nawa/evaluation/taxonomy.py`؛ `tests/test_failure_taxonomy.py` (4 اختبارات) | 2026-09-30 |
 | P1-02 | DONE | bootstrap-agent | 9 مجموعات في `src/nawa/evaluation/suites/` + `eval/suites/README.md` + `factual_bank.yaml`؛ dev=243 وcalib=128 عنصرًا؛ `tests/test_eval_suites.py` (15 اختبارًا) | 2026-09-30 |
 | P1-02a | BLOCKED | — | مجموعة `domain` تنتظر OD-01 (المجال الأول) | 2026-09-30 |
@@ -168,7 +168,7 @@ Core Model
 | P1-06a | PLANNED | — | تثبيت أرقام T1 وT2 وT5 وT6 على أول نواة NAWA مدربة على نص حقيقي؛ تنتظر أول مرشح من P5؛ شرط لـ G5 (ADR-0004) | 2026-09-30 |
 | P1-07 | DONE | bootstrap-agent | `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/{runner,report}.py`؛ `make eval` و`make report` و`make repro`؛ `tests/test_eval_runner.py` (10 اختبارات) | 2026-09-30 |
 | P1-08 | DONE | agent-P1-08 | أول 224 سجلًا في Atlas، كلها متحققة حتميًا وممنوعة من التدريب، ومثبتة ببصمة في `data_pipeline/atlas/manifest.yaml` (البيانات خارج Git)؛ `nawa.atlas` (schema، ingest، validate)؛ إصلاح تصنيف الامتناع إلى FT-13 | 2026-09-30 |
-| R-05 | IN_PROGRESS | agent-R-05 | تحديد مهام P2 القابلة للتنفيذ قبل إغلاق G0/G1 وفق قاعدة §0: كود فقط، دون بيانات تدريب أو رفع؛ ADR-0005 (PROPOSED، ينتظر مراجعة المالك)؛ `tests/test_roadmap_consistency.py` | 2026-10-01 |
+| R-05 | DONE | agent-R-05 | تحديد مهام P2 القابلة للتنفيذ قبل إغلاق G0/G1 وفق قاعدة §0: كود فقط، دون بيانات تدريب أو رفع؛ ADR-0005 (ACCEPTED بتوجيه المالك 2026-10-01)؛ `tests/test_roadmap_consistency.py`؛ PR #18 | 2026-10-01 |
 | P2-01 | BLOCKED | — | `mine.py` يحتاج نموذجًا نصيًا: نواة NAWA نصية (P5) أو أدوات خارجية مصرحًا بها (OD-10)؛ مسار تشغيلات التقييم الحتمي مغطى في P1-08 (ADR-0005) | 2026-10-01 |
 | P2-02 | PLANNED | — | `verify.py`: كود فقط على حالات اصطناعية وسجلات P1-08؛ غير محجوبة (ADR-0005)؛ الأولى في ترتيب P2 | 2026-10-01 |
 | P2-03 | PLANNED | — | منشئ توائم الامتناع على سياقات يولدها الكود؛ لا شيء `train_eligible` قبل G2 (ADR-0005) | 2026-10-01 |
@@ -501,23 +501,44 @@ Core Model
 - **Next unblocked task:** لا توجد مهام P3 غير محجوبة متبقية (P3-01..P3-03 تحتاج مدونة عربية مرخصة مشروطة بـ P2/G2). R-03 (منظومة المراجعة متعددة النماذج) مخططة. المهام التالية غير المحجوبة هي في P2 (أطلس الإخفاقات ومصنع البيانات) لكنها تحتاج إغلاق G0 وG1 أولاً.
 - **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P3-08. P3-06 وP3-07 بنتا البنية التحتية، وهذه المهمة تضيف التحقق العددي الرسمي.
 
+### R-03 — منظومة المراجعة متعددة النماذج (2026-10-01)
+
+- **Task ID:** R-03
+- **Owner:** agent-R-03
+- **Status:** DONE
+- **Scope:** بناء منظومة المراجعة متعددة النماذج أثناء التطوير (ADR-0003 D1): سجل أدوار، تشغيل معزول، تسجيل الخلافات، ومنع القرار المعتمد على نموذج واحد.
+- **التصميم:** `ReviewRole` (enum: reviewer، designer، tester، error_hunter، doc_writer)؛ `ModelEntry` و`ModelRegistry` (تسجيل نماذج خارجية مع أدوارها)؛ `ReviewRecord` (سجل مراجعة واحد)؛ `DisagreementRecord` (خلاف مع حل)؛ `ReviewLog` (سجل إلحاقي مع استمرارية)؛ `check_payload` (فحص أمان الحمولات: توكنات HF/GitHub/OpenAI، مراجع frozen، مسارات محظورة، تعيينات بيانات اعتماد)؛ `can_decide` (بوابة قرار: لا قرار بنموذج واحد).
+- **Files created:** `docs/multi_model_review.md`، `src/nawa/review.py`، `tests/test_multi_model_review.py`، `experiments/log.jsonl` (EXP-0015)
+- **Files modified:** `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`
+- **Test results:** 307 passed / 0 failed / 1 skipped (266 + 41 جديدة؛ 1 تخطي: CUDA not available). تشمل: ReviewRole من str وinvalid وvalues؛ ModelEntry creation وround_trip؛ ModelRegistry empty وregister/get وduplicate rejected وrequire unregistered وrequire role not authorized/authorized وround_trip؛ ReviewRecord creation وround_trip وmake_review؛ Disagreement creation وresolve وinvalid method وdeferred not resolved؛ ReviewLog add review/disagreement وresolve not found وmultiple models وreviews by model وsummary وpersistence؛ check_payload safe/HF/GitHub/OpenAI/frozen/env/credential/dict/list؛ can_decide no reviews/single no check/single with check/multiple/same model twice.
+- **فشل مسجَّل أثناء التطوير:** ماسح الأسرار في `test_repository_structure.py` اكتشف توكنات وهمية في `test_multi_model_review.py`. الإصلاح: تقصير التوكنات الوهمية تحت حد الماسح وتخفيض حد Payload checker للأمان. لم يتغير سلوك الكود.
+- **مراجعة PR #17 وإصلاحها (agent-R-05، 2026-10-01):** وجدت المراجعة ملاحظة جوهرية واحدة. كانت `can_decide` تسمح بقرار عند اتفاق نموذجين دون أي فحص حتمي، وهذا يخالف ADR-0003 D4 الذي ينص على أن المراجعة المستقلة يجب أن يتبعها فحص حتمي أو اختبار منفذ أو قياس. ولم تكن الدالة تمنع أن يكون النموذج المنتج هو المراجع الوحيد. أُصلح ذلك: صار الفحص الحتمي شرطًا دائمًا، وأُضيف المعامل `producer_model`، ومعامل `registry` اختياري يرفض المراجع غير المسجل لدوره. كما صار `ModelEntry` يرفض `authorized_by` غير `owner` (OD-10) والأدوار غير المعروفة. وصُحِّحت `docs/multi_model_review.md`: أُزيلت دالة `register_model` غير الموجودة، ووُضّح الفرق عن `configs/model_registry.yaml`. وأُضيفت 6 اختبارات واستُبدل اختبار واحد، فصار عدد الاختبارات 46، والنتيجة الكاملة 312 passed / 0 failed / 1 skipped.
+- **Metrics (EXP-0015):** لا يوجد تدريب. هذه مهمة حوكمة.
+- **Git commit:** PR #17، squash `f3794a7` على `main` (2026-10-01؛ دمجه agent-R-05 بعد المراجعة والإصلاح ونجاح CI)
+- **HF repository/revision:** لا شيء
+- **Known limitations:** السجل فارغ افتراضيًا؛ المزودون يُضافون عند حل OD-10. `check_payload` يستخدم أنماط regex ولا يلتقط كل أنواع الأسرار. لا تشغيل فعلي لنماذج خارجية — المنظومة توفر الإطار فقط.
+- **Roadmap section updated:** §2.2، §12
+- **Next unblocked task:** لا توجد مهام غير محجوبة متبقية. كل مهام P3 مكتملة (P3-01..P3-03 تحتاج P2/G2). P2 تحتاج إغلاق G0 وG1. G1 تنتظر مراجعة المالك. G0 تنتظر قرارات المالك (OD-01..OD-05، OD-09).
+- **Duplicate-work check:** لا يوجد `src/nawa/review.py` سابق، ولا فرع أو PR لـ R-03. ADR-0003 D1 يصف السياسة؛ هذه المهمة تبني الكود الإطار.
+
 ### R-05 — نطاق مهام P2 القابلة للتنفيذ قبل إغلاق G0/G1 (2026-10-01)
 
 - **Task ID:** R-05
 - **Owner:** agent-R-05
-- **Status:** IN_PROGRESS (المخرجات والاختبارات مكتملة؛ الـ PR مفتوح وينتظر مراجعة المالك قبل الدمج، ثم تصبح DONE)
+- **Status:** DONE (دُمج بـ squash بتوجيه المالك، 2026-10-01 07:05 +03)
 - **Scope:** إصلاح تعارض داخلي: تقرير P3-08 على `main` وتقرير R-03 في PR #17 المفتوح يقولان إن كل P2 تحتاج إغلاق G0 وG1، فلا توجد مهمة غير محجوبة. أما قاعدة §0 فتسمح بتنفيذ مهام المرحلة التي لا تعتمد على قرار معلّق، وتمنع فقط بدء مخرجات تعتمد على بوابة غير مغلقة، مثل البيانات والتدريب. الحل في ADR-0005: فصل صف P2 إلى ثماني مهام. مهام الكود P2-02..P2-05 غير محجوبة بحدود صارمة، ومهام إنتاج البيانات P2-01 وP2-06..P2-08 BLOCKED بقرارات محددة. لم يُغيَّر أي هدف أو معيار أو شرط بوابة أو معرف، ولم تُحذف أي مهمة أو نتيجة.
 - **Files created:** `docs/decisions/ADR-0005-p2-code-scope.md`
 - **Files modified:** `ROADMAP.md` (§2.1 G2، §2.2، §2.3، §4 P2، §12)، `tests/test_roadmap_consistency.py`
 - **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`
-- **Test results:** 267 passed / 0 failed / 1 skipped (266 سابقة + 1 جديد: `test_p2_code_scope_split_keeps_data_production_blocked_and_g2_unchanged`؛ التخطي: CUDA not available). اختبار طفرة: جعل P2-06 PLANNED أو خفض شرط الـ 200 مثال في G2 يُفشل الاختبار. pre-commit وdetect-secrets نظيفان.
+- **Test results:** بعد دمج PR #17 وحل التعارض: 313 passed / 0 failed / 1 skipped (312 على `main` + 1 جديد). وقبل الدمج: 267 passed / 0 failed / 1 skipped (266 سابقة + 1 جديد: `test_p2_code_scope_split_keeps_data_production_blocked_and_g2_unchanged`؛ التخطي: CUDA not available). اختبار طفرة: جعل P2-06 PLANNED أو خفض شرط الـ 200 مثال في G2 يُفشل الاختبار. pre-commit وdetect-secrets نظيفان.
 - **Metrics:** لا شيء. تغيير حوكمة.
-- **Git commit:** PR لهذه المهمة
+- **Git commit:** PR #18 (squash إلى `main`)؛ دُمج بعد PR #17، وحُلّ تعارض §2.3 و§12 يدويًا بالإبقاء على تقريري R-03 وR-05 وعلى الإصدارين 1.15.0 و1.16.0
 - **HF repository/revision:** لا شيء
-- **Known limitations:** ADR-0005 بحالة PROPOSED لأنه يعكس استنتاجًا سجله وكيلان سابقان. نص تقرير P3-08 بقي كما هو ولم يُعَد كتابة التاريخ. PR #17 (R-03) مفتوح ويعدّل المواضع نفسها في §2.3 و§12، فسيحتاج من يدمج ثانيًا حل تعارض نصي بسيط. رقم الإصدار 1.15.0 وEXP-0015 محجوزان لـ R-03، فاستخدمت هذه المهمة 1.16.0.
+- **Known limitations:** كان ADR-0005 بحالة PROPOSED لأنه يعكس استنتاجًا سجله وكيلان سابقان، ثم صار ACCEPTED بتوجيه المالك بدمج PR #18. نص تقرير P3-08 بقي كما هو ولم يُعَد كتابة التاريخ. PR #17 (R-03) عدّل المواضع نفسها في §2.3 و§12؛ دُمج أولًا (`f3794a7`) ثم حُلّ التعارض هنا. رقم الإصدار 1.15.0 وEXP-0015 محجوزان لـ R-03، فاستخدمت هذه المهمة 1.16.0.
 - **فحص الأسرار والصلاحيات (OWNER ACTION REQUIRED):** المتغيران `GITHUB_TOKEN` و`HF_TOKEN` غير موجودين كمتغيرات بيئة خام في جلسة هذا الوكيل. الوصول يتم عبر مدير أسرار المنصة، الذي يحقن المصادقة عبر proxy دون كشف القيمة. تحقق الوكيل من الوصول دون طباعة أي قيمة: GitHub يقرأ ويكتب في `sooovg/nawa`، وHF يقرأ مستودعات `vuuuv/nawa-*` الثمانية الخاصة. لكن توكن HF المسجل fine-grained على كامل حساب `vuuuv`، وليس على مستودعات NAWA وحدها. وهو يمنح كذلك `inference.endpoints.write` و`job.write` و`user.billing.read`. يوصى بأن يقصره المالك على مستودعات `vuuuv/nawa-*` بصلاحية `repo.content.read` و`repo.write` فقط (AGENTS.md §11).
 - **Roadmap section updated:** §2.1، §2.2، §2.3، §4، §12
-- **Next unblocked task:** P2-02 (`verify.py`) بعد دمج هذا الـ PR. ومراجعة المالك لـ G1 وPR #17.
+- **Next unblocked task:** P2-02 (`verify.py`). ومراجعة المالك لـ G1 (تبقى PENDING_REVIEW).
 - **Duplicate-work check:** لا يوجد ADR أو فرع أو PR سابق يعالج نطاق P2. الفروع البعيدة الثلاثة عشر كلها لمهام مدمجة، باستثناء `agent/R-03-multi-model-review` (PR #17، مفتوح، CI ناجح)، ونطاقه مختلف ولم يُلمس. لا يوجد `data_pipeline/atlas/verify.py` ولا `mine.py`.
 
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
@@ -1128,6 +1149,7 @@ Limitations:
 | 1.12.0 | 2026-09-30 | P3-06 منجزة: مدرّب كامل (optimizer/scheduler/checkpoint/resume/gradient accumulation/mixed precision/metrics/budget guard)؛ تفصيل P3-06..P3-08 إلى P3-06 وP3-07..P3-08؛ `make train` مُنفّذ. لم يُغيَّر أي هدف أو معيار. | P3-06، EXP-0012 |
 | 1.13.0 | 2026-09-30 | P3-07 منجزة: DistributedConfig وDeviceWrapper (GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، rank-0 save/log)؛ تفصيل P3-07..P3-08 إلى P3-07 وP3-08. لم يُغيَّر أي هدف أو معيار. | P3-07، EXP-0013 |
 | 1.14.0 | 2026-09-30 | P3-08 منجزة: تحقق عددي (determinism، checkpoint resume identity، gradient accumulation equivalence، numerical stability، checkpoint integrity، integration)؛ 19 اختبارًا. لم يُغيَّر أي هدف أو معيار. | P3-08، EXP-0014 |
+| 1.15.0 | 2026-10-01 | R-03 منجزة: منظومة المراجعة متعددة النماذج (ADR-0003 D1) — سجل أدوار، سجل نماذج، سجل مراجعات، تسجيل خلافات، فحص أمان الحمولات، بوابة قرار (لا قرار بنموذج واحد، والفحص الحتمي شرط دائم بعد إصلاح المراجعة)؛ 46 اختبارًا. لم يُغيَّر أي هدف أو معيار. | R-03، EXP-0015 |
 | 1.16.0 | 2026-10-01 | R-05: فصل صف P2 إلى P2-01..P2-08. مهام الكود P2-02..P2-05 غير محجوبة وفق §0، ومهام إنتاج البيانات P2-01 وP2-06..P2-08 BLOCKED؛ تصحيح استنتاج "لا مهمة غير محجوبة". لم يُغيَّر أي هدف أو معيار أو شرط بوابة. الإصدار 1.15.0 محجوز لـ R-03 (PR #17). | R-05، ADR-0005 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

@@ -1,8 +1,8 @@
 # ADR-0005: Which P2 tasks can run before G0/G1 close (code-only scope)
 
-- **Status:** PROPOSED (agent R-05, 2026-10-01). Applies an existing ROADMAP §0 rule; it does not change any goal, gate,
-  target, or task ID. It needs owner review before merge because it reverses a "no unblocked task" statement made by two earlier
-  reports (P3-08 on `main`, and R-03 in open PR #17).
+- **Status:** ACCEPTED (owner instruction of 2026-10-01, 07:05 +03: merge PR #18 after PR #17). Proposed by agent R-05. Applies an existing ROADMAP §0 rule; it does not change any goal, gate,
+  target, or task ID. It reverses a "no unblocked task" statement made by two earlier
+  reports (P3-08 and R-03).
 - **Date:** 2026-10-01
 - **Task:** R-05
 
