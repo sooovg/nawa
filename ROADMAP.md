@@ -129,7 +129,7 @@ Core Model
 |---|---|---|---|
 | G0 الميثاق والحدود وCI مبدئي (P0) | IN_PROGRESS | 2026-09-30 | P0-05 وP0-06 وP0-08 منجزة؛ CI يعمل (`d34f3f1`)؛ مستودعات HF خاصة؛ الميثاق والنطاق الأول والميزانية بانتظار المالك؛ انظر §2.3 |
 | G1 القياس والمرجع الداخلي (P1) | PENDING_REVIEW | 2026-09-30 | كل شروط G1 في §4 لها دليل: مراجع P1-07 ونواة P3-05 محفوظة (EXP-0008..0010)؛ frozen له hash ومكان خاص (P1-03)؛ لا بيانات تدريب نصية بعد، وسجلات Atlas المشتقة من التقييم ممنوعة من التدريب (P1-08)؛ أمر إعادة التقرير موجود (P1-07). P1-01..P1-03 وP1-06 وP1-07 وP1-08 منجزة؛ P1-04 وP1-05 SUPERSEDED؛ P1-02a محجوبة بـ OD-01 وليست شرطًا لـ G1؛ P1-06a شرط لـ G5 (ADR-0004). تنتظر مراجعة المالك (§0: قاعدة استقلال الحكم) |
-| G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | — | — |
+| G2 أطلس الإخفاقات ومصنع البيانات (P2) | PLANNED | 2026-10-01 | ADR-0005: مهام الكود P2-02..P2-05 غير محجوبة (أدوات واختبارات على مدخلات اصطناعية، لا بيانات تدريب ولا رفع)؛ P2-01 وP2-06..P2-08 BLOCKED بقرارات المالك؛ شروط G2 لم تتغير، ولا تُغلق قبل G0 وG1 |
 | G3 Tokenizer ونواة مرجعية (P3) | IN_PROGRESS | 2026-09-30 | P3-04..P3-08 منجزة: decoder مرجعي + XOR/tiny LM + trainer كامل + device support + numerical verification (266 اختبارًا)؛ باقي الـ Tokenizer (P3-01..P3-03) ويحتاج مدونة عربية مرخصة (مشروطة بـ P2/G2)؛ لا يُغلق G3 قبل G0–G2 |
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | — | — |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
@@ -168,7 +168,15 @@ Core Model
 | P1-06a | PLANNED | — | تثبيت أرقام T1 وT2 وT5 وT6 على أول نواة NAWA مدربة على نص حقيقي؛ تنتظر أول مرشح من P5؛ شرط لـ G5 (ADR-0004) | 2026-09-30 |
 | P1-07 | DONE | bootstrap-agent | `eval/run_eval.py`، `eval/report.py`، `eval/targets.yaml`، `src/nawa/evaluation/{runner,report}.py`؛ `make eval` و`make report` و`make repro`؛ `tests/test_eval_runner.py` (10 اختبارات) | 2026-09-30 |
 | P1-08 | DONE | agent-P1-08 | أول 224 سجلًا في Atlas، كلها متحققة حتميًا وممنوعة من التدريب، ومثبتة ببصمة في `data_pipeline/atlas/manifest.yaml` (البيانات خارج Git)؛ `nawa.atlas` (schema، ingest، validate)؛ إصلاح تصنيف الامتناع إلى FT-13 | 2026-09-30 |
-| P2-01..P2-08 | PLANNED | — | — | — |
+| R-05 | IN_PROGRESS | agent-R-05 | تحديد مهام P2 القابلة للتنفيذ قبل إغلاق G0/G1 وفق قاعدة §0: كود فقط، دون بيانات تدريب أو رفع؛ ADR-0005 (PROPOSED، ينتظر مراجعة المالك)؛ `tests/test_roadmap_consistency.py` | 2026-10-01 |
+| P2-01 | BLOCKED | — | `mine.py` يحتاج نموذجًا نصيًا: نواة NAWA نصية (P5) أو أدوات خارجية مصرحًا بها (OD-10)؛ مسار تشغيلات التقييم الحتمي مغطى في P1-08 (ADR-0005) | 2026-10-01 |
+| P2-02 | PLANNED | — | `verify.py`: كود فقط على حالات اصطناعية وسجلات P1-08؛ غير محجوبة (ADR-0005)؛ الأولى في ترتيب P2 | 2026-10-01 |
+| P2-03 | PLANNED | — | منشئ توائم الامتناع على سياقات يولدها الكود؛ لا شيء `train_eligible` قبل G2 (ADR-0005) | 2026-10-01 |
+| P2-04 | PLANNED | — | منشئ أزواج التفضيل وschema فقط؛ الأزواج الحقيقية تحتاج مخرجات نموذج (P2-01 أو P5) (ADR-0005) | 2026-10-01 |
+| P2-05 | PLANNED | — | أدوات التنظيف وPII وdedup وdecontamination (ببصمات `eval/frozen_item_hashes.txt` فقط) وprovenance وlicense وquality على مدخلات اصطناعية (ADR-0005) | 2026-10-01 |
+| P2-06 | BLOCKED | — | طبقات البيانات تحتاج مصادر حقيقية مرخصة (OD-03) والمجال الأول (OD-01) (ADR-0005) | 2026-10-01 |
+| P2-07 | BLOCKED | — | `DATA_SOURCES.md` و`LICENSES.md` وdata cards تنتظر OD-03 (ADR-0005) | 2026-10-01 |
+| P2-08 | BLOCKED | — | رفع `nawa-data:v1` ينتظر OD-03 واعتماد الحقوق (G2) (ADR-0005) | 2026-10-01 |
 | P3-01..P3-03 | PLANNED | — | — | — |
 | P3-04 | DONE | agent-P3-04 | `src/nawa/model/{config,layers,decoder}.py` (نواة decoder مرجعية من الصفر، مكوّنات قابلة للتبديل لتجارب P4)؛ `configs/base_model.yaml`؛ `tests/test_reference_decoder.py` (49 اختبارًا)؛ EXP-0006 | 2026-09-30 |
 | P3-05 | DONE | agent-P3-05 | `src/nawa/training/sanity.py` (XOR + tiny character LM على مصدر ماركوف عربي اصطناعي بإنتروبيا محسوبة بدقة)؛ `make sanity`؛ `tests/test_sanity_training.py` (9 اختبارات)؛ EXP-0007 (FAILED) وEXP-0008 وEXP-0009 (PASSED) | 2026-09-30 |
@@ -493,6 +501,25 @@ Core Model
 - **Next unblocked task:** لا توجد مهام P3 غير محجوبة متبقية (P3-01..P3-03 تحتاج مدونة عربية مرخصة مشروطة بـ P2/G2). R-03 (منظومة المراجعة متعددة النماذج) مخططة. المهام التالية غير المحجوبة هي في P2 (أطلس الإخفاقات ومصنع البيانات) لكنها تحتاج إغلاق G0 وG1 أولاً.
 - **Duplicate-work check:** لا يوجد فرع أو PR سابق لـ P3-08. P3-06 وP3-07 بنتا البنية التحتية، وهذه المهمة تضيف التحقق العددي الرسمي.
 
+### R-05 — نطاق مهام P2 القابلة للتنفيذ قبل إغلاق G0/G1 (2026-10-01)
+
+- **Task ID:** R-05
+- **Owner:** agent-R-05
+- **Status:** IN_PROGRESS (المخرجات والاختبارات مكتملة؛ الـ PR مفتوح وينتظر مراجعة المالك قبل الدمج، ثم تصبح DONE)
+- **Scope:** إصلاح تعارض داخلي: تقرير P3-08 على `main` وتقرير R-03 في PR #17 المفتوح يقولان إن كل P2 تحتاج إغلاق G0 وG1، فلا توجد مهمة غير محجوبة. أما قاعدة §0 فتسمح بتنفيذ مهام المرحلة التي لا تعتمد على قرار معلّق، وتمنع فقط بدء مخرجات تعتمد على بوابة غير مغلقة، مثل البيانات والتدريب. الحل في ADR-0005: فصل صف P2 إلى ثماني مهام. مهام الكود P2-02..P2-05 غير محجوبة بحدود صارمة، ومهام إنتاج البيانات P2-01 وP2-06..P2-08 BLOCKED بقرارات محددة. لم يُغيَّر أي هدف أو معيار أو شرط بوابة أو معرف، ولم تُحذف أي مهمة أو نتيجة.
+- **Files created:** `docs/decisions/ADR-0005-p2-code-scope.md`
+- **Files modified:** `ROADMAP.md` (§2.1 G2، §2.2، §2.3، §4 P2، §12)، `tests/test_roadmap_consistency.py`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `pre-commit run --all-files`، `detect-secrets-hook`
+- **Test results:** 267 passed / 0 failed / 1 skipped (266 سابقة + 1 جديد: `test_p2_code_scope_split_keeps_data_production_blocked_and_g2_unchanged`؛ التخطي: CUDA not available). اختبار طفرة: جعل P2-06 PLANNED أو خفض شرط الـ 200 مثال في G2 يُفشل الاختبار. pre-commit وdetect-secrets نظيفان.
+- **Metrics:** لا شيء. تغيير حوكمة.
+- **Git commit:** PR لهذه المهمة
+- **HF repository/revision:** لا شيء
+- **Known limitations:** ADR-0005 بحالة PROPOSED لأنه يعكس استنتاجًا سجله وكيلان سابقان. نص تقرير P3-08 بقي كما هو ولم يُعَد كتابة التاريخ. PR #17 (R-03) مفتوح ويعدّل المواضع نفسها في §2.3 و§12، فسيحتاج من يدمج ثانيًا حل تعارض نصي بسيط. رقم الإصدار 1.15.0 وEXP-0015 محجوزان لـ R-03، فاستخدمت هذه المهمة 1.16.0.
+- **فحص الأسرار والصلاحيات (OWNER ACTION REQUIRED):** المتغيران `GITHUB_TOKEN` و`HF_TOKEN` غير موجودين كمتغيرات بيئة خام في جلسة هذا الوكيل. الوصول يتم عبر مدير أسرار المنصة، الذي يحقن المصادقة عبر proxy دون كشف القيمة. تحقق الوكيل من الوصول دون طباعة أي قيمة: GitHub يقرأ ويكتب في `sooovg/nawa`، وHF يقرأ مستودعات `vuuuv/nawa-*` الثمانية الخاصة. لكن توكن HF المسجل fine-grained على كامل حساب `vuuuv`، وليس على مستودعات NAWA وحدها. وهو يمنح كذلك `inference.endpoints.write` و`job.write` و`user.billing.read`. يوصى بأن يقصره المالك على مستودعات `vuuuv/nawa-*` بصلاحية `repo.content.read` و`repo.write` فقط (AGENTS.md §11).
+- **Roadmap section updated:** §2.1، §2.2، §2.3، §4، §12
+- **Next unblocked task:** P2-02 (`verify.py`) بعد دمج هذا الـ PR. ومراجعة المالك لـ G1 وPR #17.
+- **Duplicate-work check:** لا يوجد ADR أو فرع أو PR سابق يعالج نطاق P2. الفروع البعيدة الثلاثة عشر كلها لمهام مدمجة، باستثناء `agent/R-03-multi-model-review` (PR #17، مفتوح، CI ناجح)، ونطاقه مختلف ولم يُلمس. لا يوجد `data_pipeline/atlas/verify.py` ولا `mine.py`.
+
 ## 2.4 قرارات المالك المطلوبة (OWNER DECISION REQUIRED)
 
 | ID | القرار | يحجب | الحالة |
@@ -667,6 +694,8 @@ nawa/
 ## P2 — أطلس الإخفاقات ومصنع البيانات
 
 **الهدف:** جعل كل فشل مصدرًا لتحسين واختبار، لا مجرد شكوى.
+
+> **نطاق التنفيذ قبل إغلاق G0/G1 (ADR-0005):** مهام الكود P2-02 ← P2-05 ← P2-03 ← P2-04 غير محجوبة، بشرط ألا تستورد بيانات خارجية، وألا تنتج بيانات تدريب، وألا تقرأ frozen، وألا ترفع شيئًا إلى HF. أما P2-01 وP2-06 وP2-07 وP2-08 فمحجوبة بقرارات OD-01 وOD-03 وOD-10 أو بغياب نواة نصية. شروط G2 لم تتغير.
 
 ### المهام
 
@@ -1099,5 +1128,6 @@ Limitations:
 | 1.12.0 | 2026-09-30 | P3-06 منجزة: مدرّب كامل (optimizer/scheduler/checkpoint/resume/gradient accumulation/mixed precision/metrics/budget guard)؛ تفصيل P3-06..P3-08 إلى P3-06 وP3-07..P3-08؛ `make train` مُنفّذ. لم يُغيَّر أي هدف أو معيار. | P3-06، EXP-0012 |
 | 1.13.0 | 2026-09-30 | P3-07 منجزة: DistributedConfig وDeviceWrapper (GPU auto-detect، CUDA fallback، DDP wrap/unwrap، barrier، rank-0 save/log)؛ تفصيل P3-07..P3-08 إلى P3-07 وP3-08. لم يُغيَّر أي هدف أو معيار. | P3-07، EXP-0013 |
 | 1.14.0 | 2026-09-30 | P3-08 منجزة: تحقق عددي (determinism، checkpoint resume identity، gradient accumulation equivalence، numerical stability، checkpoint integrity، integration)؛ 19 اختبارًا. لم يُغيَّر أي هدف أو معيار. | P3-08، EXP-0014 |
+| 1.16.0 | 2026-10-01 | R-05: فصل صف P2 إلى P2-01..P2-08. مهام الكود P2-02..P2-05 غير محجوبة وفق §0، ومهام إنتاج البيانات P2-01 وP2-06..P2-08 BLOCKED؛ تصحيح استنتاج "لا مهمة غير محجوبة". لم يُغيَّر أي هدف أو معيار أو شرط بوابة. الإصدار 1.15.0 محجوز لـ R-03 (PR #17). | R-05، ADR-0005 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.
