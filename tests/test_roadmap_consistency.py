@@ -155,3 +155,37 @@ def test_p4_real_text_comparisons_are_tracked_and_g4_stays_open() -> None:
     g4_status = re.search(r"^\| G4 [^|]*\| (\w+) \|", gates, flags=re.M)[1]
     if rows["P4-01"][1] != "DONE" or any(rows[t][1] != "DONE" for t in ("P4-02a", "P4-03a", "P4-04a", "P4-05a")):
         assert g4_status not in {"DONE", "PENDING_REVIEW"}, g4_status
+
+
+def test_p6_code_scope_split_blocks_model_dependent_parts_and_strengthens_g6() -> None:
+    """R-08 / ADR-0008: P6 code tasks are unblocked under §0 with no external model, no network and no quality claim;
+    the parts that need a trained core, real data or an owner decision stay BLOCKED; G6 keeps every condition and
+    gains one; OD-11 is registered."""
+    rows = {r[0]: r for r in status_rows()}
+    assert "P6-01..P6-09" not in rows
+    for tid in ("P6-01", "P6-02", "P6-03", "P6-04", "P6-05", "P6-06", "P6-07", "P6-08"):
+        assert rows[tid][1] in {"PLANNED", "CLAIMED", "IN_PROGRESS", "DONE", "FAILED"}, rows[tid]
+        assert "ADR-0008" in rows[tid][3], rows[tid]
+    gates = section("## 2.1 حالة البوابات", "## 2.2")
+    g5_status = re.search(r"^\| G5 [^|]*\| (\w+) \|", gates, flags=re.M)[1]
+    for tid in ("P6-01a", "P6-02a", "P6-03a", "P6-04a", "P6-05a", "P6-09"):
+        assert "ADR-0008" in rows[tid][3], rows[tid]
+        if tid != "P6-02a" and g5_status != "DONE":
+            assert rows[tid][1] == "BLOCKED", rows[tid]
+    odt = section("## 2.4 قرارات المالك المطلوبة", "# 3. بنية المستودعات")
+    od11 = re.search(r"^\| OD-11 \|[^\n]*\| (\w+) \|$", odt, flags=re.M)
+    assert od11 and "P6-02a" in od11[0]
+    if od11[1] == "OPEN":
+        assert rows["P6-02a"][1] == "BLOCKED", rows["P6-02a"]
+    phases = section("# 4. مراحل التنفيذ والبوابات", "# 5. قواعد Git")
+    p6 = phases[phases.index("## P6"):phases.index("## P7")]
+    g6 = p6[p6.index("### G6"):]
+    for condition in ("تحقق واضح الادعاء مقابل الدليل", "امتنع النظام عند نقص الدليل دون انهيار في التغطية",
+                      "لا يمر ادعاء غير مدعوم بصمت في الوضع الدقيق", "المخاطر والتغطية مقاسة بمنحنى risk–coverage",
+                      "P6-01a وP6-02a وP6-03a وP6-04a وP6-05a وP6-09 منجزة على نواة NAWA مدربة"):
+        assert condition in g6, condition
+    assert "ADR-0008" in p6 and "دون أي نموذج خارجي" in p6 and "دون شبكة" in p6
+    g6_status = re.search(r"^\| G6 [^|]*\| (\w+) \|", gates, flags=re.M)[1]
+    if g5_status != "DONE" or any(rows[t][1] != "DONE" for t in ("P6-01a", "P6-03a", "P6-04a", "P6-05a", "P6-09")):
+        assert g6_status not in {"DONE", "PENDING_REVIEW"}, g6_status
+    assert (ROOT / "docs/decisions/ADR-0008-p6-code-scope.md").is_file()
