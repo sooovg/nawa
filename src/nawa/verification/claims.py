@@ -91,7 +91,7 @@ class TextClaim:
 Claim = ArithmeticClaim | CodeClaim | FactClaim | TextClaim
 CLAIM_TYPES = (ArithmeticClaim, CodeClaim, FactClaim, TextClaim)
 
-_CITE = re.compile(r"\[@?([A-Za-z0-9_:.\-@]+)\]")
+_CITE = re.compile(r"\[@?([A-Za-z0-9_:.\-@#]+)\]")    # "#": P6-01 chunk ids look like "d1#0" (P6-07)
 _SPLIT = re.compile(r"(?<!\d)\.|\.(?!\d)|[!?؟؛]|\n+")    # a dot between two digits is a decimal point
 _ARITH = re.compile(r"\s*([0-9\s+\-*/×÷−().٫^]+?)\s*=\s*(-?[0-9]+(?:[.٫][0-9]+)?(?:/[0-9]+)?)\s*\Z")
 
