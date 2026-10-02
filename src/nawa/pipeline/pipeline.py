@@ -74,7 +74,7 @@ from nawa.reasoning.planner import Action as Step_
 from nawa.reasoning.planner import Plan, plan_subtasks
 from nawa.reasoning.state import State, canonical
 from nawa.retrieval.index import LexicalIndex
-from nawa.retrieval.rerank import LexicalReranker, Reranker, apply_reranker, to_evidence
+from nawa.retrieval.rerank import LexicalReranker, apply_reranker, to_evidence
 from nawa.routing.router import TOOL_HANDLERS, Handler, Route, RouterConfig, route
 from nawa.tools.registry import Permission, ToolRegistry, default_registry
 from nawa.verification.claims import ArithmeticClaim, CodeClaim, extract_claims
@@ -160,7 +160,7 @@ class Components:
                              "need OD-10")
         if self.index is not None and not isinstance(self.index, LexicalIndex):
             raise ValueError("index must be a P6-01 LexicalIndex")
-        if self.reranker is not None and not isinstance(self.reranker, Reranker):
+        if self.reranker is not None and not callable(getattr(self.reranker, "rerank", None)):
             raise ValueError("reranker must implement rerank(query, hits)")
         if self.checkers is not None:
             object.__setattr__(self, "checkers", tuple(self.checkers))
