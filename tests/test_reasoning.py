@@ -157,6 +157,34 @@ def test_r2_tamper_detected():
         assert name  # every case raised
 
 
+def _rehash(records, start, relink):
+    from nawa.reasoning.state import _hash
+    for i in range(start, len(records)):
+        if relink:
+            records[i]["prev_hash"] = records[i - 1]["hash"] if i else "0" * 64
+        body = {k: v for k, v in records[i].items() if k != "hash"}
+        records[i]["hash"] = _hash(body)
+
+
+def test_r2_forged_hashes_are_caught_by_chain_and_spend():
+    """Hashes recomputed by a forger: the chain catches an unlinked edit, the spend check catches a relinked one.
+    Stated limit: a forger who also fixes every spend can rebuild a valid chain (no secret key; integrity, not
+    authentication)."""
+    text = _run().to_json()
+    d = json.loads(text)
+    d["records"][1]["payload"] = {"x": 99}
+    _rehash(d["records"], 1, relink=False)                  # self-hashes valid, links broken
+    d["head"] = d["records"][-1]["hash"]
+    with pytest.raises(ValueError, match="broken chain"):
+        State.from_json(json.dumps(d))
+    d = json.loads(text)
+    d["records"][1]["cost"]["TOOL_CALLS"] = 0               # spend no longer adds up
+    _rehash(d["records"], 1, relink=True)
+    d["head"] = d["records"][-1]["hash"]
+    with pytest.raises(ValueError, match="spend does not add up"):
+        State.from_json(json.dumps(d))
+
+
 def test_r2_budget_stop_is_recorded_and_final():
     s = _run(Budget(max_steps=10, max_tool_calls=2), n=2)
     r = s.record("tool", ref="s9", cost={Resource.TOOL_CALLS: 1})
@@ -242,6 +270,7 @@ def test_r3_decomposer_edge_cases():
     assert [t.kind for t in code] == [Kind.TEXT, Kind.CODE, Kind.TEXT]
     assert code[1].code == "x = 1; print(x)? \n"                              # nothing inside the fence is split
     assert decompose("ما لون زارِنا وكم عمر كولموت")[0].text == "ما لون زارِنا وكم عمر كولموت"
+    assert [t.text for t in decompose("ما لون زارِنا و كم عمر كولموت")] == ["ما لون زارِنا و كم عمر كولموت"]
     assert find_expression("رقم 42 فقط") is None and find_expression("سنة 2020-2021") == "2020-2021"
     with pytest.raises(ValueError):
         decompose("x" * 4001)
@@ -429,8 +458,9 @@ def _cands(texts):
 
 
 def test_r6_grouping_ties_and_flags():
-    a = agreement(_cands(["الأزرق", "الازرق", "أزرق", "Red", "red"]))
-    assert a.plurality == "الازرق" and a.plurality_share == Fraction(2, 5)   # normalize: hamza; "أزرق" differs
+    a = agreement(_cands(["الأزرق", "الازرق", "أزرق", "Red"]))
+    assert a.plurality == "الازرق" and a.plurality_share == Fraction(2, 4)   # normalize: hamza; "أزرق" differs
+    assert agreement(_cands(["الأزرق", "الازرق", "Red", "red"])).plurality is None   # 2 vs 2 after case folding
     t = agreement(_cands(["a", "b", "A", "B"]))
     assert t.plurality is None and t.representative is None and t.plurality_share is None
     ab = agreement(_cands(["لا أعرف", "I don't know", "x"]))
