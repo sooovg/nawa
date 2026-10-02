@@ -11,6 +11,18 @@ P4-02). Loss gaps, parameter counts, FLOPs, decoding-state size and latency are 
 Markov source needs only two symbols of context, which a 2-layer convolution of kernel 4 already covers, so this
 source cannot show what attention adds over a short convolution, and cannot rank the layouts. The comparison on
 real text is P4-04a (BLOCKED: OD-03, P3-03).
+
+Amendment to the pre-registration (commit after 9af18f0, before the registered run). A development smoke of the
+probes (seed 1, no training, not recorded) found two **probe** defects; no criterion, tolerance or config changed:
+
+1. ``surgery_preserved`` required the replaced keys to be absent, but :class:`ConvMixer` also names its output
+   projection ``o_proj``, so ``blocks.i.attn.o_proj.*`` exists in both models. The probe now skips every key under a
+   replaced ``blocks.i.attn.`` prefix, checks that the module there is a :class:`ConvMixer`, and checks every other
+   key for exact equality, which is what the criterion states.
+2. ``reference_and_streaming_checks`` randomised every mixer parameter with std 0.5, which made outputs reach ~495;
+   the measured difference (4.6e-5) was 6e-8 *relative*, i.e. float32 rounding, outside the order-1 activations TOL
+   was justified for. Randomised parameters now use std 1/sqrt(fan_in) (fan_in = d_model for the projections, K for
+   the taps, 1 for biases), which keeps activations of order 1. The max absolute output is recorded as evidence.
 """
 
 from __future__ import annotations
@@ -168,14 +180,16 @@ def reference_and_streaming_checks(seed: int) -> dict[str, float]:
     """Shifted-sum convolution vs conv1d, and ConvMixer.step vs ConvMixer.forward, over every case's mixer, on
     random inputs and on randomised (non-init) taps and biases."""
     g = torch.Generator().manual_seed(seed + 5)
-    worst_ref, worst_stream = 0.0, 0.0
+    worst_ref, worst_stream, out_max = 0.0, 0.0, 0.0
     n = CONFIG["probe"]["streaming_len"]
     for cfg, conv, _ in _cases():
         mixer = ConvMixer(cfg, conv)
-        for p in mixer.parameters():
-            p.copy_(torch.randn(p.shape, generator=g) * 0.5)
+        for name, p in mixer.named_parameters():
+            fan_in = 1 if name.endswith("bias") else p.shape[-1]
+            p.copy_(torch.randn(p.shape, generator=g) / math.sqrt(fan_in))
         x = torch.randn(3, n, cfg.d_model, generator=g)
         full = mixer(x)
+        out_max = max(out_max, float(full.abs().max()))
         worst_ref = max(worst_ref, float((full - mixer.reference_forward(x)).abs().max()))
         worst_ref = max(worst_ref, float((mixer.conv(x) - mixer.conv.reference(x)).abs().max()))
         state = mixer.init_state(3)
@@ -184,7 +198,8 @@ def reference_and_streaming_checks(seed: int) -> dict[str, float]:
             y, state = mixer.step(x[:, i], state)
             steps.append(y)
         worst_stream = max(worst_stream, float((torch.stack(steps, 1) - full).abs().max()))
-    return {"conv_vs_conv1d_reference_max_abs_diff": worst_ref, "streaming_vs_full_max_abs_diff": worst_stream}
+    return {"conv_vs_conv1d_reference_max_abs_diff": worst_ref, "streaming_vs_full_max_abs_diff": worst_stream,
+            "probe_max_abs_output_evidence": round(out_max, 3)}
 
 
 @torch.no_grad()
@@ -248,9 +263,10 @@ def surgery_preserved(seed: int) -> bool:
             sd = m.state_dict()
             for k, v in ref.items():
                 if k.startswith(replaced):
-                    ok &= k not in sd
                     continue
                 ok &= k in sd and torch.equal(sd[k], v)
+            ok &= all(isinstance(m.blocks[i].attn, ConvMixer) for i in layout)
+            ok &= all(isinstance(blk.attn, CausalSelfAttention) for i, blk in enumerate(m.blocks) if i not in layout)
             ok &= len(conv_mixers_of(m)) == len(layout)
     return bool(ok)
 
