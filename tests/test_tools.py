@@ -152,9 +152,9 @@ def test_sandbox_can_write_and_read_its_own_directory_which_is_then_removed() ->
     ("urllib", "import urllib.request", "import urllib"),
     ("subprocess", "import subprocess", "import subprocess"),
     ("socket after unhiding", "import sys, importlib\ndel sys.modules['_socket']\n"
-                              "importlib.import_module('_socket').socket()", "socket.__new__"),
+                              "importlib.import_module('_socket').socket()", ("import _socket", "socket.__new__")),
     ("ctypes after unhiding", "import sys, importlib\ndel sys.modules['_ctypes']\n"
-                              "importlib.import_module('_ctypes').dlopen(None)", "ctypes.dlopen"),
+                              "importlib.import_module('_ctypes').dlopen(None)", ("import _ctypes", "ctypes.dlopen")),
     ("os.system", "import os\nos.system('true')", "os.system"),
     ("posix_spawn", "import os\nos.posix_spawn('/bin/true', ['true'], {})", "os.posix_spawn"),
     ("fork", "import os\nos.fork()", "os.fork"),
@@ -170,7 +170,9 @@ def test_sandbox_can_write_and_read_its_own_directory_which_is_then_removed() ->
     ("chdir out", "import os\nos.chdir('/')", "os.chdir"),
     ("raise limits", "import resource\nresource.setrlimit(resource.RLIMIT_CPU, (100, 100))", "resource.setrlimit"),
 ])
-def test_sandbox_denies_and_reports(name: str, code: str, event: str) -> None:
+def test_sandbox_denies_and_reports(name: str, code: str, event: str | tuple[str, ...]) -> None:
+    """A tuple means either layer may stop it: a builtin module (no import event) is stopped at use, an extension module
+    (``lib-dynload``, as on CI's Python) already at import. Either is a denial."""
     r = sbx(code)
     assert not r.ok and "PermissionError" in r.stderr, name
     assert any(d.startswith(event) for d in r.denied), (name, r.denied)
