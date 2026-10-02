@@ -1795,7 +1795,8 @@ Core Model
     - **شرط زائد:** كان شرط الأرقام في A2 زائدًا، وكشفته طفرة مكافئة فحُذف.
     - **طفرة غير فعالة:** كانت طفرة «توجيه البحث» غير فعالة، فاستُبدلت بطفرة حقيقية.
 - **Metrics:** لا تجربة ولا قياس جودة، ولا سجل في `experiments/log.jsonl`.
-- **Git commit:** PR #37 من الفرع `agent/P6-06-query-router` (squash بعد نجاح CI)، فوق `main` عند `6ecaae3`، وهو squash الـ PR #36 لـ P6-01.
+- **Git commit:** PR #38 من الفرع `agent/P6-06-query-router`، فوق `main` عند `6ecaae3`، وهو squash الـ PR #36 لـ P6-01. الدمج بقرار المالك، إذ طلب فتح PR فقط.
+- **خطأ إجرائي مسجل:** فُتح PR #37 خطأً لأن ملف وصف قديم لـ P6-01 أعيد استخدامه، فأشار إلى الفرع `agent/P6-01-chunker-lexical-index` المدموج سابقًا. أُغلق بلا دمج مع تعليق يشرح السبب، ولم يتغير `main`.
 - **HF repository/revision:** لا شيء.
 - **Dataset version:** لا شيء.
 - **Known limitations:**
