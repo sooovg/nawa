@@ -11,6 +11,67 @@ Rules (ADR-0007):
   on real text (P4-02a..P4-05a), after G3.
 - No real data before OD-03 is resolved; no artifact upload while P4-08 is BLOCKED.
 
+## Status at P4-07 closure (2026-10-02)
+
+P4-07 is closed: its condition (P4-02..P4-05 done, ADR-0007) is met, and every P4 record is listed below. This register
+stays open for appends: every later P4 experiment (P4-01, P4-02a..P4-05a, P4-08) must add its rows here, including
+failures. A test (`tests/test_ablations_register.py`) checks that the index below equals the P4 records in
+`experiments/log.jsonl`.
+
+**Nothing is adopted.** Every result below comes from small models on synthetic sources (an order-2 Markov source and a
+random-init model). It is preliminary evidence that the code is correct and runs, not evidence that a technique is
+better for NAWA. In particular, attention, convolution and the attention/convolution hybrid (P4-04, EXP-0028) are
+**not** adopted, and no attention:convolution ratio is chosen. The reference core default config is unchanged
+(`configs/base_model.yaml`, `config_hash` `918f4cf4877c0cca`, enforced by a test).
+
+**Not started, by rule:** no real-text comparison (P4-01, P4-02a..P4-05a) and no upload of data or weights to Hugging
+Face (P4-08) before OD-03 (license of future weights and data) is resolved by the owner. No external model was used for
+review (OD-10 open, `ModelRegistry` empty).
+
+### Index of every P4 record
+
+Generated from `experiments/log.jsonl` (schema `p4-record/v1`). Legacy records EXP-0001..EXP-0023 belong to other phases
+(P1, P2, P3, R-*) and are not P4 ablations.
+
+| Experiment | Task | Status | Passed | Criteria | data_kind | Seed | Steps | GPU h | Cost USD | config_hash | git_commit | Artifact | Reproduce |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| EXP-0024 | P4-06 | PASSED | true | 7 | synthetic | 42 | 150 | 0 | 0 | `30fb8b8dd3745e51` | `87ad308` | none | `python -m nawa.experiments record-p4-06 --seed 42 --dry-run` |
+| EXP-0025 | P4-05 | PASSED | true | 13 | synthetic | 42 | 900 | 0 | 0 | `f76285c34a004a0b` | `3c442f8` | none | `python -m nawa.efficiency.p4_05 --seed 42 --dry-run` |
+| EXP-0026 | P4-03 | PASSED | true | 15 | synthetic | 42 | 4500 | 0 | 0 | `70c4c6f78cce735f` | `b0420a0` | none | `python -m nawa.efficiency.p4_03 --seed 42 --dry-run` |
+| EXP-0027 | P4-02 | PASSED | true | 16 | synthetic | 42 | 4500 | 0 | 0 | `27370e3f7d5f28f8` | `1d8e66e` | none | `python -m nawa.efficiency.p4_02 --seed 42 --dry-run` |
+| EXP-0028 | P4-04 | PASSED | true | 15 | synthetic | 42 | 4500 | 0 | 0 | `88d01a41acfd15cc` | `49628b2` | none | `python -m nawa.efficiency.p4_04 --seed 42 --dry-run` |
+
+### Technique status
+
+| Technique | Code task | Correctness (synthetic) | Preliminary synthetic evidence | Adoption | Governing comparison |
+|---|---|---|---|---|---|
+| Experiment record + validator | P4-06 | PASSED, EXP-0024 | pipeline deterministic; 22 violation types detected | infrastructure, in use for every P4 run (not a model technique) | none needed |
+| KV cache | P4-05 | PASSED, EXP-0025 (logits within 1e-4 of recomputation) | exact equivalence, so no quality effect is expected | NOT ADOPTED (inference path for P8-04) | P8-04 |
+| Greedy speculative decoding | P4-05 | PASSED, EXP-0025 (tokens identical to the target model) | low draft acceptance with a 300-step draft | NOT ADOPTED | P8-04 |
+| `torch.compile` | P4-05 | PASSED, EXP-0025 (within 1e-4) | none | NOT ADOPTED | P8-04 |
+| Weight sharing, low-rank MLP, magnitude sparsity | P4-05 | PASSED, EXP-0025 (exact counts, factorisation, sparsity) | random-init model only, no quality measured | NOT ADOPTED | P4-05a (BLOCKED: OD-03, P3-03) |
+| Ternary and symmetric 4-bit QAT + packed export | P4-03 | PASSED, EXP-0026 | loss gap vs fp: int4 +0.028, ternary +0.158 | NOT ADOPTED | P4-03a (BLOCKED: OD-03, P3-03) |
+| Sparse MoE and MoE hybrid | P4-02 | PASSED, EXP-0027 | loss vs Dense: MoE −0.034, hybrid −0.027 | NOT ADOPTED | P4-02a (BLOCKED: OD-03, P3-03) |
+| Convolution mixer and attention/convolution hybrid | P4-04 | PASSED, EXP-0028 | loss vs attention: convolution −0.035, hybrid −0.047; the source needs only 2 symbols of context, so it cannot show what attention adds | NOT ADOPTED, no ratio chosen | P4-04a (BLOCKED: OD-03, P3-03) |
+| Scaling curves | P4-01 | not run (BLOCKED) | none | — | P4-01 (BLOCKED: OD-03, P2-06..P2-08, P3-03) |
+
+### What failed or was amended
+
+No registered P4 run failed its criteria. These defects were found during development, fixed and documented before
+the registered run (records are append-only; nothing was deleted):
+
+| Task | What failed | Fix | Criteria changed? | Reference |
+|---|---|---|---|---|
+| P4-06 | first record attempt (not committed) said `git_dirty: false` with `experiments.py` untracked | `git_state` counts untracked files; record re-created | no | EXP-0024 `failure_cases` |
+| P4-06 | weight-hash reproducibility test would fail across Python/torch versions in CI | match data/config hashes and parameter count exactly, loss within 1e-3, weight hash only in the recorded environment | no | ROADMAP §2.3 P4-06 |
+| P4-06 | validator benchmark written by the same agent as the validator | recorded limitation, no independent review (OD-10 open) | no | EXP-0024 `failure_cases` |
+| P4-05 | three UserWarnings in `test_efficiency.py` | fixed in the tests (`no_grad`/`detach`), no `src` change | no | ROADMAP §2.3 P4-05 |
+| P4-02 | dispatch-path causality "violation" of 1.5e-8 (float32 rounding when a later token changes an expert's row count) | `moe_causality_violations == 0` replaced by exact causality on the dense path plus dispatch diff ≤ TOL; strict count kept as evidence | yes, documented before the run (`1d8e66e`) | ROADMAP §2.3 P4-02 |
+| P4-04 | surgery probe required replaced keys to be absent, but `ConvMixer` reuses the name `o_proj` | probe skips the replaced prefix, checks module types and every other key | no (probe only, `49628b2`) | ROADMAP §2.3 P4-04 |
+| P4-04 | reference/streaming probe used std 0.5 parameters (outputs ~495, diff 4.6e-5 absolute, 6e-8 relative) | parameters at std 1/sqrt(fan_in); max output recorded | no (probe only, `49628b2`) | ROADMAP §2.3 P4-04 |
+
+### Experiment details
+
 | Experiment | Task | Technique | data_kind | Registered criteria | Result | What it shows | What it does not show |
 |---|---|---|---|---|---|---|---|
 | EXP-0024 | P4-06 | none (record pipeline) | synthetic | rerun identical, finite loss, loss decreased; validator: legacy log valid, valid records accepted, 22 violation types detected, append refuses invalid | PASSED (all = 1.0 / true) | The P4 record is enforced by re-derivation and the pipeline is deterministic | Anything about model quality or any technique |
