@@ -25,5 +25,11 @@ jobs:
         env:
           NAWA_REQUIRE_TORCH: "1"   # P3-04 tests must fail, not skip, if torch is missing
         run: python -m pytest
+      - name: Memory self-check (P7-05, synthetic users only; determinism, isolation, no trace after deletion)
+        run: |
+          python -m nawa.memory.replay --check --seed 7 --ops 300
+          a=$(PYTHONHASHSEED=0 python -m nawa.memory.replay --seed 7 --ops 300)
+          b=$(PYTHONHASHSEED=4242 python -m nawa.memory.replay --seed 7 --ops 300)
+          test "$a" = "$b" && echo "memory replay digest identical across processes: $a"
       - name: detect-secrets
         run: git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
