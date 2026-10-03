@@ -158,7 +158,7 @@ def test_train_eligibility_order_of_blocks(tmp_path: Path) -> None:
     roadmap.write_text("| G2 أطلس (P2) | DONE | 2026-10-01 | test |\n", encoding="utf-8")
     c = cand("calculation", {"expression": "1+1", "claimed": "2"})
     res = dv.verify(c, CFG)
-    assert dv.train_eligibility(c, res, roadmap, frozen=set()) == (True, "verified, not evaluation-derived, no frozen hash, G2 closed")
+    assert dv.train_eligibility(c, res, roadmap, frozen=set()) == (True, "verified, not evaluation-derived, no frozen hash, mutability ok, G2 closed")
     assert not dv.train_eligibility({**c, "split": "dev"}, res, roadmap, frozen=set())[0]
     assert "frozen" in dv.train_eligibility({**c, "content_hash": "h"}, res, roadmap, frozen={"h"})[1]
     bad = dv.verify(cand("calculation", {"expression": "1+1", "claimed": "3"}), CFG)

@@ -134,7 +134,7 @@ Core Model
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | 2026-10-01 | P4-06 منجزة (سجل التجربة ومدققه، EXP-0024)؛ P4-05 منجزة (تكافؤ KV cache وspeculative وcompile، وصحة sharing وlow-rank وsparsity، EXP-0025)؛ P4-03 منجزة (صحة الأوزان الثلاثية و4-bit بـ QAT والتصدير المضغوط، EXP-0026؛ تجربة تقنية فقط، لا اعتماد)؛ P4-02 منجزة (صحة Sparse MoE وHybrid مقابل Dense، EXP-0027؛ لا اختيار ولا اعتماد)؛ P4-04 منجزة (صحة mixer الالتفاف السببي والتخطيطات الهجينة attention + convolution، EXP-0028؛ لا نسبة معتمدة)؛ P4-07 منجزة (سجل ablations كامل لـ EXP-0024..EXP-0028 بلا اعتماد أي تقنية)؛ ADR-0007: مهام الكود P4-02..P4-07 غير محجوبة (تنفيذ واختبارات صحة على النواة المرجعية ومصادر اصطناعية، دون اعتماد أي تقنية)؛ P4-01 وP4-02a..P4-05a وP4-08 BLOCKED؛ شروط G4 لم تُخفَّف (أضيف شرط ablations على نص حقيقي)، ولا تُغلق قبل P4-01 وP4-02a..P4-05a وG0–G3 |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | 2026-10-02 | ADR-0008 (R-08): مهام الكود P6-01..P6-08 غير محجوبة بنطاق كود فقط (لا نموذج خارجي، لا شبكة، لا بيانات حقيقية، مولّدات stub)؛ P6-01a..P6-05a وP6-09 BLOCKED؛ أضيف إلى G6 شرط إنجازها؛ لا ادعاء جودة قبل G5؛ P6-08 منجزة (الحالات الخمس وقواعدها، بلا ادعاء جودة)؛ P6-02 منجزة (calculator وsandbox بلا شبكة وfile inspector وصلاحيات وسجل تدقيق، بلا ادعاء جودة؛ P6-02a BLOCKED حتى OD-11)؛ P6-04 منجزة (فحص الادعاءات مقابل الأدلة المقدمة بفاحصين حتميين مستقلين، بلا ادعاء جودة؛ P6-04a BLOCKED)؛ P6-05 منجزة (قرار الامتناع وrisk–coverage، بلا عتبات معتمدة ولا ادعاء جودة؛ P6-05a BLOCKED)؛ P6-01 منجزة (chunker وفهرس lexical قابل لإعادة البناء والتحقق على مدونة اصطناعية، ليس RAG نهائيًا ولا ادعاء جودة؛ P6-01a BLOCKED)؛ P6-06 منجزة (موجّه حتمي معجمي بلا فهم للمعنى، بلا ادعاء جودة)؛ P6-03 منجزة (planner وdecomposer وstate وbudget وواجهة مولّد بـ stubs وself-consistency غير معاير، بلا ادعاء جودة؛ P6-03a BLOCKED)؛ P6-07 منجزة (خط معالجة حتمي قابل لإعادة التشغيل بـ stubs، بلا ادعاء جودة)؛ مهام كود P6-01..P6-08 كلها منجزة، وG6 لا تُغلق على أدلة stubs (ADR-0008 D4)؛ R-09: إغلاق مهام كود P6 وتوحيد القيود في §4 P6، والقرارات المطلوبة في `docs/OWNER_DECISIONS.md` |
-| G7 الخبراء والمحولات والذاكرة (P7) | PLANNED | 2026-10-03 | ADR-0009 (R-10): مهام الكود P7-02..P7-06 وP7-08 غير محجوبة بنطاق كود فقط (ذاكرة ومواصفات خبراء وآلية توجيه وحزمة اختبار عزل، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub)؛ P7-01 وP7-03a وP7-04a وP7-05a وP7-07 BLOCKED؛ أضيف إلى G7 شرط إنجازها واعتماد OD-12؛ لا ادعاء جودة قبل G5، ولا تُغلق G7 قبل G0–G6؛ P7-05 منجزة (نظام ذاكرة حتمي بمستخدمين اصطناعيين: عزل، وprovenance، ودمج حتمي، ونسيان حقيقي بسجل hash؛ بلا ادعاء جودة؛ OD-12 مطلوب قبل أي ذاكرة حقيقية)؛ P7-08 منجزة (سيناريو اصطناعي مسجل مسبقًا بـ 13 توقع و9 طفرات آلية و54 اختبارًا خصميًا؛ 9/9 طفرات مقتولة؛ بلا ادعاء جودة) |
+| G7 الخبراء والمحولات والذاكرة (P7) | PLANNED | 2026-10-03 | ADR-0009 (R-10): مهام الكود P7-02..P7-06 وP7-08 غير محجوبة بنطاق كود فقط (ذاكرة ومواصفات خبراء وآلية توجيه وحزمة اختبار عزل، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub)؛ P7-01 وP7-03a وP7-04a وP7-05a وP7-07 BLOCKED؛ أضيف إلى G7 شرط إنجازها واعتماد OD-12؛ لا ادعاء جودة قبل G5، ولا تُغلق G7 قبل G0–G6؛ P7-05 منجزة (نظام ذاكرة حتمي بمستخدمين اصطناعيين: عزل، وprovenance، ودمج حتمي، ونسيان حقيقي بسجل hash؛ بلا ادعاء جودة؛ OD-12 مطلوب قبل أي ذاكرة حقيقية)؛ P7-08 منجزة (سيناريو اصطناعي مسجل مسبقًا بـ 13 توقع و9 طفرات آلية و54 اختبارًا خصميًا؛ 9/9 طفرات مقتولة؛ بلا ادعاء جودة)؛ P7-06 منجزة (تصنيف mutability: STABLE/CHANGING/UNKNOWN؛ حارس manifest مركزي يرفض CHANGING وUNKNOWN من التدريب؛ 23 اختبارًا؛ بلا ادعاء جودة) |
 | G8 الضغط والكفاءة (P8) | PLANNED | — | — |
 | G9 التعلم المستمر ومقاومة الانحدار (P9) | PLANNED | — | — |
 | G10 الإصدار 1.0 — تعريف 100% (P10) | PLANNED | — | — |
@@ -226,7 +226,7 @@ Core Model
 | P7-04a | BLOCKED | — | العزل على adapters مدربة ولا تدهور عام أكبر من T5؛ تنتظر P7-01 (ADR-0009) | 2026-10-03 |
 | P7-05 | DONE | agent-P7-05 | `src/nawa/memory` (types، store، orchestrator، policy، consolidation، forgetting، provenance، isolation، replay): خمسة أنواع أساسية + مخزن حسي مؤقت بالأنماط، وسجل موسّع لـ 213 اسمًا مطلوبًا لكل منها حالة صريحة؛ عزل بقسم لكل (مستخدم، مشروع) وثلاثة مستخدمين اصطناعيين فقط؛ provenance وثقة وطابع زمني منطقي ومالك لكل عنصر؛ دمج حتمي idempotent؛ نسيان حقيقي بسلسلة hash وبلا أثر؛ 151 اختبار ذاكرة + فحص CI؛ ليس سياسة خصوصية نهائية: OD-12 مطلوب قبل أي ذاكرة حقيقية (ADR-0009؛ كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية؛ لا ادعاء جودة) | 2026-10-03 |
 | P7-05a | BLOCKED | — | ذاكرة من محادثات أو بيانات شخصية حقيقية، واستخلاص أو دمج بنموذج؛ تنتظر OD-12 وG5 (أو OD-10 لنموذج خارجي) (ADR-0009) | 2026-10-03 |
-| P7-06 | PLANNED | — | قاعدة المعرفة المتغيرة فحصًا مفروضًا: الحقيقة المتغيرة تُقبل في memory/retrieval وتُرفض في أي manifest لبيانات التدريب (ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub؛ لا ادعاء جودة) | 2026-10-03 |
+| P7-06 | DONE | agent-P7-06 | `src/nawa/memory/mutability.py` (KnowledgeMutability: STABLE/CHANGING/UNKNOWN؛ `mutability_reasons` و`is_train_eligible_by_mutability`؛ `MemoryItem.mutability`؛ `MemoryStore.write(mutability=)`؛ `data_verify.train_eligibility` يرفض CHANGING وUNKNOWN)؛ `tests/test_changing_knowledge.py` بـ 23 اختبارًا في 4 فئات: 8 ذاكرة، 2 استرجاع، 10 manifest، 3 طفرات؛ 1287 passed / 1 skipped الكلية؛ ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية؛ لا ادعاء جودة) | 2026-10-03 |
 | P7-07 | BLOCKED | — | رفع adapters إلى `nawa-adapters`؛ تنتظر P7-01 وOD-03 (ADR-0009) | 2026-10-03 |
 | P7-08 | DONE | agent-P7-08 | `src/nawa/memory/benchmark.py` (سيناريو اصطناعي مسجل مسبقًا بـ 10 عناصر و10 توقعات + 3 متأخرة = 13 إجمالًا، و9 طفرات آلية؛ `tests/test_memory_adversarial.py` بـ 54 اختبارًا في 6 فئات: 13 تخمين معرفات، 12 حقن استعلام، 6 حقن وسوم، 5 تسلسلات متداخلة، 12 طفرة + سلامة؛ 1264 passed / 1 skipped الكلية؛ ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية؛ لا ادعاء جودة) | 2026-10-03 |
 | P8-01..P8-08 | PLANNED | — | — | — |
@@ -2280,6 +2280,46 @@ Core Model
   - أُعيد استخدام `nawa.retrieval.analyze`، و`nawa.data.pii.find_pii`، و`VerificationState` من P6-08، و`normalize`، دون نسخ.
   - اختبارات P7-05 تغطي معايير P7-08 الأربعة على مستوى الوحدة، فقُصر نطاق P7-08 على ما لم يُغطَّ.
 
+### P7-06 — قاعدة المعرفة المتغيرة فحصًا مفروضًا (2026-10-03)
+
+- **Task ID:** P7-06
+- **Owner:** agent-P7-06
+- **Status:** DONE
+- **Scope (ADR-0009):** كود فقط، على CPU، من الصفر (المسار S). لا نموذج خارجي ولا شبكة ولا بيانات حقيقية ولا frozen ولا رفع. لا ادعاء جودة.
+- **التصميم:**
+  - **`KnowledgeMutability` (enum):** ثلاث قيم: `STABLE` (حقيقة دائمة)، `CHANGING` (حقيقة متغيرة زمنيًا)، `UNKNOWN` (غير مسجّل).
+  - **`mutability_reasons` (دالة مركزية):** تُفحص سجل manifest وتُرجع أكواد أسباب الرفض. `STABLE` فقط يمر؛ `CHANGING` و`UNKNOWN` يُرفضان؛ الغياب يُعامل كـ `UNKNOWN` ولا يُقرأ كـ `STABLE`.
+  - **`MemoryItem.mutability`:** حقل جديد يُكتب مع `KNOWLEDGE` فقط، ويُحفظ في `to_record`/`from_record`.
+  - **`MemoryStore.write(mutability=)`:** يقبل المعامل ويضعه على العنصر؛ غير `KNOWLEDGE` يُضبط على `None`.
+  - **`data_verify.train_eligibility`:** يستدعي `mutability_reasons` ويرفض السجلات ذات المعرفة المتغيرة أو المفقودة قبل فحص G2.
+- **ما أُنجز:**
+  - **`src/nawa/memory/mutability.py`:** وحدة كاملة بـ `KnowledgeMutability` و`mutability_reasons` و`is_train_eligible_by_mutability` وأكواد أسباب مغلقة.
+  - **`src/nawa/memory/types.py`:** حقل `mutability` في `MemoryItem`، وتسلسل/إزالة تسلسل في `to_record`/`from_record`.
+  - **`src/nawa/memory/store.py`:** معامل `mutability=` في `write`.
+  - **`src/nawa/memory/__init__.py`:** تصدير `KnowledgeMutability` و`mutability_reasons` و`is_train_eligible_by_mutability`.
+  - **`src/nawa/data_verify.py`:** دمج `mutability_reasons` في `train_eligibility`.
+  - **`tests/test_changing_knowledge.py`:** 23 اختبارًا في 4 فئات.
+- **Files created:** `src/nawa/memory/mutability.py`، `tests/test_changing_knowledge.py`
+- **Files modified:** `src/nawa/memory/types.py`، `src/nawa/memory/store.py`، `src/nawa/memory/__init__.py`، `src/nawa/data_verify.py`، `tests/test_data_verify.py` (رسالة النجاح)، `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `python -m nawa.experiments validate`، `pre-commit run --all-files`، `detect-secrets-hook`
+- **Test results:**
+  - الكلية: 1287 passed / 1 skipped / 0 failed (1264 + 23 جديدة؛ التخطي: CUDA not available).
+  - experiments/log.jsonl: valid.
+  - pre-commit وdetect-secrets: نظيفان.
+- **Metrics:** لا مقياس جودة. أرقام صحة فقط: 3/3 طفرات مقتولة.
+- **Git commit:** PR #46 من الفرع `agent/P7-06-changing-knowledge-baseline`.
+- **HF repository/revision:** لا شيء.
+- **Known limitations:**
+  - التصنيف يدوي (الكود لا يحدد تلقائيًا ما إذا كانت الحقيقة متغيرة)؛ هذا قرار تصميمي وليس قيدًا.
+  - لا فحص على بيانات حقيقية (OD-03 مفتوح).
+  - لا مراجعة مستقلة من نموذج (OD-10 مفتوح).
+- **Roadmap section updated:** §2.1 G7، §2.2 P7-06، §2.3، §12
+- **Next unblocked task:** P7-02 (مخطط مواصفات الخبير وسجله)، ثم P7-03، P7-04. G1 تبقى PENDING_REVIEW، وقرارات المالك مفتوحة كما في §2.4.
+- **Duplicate-work check:**
+  - لا توجد وحدة `mutability` سابقة.
+  - `data_verify.train_eligibility` لم يكن يفحص المعرفة المتغيرة.
+  - لا فرع أو PR سابق لـ P7-06.
+
 ### P7-08 — اختبارات الذاكرة الخصمية والطفرات الآلية (2026-10-03)
 
 - **Task ID:** P7-08
@@ -3067,5 +3107,6 @@ Limitations:
 | 1.39.0 | 2026-10-03 | R-10: إصلاح تعارض §0 مع عبارة R-09 «لا مهمة غير محجوبة» (كانت مقيدة بتوجيه جلسة 2026-10-02) بتوجيه المالك 2026-10-03. ADR-0009: فصل صف P7 إلى ثماني مهام وثلاث فرعية؛ مهام الكود P7-02..P7-06 وP7-08 غير محجوبة بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية ولا ادعاء جودة؛ P7-01 وP7-03a وP7-04a وP7-05a وP7-07 BLOCKED؛ شرط جديد في G7؛ OD-12 جديد. تحديث رصد R-07 (HF fine-grained مقصور؛ GitHub classic). استكمال squash `bb827fe` في تقرير R-09. لا تغيير لأي هدف أو عتبة. | R-10، G7، §2.4، R-07 |
 | 1.40.0 | 2026-10-03 | P7-05 منجزة: `src/nawa/memory` بخمسة أنواع أساسية (المحادثة، والدائمة للمستخدم بموافقة، والمهام، والمعرفة بمصدر وثقة وحالة تحقق، والخبرة والإجراءات) ومخزن حسي مؤقت، وسجل موسّع لـ 213 اسمًا مطلوبًا (5 أساسية، و5 مخزن حسي، و23 مرادفًا، و31 قدرة مختبرة، و33 وسم مجال، و17 مؤجلًا، و95 غير منطبق، و4 مرفوضة). عزل كامل بين المستخدمين الاصطناعيين، ونسيان حقيقي بسلسلة hash يمتد إلى سلسلة الدمج، ودمج حتمي idempotent، وإعادة تشغيل بنفس الـ digest عبر العمليات. فحص الذاكرة في CI. OD-12 مطلوب قبل أي ذاكرة حقيقية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-05، P7-08، G7، OD-12 |
 | 1.41.0 | 2026-10-03 | P7-08 منجزة: `src/nawa/memory/benchmark.py` (سيناريو اصطناعي مسجل مسبقًا بـ 10 عناصر و10 توقعات + 3 متأخرة = 13 إجمالًا، و9 طفرات آلية مستهدفة) و`tests/test_memory_adversarial.py` (54 اختبارًا في 6 فئات: 13 تخمين معرفات، و12 حقن استعلام، و6 حقن وسوم، و5 تسلسلات متداخلة، و12 طفرة تُقتل + سلامة). 9/9 طفرات مقتولة. 1264 passed / 1 skipped الكلية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-08، G7 |
+| 1.42.0 | 2026-10-03 | P7-06 منجزة: `src/nawa/memory/mutability.py` (تصنيف المعرفة: `KnowledgeMutability` بثلاث قيم STABLE/CHANGING/UNKNOWN؛ دالة `mutability_reasons` المركزية و`is_train_eligible_by_mutability`؛ `MemoryItem.mutability`؛ `MemoryStore.write(mutability=)`؛ `data_verify.train_eligibility` يرفض CHANGING وUNKNOWN من أي manifest تدريب) و`tests/test_changing_knowledge.py` (23 اختبارًا في 4 فئات: 8 ذاكرة، و2 استرجاع، و10 manifest، و3 طفرات). 3/3 طفرات مقتولة. 1287 passed / 1 skipped الكلية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-06، G7 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

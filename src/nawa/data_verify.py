@@ -265,10 +265,15 @@ def train_eligibility(candidate: dict[str, Any], result: VerificationResult,
     h = candidate.get("content_hash")
     if h and h in (frozen if frozen is not None else frozen_hashes()):
         return False, "content hash matches a frozen item (leakage into frozen, G2)"
+    # P7-06: changing knowledge must never enter a training manifest
+    from nawa.memory.mutability import mutability_reasons
+    m_reasons = mutability_reasons(candidate)
+    if m_reasons:
+        return False, f"{'/'.join(m_reasons)}: changing or unknown knowledge is not train-eligible (P7-06)"
     g2 = gate_status("G2", roadmap)
     if g2 != "DONE":
         return False, f"G2 is {g2}: no training data before G2 closes (ADR-0005 D2)"
-    return True, "verified, not evaluation-derived, no frozen hash, G2 closed"
+    return True, "verified, not evaluation-derived, no frozen hash, mutability ok, G2 closed"
 
 
 def verify_atlas_record(rec: dict[str, Any]) -> VerificationResult:
