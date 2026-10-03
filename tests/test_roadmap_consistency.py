@@ -189,3 +189,38 @@ def test_p6_code_scope_split_blocks_model_dependent_parts_and_strengthens_g6() -
     if g5_status != "DONE" or any(rows[t][1] != "DONE" for t in ("P6-01a", "P6-03a", "P6-04a", "P6-05a", "P6-09")):
         assert g6_status not in {"DONE", "PENDING_REVIEW"}, g6_status
     assert (ROOT / "docs/decisions/ADR-0008-p6-code-scope.md").is_file()
+
+
+def test_p7_code_scope_split_blocks_trained_and_private_parts_and_strengthens_g7() -> None:
+    """R-10 / ADR-0009: P7 code tasks are unblocked under §0 with no external model, no network, no real data and no
+    quality claim; trained adapters, real personal memory and upload stay BLOCKED; G7 keeps every condition and gains
+    one; OD-12 is registered and blocks P7-05a only."""
+    rows = {r[0]: r for r in status_rows()}
+    assert "P7-01..P7-08" not in rows
+    for tid in ("P7-02", "P7-03", "P7-04", "P7-05", "P7-06", "P7-08"):
+        assert rows[tid][1] in {"PLANNED", "CLAIMED", "IN_PROGRESS", "DONE", "FAILED"}, rows[tid]
+        assert "ADR-0009" in rows[tid][3], rows[tid]
+    gates = section("## 2.1 حالة البوابات", "## 2.2")
+    g5_status = re.search(r"^\| G5 [^|]*\| (\w+) \|", gates, flags=re.M)[1]
+    odt = section("## 2.4 قرارات المالك المطلوبة", "# 3. بنية المستودعات")
+    od12 = re.search(r"^\| OD-12 \|[^\n]*\| (\w+) \|$", odt, flags=re.M)
+    assert od12 and "P7-05a" in od12[0]
+    for tid in ("P7-01", "P7-03a", "P7-04a", "P7-05a", "P7-07"):
+        assert "ADR-0009" in rows[tid][3], rows[tid]
+        if g5_status != "DONE":
+            assert rows[tid][1] == "BLOCKED", rows[tid]
+    if od12[1] == "OPEN":
+        assert rows["P7-05a"][1] == "BLOCKED", rows["P7-05a"]
+    phases = section("# 4. مراحل التنفيذ والبوابات", "# 5. قواعد Git")
+    p7 = phases[phases.index("## P7"):phases.index("## P8")]
+    g7 = p7[p7.index("### G7"):]
+    for condition in ("كل adapter يحسن ميدانه", "لا تدهور عام أكبر من T5", "router موثق وقابل للرجوع",
+                      "الذاكرة لا تسرب بيانات ولا تغير الحقائق بلا provenance",
+                      "P7-01 وP7-03a وP7-04a وP7-05a وP7-07 منجزة على نواة NAWA مدربة، وOD-12 معتمد"):
+        assert condition in g7, condition
+    assert "ADR-0009" in p7 and "دون أي نموذج خارجي" in p7 and "دون شبكة" in p7 and "دون بيانات حقيقية" in p7
+    g7_status = re.search(r"^\| G7 [^|]*\| (\w+) \|", gates, flags=re.M)[1]
+    if g5_status != "DONE" or od12[1] == "OPEN" or any(
+            rows[t][1] != "DONE" for t in ("P7-01", "P7-03a", "P7-04a", "P7-05a", "P7-07")):
+        assert g7_status not in {"DONE", "PENDING_REVIEW"}, g7_status
+    assert (ROOT / "docs/decisions/ADR-0009-p7-code-scope.md").is_file()
