@@ -67,7 +67,7 @@ def test_track_s_packages_import_no_external_model_libraries() -> None:
     banned = {"transformers", "huggingface_hub", "tokenizers", "sentencepiece", "tiktoken", "peft", "accelerate",
               "datasets", "safetensors", "timm", "vllm", "llama_cpp", "bitsandbytes", "xformers"}
     for pkg in ("model", "training", "tokenizer", "efficiency",
-                "retrieval", "tools", "reasoning", "verification", "abstention", "routing", "pipeline"):
+                "retrieval", "tools", "reasoning", "verification", "abstention", "routing", "pipeline", "memory"):
         for path in sorted((ROOT / "src/nawa" / pkg).rglob("*.py")):
             for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
                 names = ([a.name for a in node.names] if isinstance(node, ast.Import)
@@ -76,7 +76,8 @@ def test_track_s_packages_import_no_external_model_libraries() -> None:
                     assert name.split(".")[0] not in banned, f"{path.relative_to(ROOT)} imports {name}"
 
 
-P6_PACKAGES = ("retrieval", "tools", "reasoning", "verification", "abstention", "routing", "pipeline")
+P6_PACKAGES = ("retrieval", "tools", "reasoning", "verification", "abstention", "routing", "pipeline",
+               "memory")  # memory: P7-05 under ADR-0009 D2 (no external model, no network, no Hugging Face)
 P6_BANNED = {
     # external models as generator, verifier, judge or reviewer (OD-10)
     "openai", "anthropic", "cohere", "mistralai", "litellm", "langchain", "langchain_core", "llama_index",
@@ -114,3 +115,13 @@ def test_p6_import_rule_is_not_vacuous(tmp_path: Path) -> None:
     bad.write_text("import importlib\nfrom urllib.request import urlopen\nimport openai\n"
                    "m = importlib.import_module('requests')\n", encoding="utf-8")
     assert {n.split(".")[0] for n in _imports(bad)} >= {"urllib", "openai", "requests"}
+
+
+def test_memory_package_exists_and_is_covered_by_the_import_rules() -> None:
+    """ADR-0009 D2: the first P7 task that creates a package extends both import rules to it (non-vacuous)."""
+    files = sorted((ROOT / "src/nawa/memory").glob("*.py"))
+    assert {f.name for f in files} >= {"types.py", "store.py", "orchestrator.py", "policy.py", "consolidation.py",
+                                      "forgetting.py", "provenance.py", "isolation.py", "replay.py"}
+    assert "memory" in P6_PACKAGES
+    imported = {n.split(".")[0] for f in files for n in _imports(f)}
+    assert imported and not imported & P6_BANNED and "huggingface_hub" not in imported
