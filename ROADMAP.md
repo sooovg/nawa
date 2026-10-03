@@ -134,7 +134,7 @@ Core Model
 | G4 دراسات الكفاءة والابتكار (P4) | PLANNED | 2026-10-01 | P4-06 منجزة (سجل التجربة ومدققه، EXP-0024)؛ P4-05 منجزة (تكافؤ KV cache وspeculative وcompile، وصحة sharing وlow-rank وsparsity، EXP-0025)؛ P4-03 منجزة (صحة الأوزان الثلاثية و4-bit بـ QAT والتصدير المضغوط، EXP-0026؛ تجربة تقنية فقط، لا اعتماد)؛ P4-02 منجزة (صحة Sparse MoE وHybrid مقابل Dense، EXP-0027؛ لا اختيار ولا اعتماد)؛ P4-04 منجزة (صحة mixer الالتفاف السببي والتخطيطات الهجينة attention + convolution، EXP-0028؛ لا نسبة معتمدة)؛ P4-07 منجزة (سجل ablations كامل لـ EXP-0024..EXP-0028 بلا اعتماد أي تقنية)؛ ADR-0007: مهام الكود P4-02..P4-07 غير محجوبة (تنفيذ واختبارات صحة على النواة المرجعية ومصادر اصطناعية، دون اعتماد أي تقنية)؛ P4-01 وP4-02a..P4-05a وP4-08 BLOCKED؛ شروط G4 لم تُخفَّف (أضيف شرط ablations على نص حقيقي)، ولا تُغلق قبل P4-01 وP4-02a..P4-05a وG0–G3 |
 | G5 تدريب النواة (P5) | PLANNED | — | — |
 | G6 نظام الاستدلال والتحقق (P6) | PLANNED | 2026-10-02 | ADR-0008 (R-08): مهام الكود P6-01..P6-08 غير محجوبة بنطاق كود فقط (لا نموذج خارجي، لا شبكة، لا بيانات حقيقية، مولّدات stub)؛ P6-01a..P6-05a وP6-09 BLOCKED؛ أضيف إلى G6 شرط إنجازها؛ لا ادعاء جودة قبل G5؛ P6-08 منجزة (الحالات الخمس وقواعدها، بلا ادعاء جودة)؛ P6-02 منجزة (calculator وsandbox بلا شبكة وfile inspector وصلاحيات وسجل تدقيق، بلا ادعاء جودة؛ P6-02a BLOCKED حتى OD-11)؛ P6-04 منجزة (فحص الادعاءات مقابل الأدلة المقدمة بفاحصين حتميين مستقلين، بلا ادعاء جودة؛ P6-04a BLOCKED)؛ P6-05 منجزة (قرار الامتناع وrisk–coverage، بلا عتبات معتمدة ولا ادعاء جودة؛ P6-05a BLOCKED)؛ P6-01 منجزة (chunker وفهرس lexical قابل لإعادة البناء والتحقق على مدونة اصطناعية، ليس RAG نهائيًا ولا ادعاء جودة؛ P6-01a BLOCKED)؛ P6-06 منجزة (موجّه حتمي معجمي بلا فهم للمعنى، بلا ادعاء جودة)؛ P6-03 منجزة (planner وdecomposer وstate وbudget وواجهة مولّد بـ stubs وself-consistency غير معاير، بلا ادعاء جودة؛ P6-03a BLOCKED)؛ P6-07 منجزة (خط معالجة حتمي قابل لإعادة التشغيل بـ stubs، بلا ادعاء جودة)؛ مهام كود P6-01..P6-08 كلها منجزة، وG6 لا تُغلق على أدلة stubs (ADR-0008 D4)؛ R-09: إغلاق مهام كود P6 وتوحيد القيود في §4 P6، والقرارات المطلوبة في `docs/OWNER_DECISIONS.md` |
-| G7 الخبراء والمحولات والذاكرة (P7) | PLANNED | 2026-10-03 | ADR-0009 (R-10): مهام الكود P7-02..P7-06 وP7-08 غير محجوبة بنطاق كود فقط (ذاكرة ومواصفات خبراء وآلية توجيه وحزمة اختبار عزل، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub)؛ P7-01 وP7-03a وP7-04a وP7-05a وP7-07 BLOCKED؛ أضيف إلى G7 شرط إنجازها واعتماد OD-12؛ لا ادعاء جودة قبل G5، ولا تُغلق G7 قبل G0–G6؛ P7-05 منجزة (نظام ذاكرة حتمي بمستخدمين اصطناعيين: عزل، وprovenance، ودمج حتمي، ونسيان حقيقي بسجل hash؛ بلا ادعاء جودة؛ OD-12 مطلوب قبل أي ذاكرة حقيقية)؛ P7-08 منجزة (سيناريو اصطناعي مسجل مسبقًا بـ 13 توقع و9 طفرات آلية و54 اختبارًا خصميًا؛ 9/9 طفرات مقتولة؛ بلا ادعاء جودة)؛ P7-06 منجزة (تصنيف mutability: STABLE/CHANGING/UNKNOWN؛ حارس manifest مركزي يرفض CHANGING وUNKNOWN من التدريب؛ 23 اختبارًا؛ بلا ادعاء جودة)؛ P7-02 منجزة (مواصفات 7 خبراء stub بـ goal وdata contract وtest cases وlimits وrouting decision؛ ExpertRegistry قابل للنسخ؛ 51 اختبارًا؛ بلا ادعاء جودة) |
+| G7 الخبراء والمحولات والذاكرة (P7) | PLANNED | 2026-10-03 | ADR-0009 (R-10): مهام الكود P7-02..P7-06 وP7-08 غير محجوبة بنطاق كود فقط (ذاكرة ومواصفات خبراء وآلية توجيه وحزمة اختبار عزل، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub)؛ P7-01 وP7-03a وP7-04a وP7-05a وP7-07 BLOCKED؛ أضيف إلى G7 شرط إنجازها واعتماد OD-12؛ لا ادعاء جودة قبل G5، ولا تُغلق G7 قبل G0–G6؛ P7-05 منجزة (نظام ذاكرة حتمي بمستخدمين اصطناعيين: عزل، وprovenance، ودمج حتمي، ونسيان حقيقي بسجل hash؛ بلا ادعاء جودة؛ OD-12 مطلوب قبل أي ذاكرة حقيقية)؛ P7-08 منجزة (سيناريو اصطناعي مسجل مسبقًا بـ 13 توقع و9 طفرات آلية و54 اختبارًا خصميًا؛ 9/9 طفرات مقتولة؛ بلا ادعاء جودة)؛ P7-06 منجزة (تصنيف mutability: STABLE/CHANGING/UNKNOWN؛ حارس manifest مركزي يرفض CHANGING وUNKNOWN من التدريب؛ 23 اختبارًا؛ بلا ادعاء جودة)؛ P7-02 منجزة (مواصفات 7 خبراء stub بـ goal وdata contract وtest cases وlimits وrouting decision؛ ExpertRegistry قابل للنسخ؛ 51 اختبارًا؛ بلا ادعاء جودة)؛ P7-03 منجزة (آلية توجيه فوق الخبراء المسجلين باستخدام nawa.routing الموجود؛ ExpertRoute يغلّف Route؛ fallback إلى النواة؛ 26 اختبارًا؛ بلا ادعاء جودة) |
 | G8 الضغط والكفاءة (P8) | PLANNED | — | — |
 | G9 التعلم المستمر ومقاومة الانحدار (P9) | PLANNED | — | — |
 | G10 الإصدار 1.0 — تعريف 100% (P10) | PLANNED | — | — |
@@ -220,7 +220,7 @@ Core Model
 | P6-05a | BLOCKED | — | معايرة NAWA وعتبات الامتناع على `calib`، وفحص واحد على `frozen` بيد دور Eval؛ تنتظر G5 (ADR-0008) | 2026-10-02 |
 | P7-01 | BLOCKED | — | adapters أو خبراء مدربون؛ تنتظر G5 وOD-03 (ADR-0009) | 2026-10-03 |
 | P7-02 | DONE | agent-P7-02 | `src/nawa/experts/spec.py` (ExpertDomain enum بـ 7 مجالات؛ ExpertSpec وDataContract وExpertLimits وExpertTestCase وFailureMode؛ 7 خبراء stub بـ routing_kinds وrouting_handler وrouting_priority؛ `validate_expert_specs`)؛ `src/nawa/experts/registry.py` (ExpertRegistry قابل للنسخ والتعديل؛ `EXPERT_REGISTRY` مُعبّأة مسبقًا)؛ `tests/test_expert_specs.py` بـ 51 اختبارًا في 11 فئة؛ 1338 passed / 1 skipped الكلية؛ ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية؛ لا ادعاء جودة) | 2026-10-03 |
-| P7-03 | PLANNED | — | آلية router فوق الخبراء المسجلين مبنية على P6-06، مع fallback إلى النواة وحدها ورجوع موثق (ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub؛ لا ادعاء جودة) | 2026-10-03 |
+| P7-03 | DONE | agent-P7-03 | `src/nawa/experts/router.py` (`ExpertRoute` يغلّف P6-06 `Route` مع `selected_experts` و`core_only` و`fallback_reason` و`expert_trace`؛ `route_with_experts()` يستدعي `nawa.routing.route()` ثم يفحص السجل؛ `_matches()` بشرط مزدوج: تقاطع routing_kinds مع kinds وrouting_handler في plan قبل ABSTAIN؛ safety (ABSTAIN) يُختار فقط عندما current هو ABSTAIN؛ max_experts يحد العدد؛ ترتيب (priority, expert_id) حتمي)؛ `tests/test_expert_router.py` بـ 26 اختبارًا في 10 فئات؛ 1364 passed / 1 skipped الكلية؛ ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية؛ لا ادعاء جودة) | 2026-10-03 |
 | P7-03a | BLOCKED | — | جودة التوجيه بين النواة وخبراء مدربين؛ تنتظر P7-01 (ADR-0009) | 2026-10-03 |
 | P7-04 | PLANNED | — | حزمة اختبار العزل: إضافة خبير تعيد فحوص الخبراء السابقين (ADR-0009: كود فقط، بلا نموذج خارجي ولا شبكة ولا بيانات حقيقية، وخبراء stub؛ لا ادعاء جودة) | 2026-10-03 |
 | P7-04a | BLOCKED | — | العزل على adapters مدربة ولا تدهور عام أكبر من T5؛ تنتظر P7-01 (ADR-0009) | 2026-10-03 |
@@ -2280,6 +2280,42 @@ Core Model
   - أُعيد استخدام `nawa.retrieval.analyze`، و`nawa.data.pii.find_pii`، و`VerificationState` من P6-08، و`normalize`، دون نسخ.
   - اختبارات P7-05 تغطي معايير P7-08 الأربعة على مستوى الوحدة، فقُصر نطاق P7-08 على ما لم يُغطَّ.
 
+### P7-03 — آلية router فوق الخبراء المسجلين (2026-10-03)
+
+- **Task ID:** P7-03
+- **Owner:** agent-P7-03
+- **Status:** DONE
+- **Scope (ADR-0009):** كود فقط، على CPU، من الصفر (المسار S). لا نموذج خارجي ولا شبكة ولا بيانات حقيقية ولا frozen ولا رفع. لا ادعاء جودة.
+- **التصميم:**
+  - **`ExpertRoute` (dataclass frozen):** يغلّف P6-06 `Route` (composition، لا وراثة) مع `selected_experts` و`core_only` و`fallback_reason` و`expert_trace`.
+  - **`route_with_experts()`:** يستدعي `nawa.routing.route()` من P6-06 ثم يفحص السجل. لا يعيد تصنيف الاستعلام.
+  - **`_matches()`:** شرط مزدوج: تقاطع `routing_kinds` مع `kinds` و`routing_handler` في `plan` قبل `ABSTAIN`.
+  - **safety (ABSTAIN handler):** يُختار فقط عندما `current` هو `ABSTAIN` — أي عندما لا تملك النواة شيئًا آخر.
+  - **`max_experts`:** يحد العدد المختار؛ الترتيب بـ `(routing_priority, expert_id)` حتمي.
+  - **المسار الغامض:** لا يفوّض أبدًا؛ يبقى على مسار P6-06.
+- **ما أُنجز:**
+  - **`src/nawa/experts/router.py`:** `ExpertRoute` و`route_with_experts` و`_matches`.
+  - **`src/nawa/experts/__init__.py`:** تصدير `ExpertRoute` و`route_with_experts`.
+  - **`tests/test_expert_router.py`:** 26 اختبارًا في 10 فئات.
+- **Files created:** `src/nawa/experts/router.py`، `tests/test_expert_router.py`
+- **Files modified:** `src/nawa/experts/__init__.py`، `ROADMAP.md`
+- **Tests executed:** `NAWA_REQUIRE_TORCH=1 python -m pytest`، `python -m nawa.experiments validate`، `pre-commit run --all-files`
+- **Test results:**
+  - الكلية: 1364 passed / 1 skipped / 0 failed (1338 + 26 جديدة).
+  - experiments/log.jsonl: valid.
+  - pre-commit: نظيف.
+- **Metrics:** لا مقياس جودة.
+- **Git commit:** PR #48 (stacked على PR #47) من الفرع `agent/P7-03-expert-router`.
+- **HF repository/revision:** لا شيء.
+- **Known limitations:**
+  - لا تقييم جودة التوجيه حتى P7-01 (P7-03a BLOCKED).
+  - الخبراء stub فقط؛ لا تنفيذ فعلي حتى G5 (OD-10).
+- **Roadmap section updated:** §2.1 G7، §2.2 P7-03، §2.3، §12
+- **Next unblocked task:** P7-04 (حزمة اختبار العزل).
+- **Duplicate-work check:**
+  - أُعيد استخدام `nawa.routing.route()` و`Route` و`RouterConfig` دون نسخ.
+  - لا موجّه ثانٍ؛ `route_with_experts` طبقة تفويض رقيقة فوق P6-06.
+
 ### P7-02 — مخطط مواصفات الخبير وسجله (2026-10-03)
 
 - **Task ID:** P7-02
@@ -3151,5 +3187,6 @@ Limitations:
 | 1.41.0 | 2026-10-03 | P7-08 منجزة: `src/nawa/memory/benchmark.py` (سيناريو اصطناعي مسجل مسبقًا بـ 10 عناصر و10 توقعات + 3 متأخرة = 13 إجمالًا، و9 طفرات آلية مستهدفة) و`tests/test_memory_adversarial.py` (54 اختبارًا في 6 فئات: 13 تخمين معرفات، و12 حقن استعلام، و6 حقن وسوم، و5 تسلسلات متداخلة، و12 طفرة تُقتل + سلامة). 9/9 طفرات مقتولة. 1264 passed / 1 skipped الكلية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-08، G7 |
 | 1.42.0 | 2026-10-03 | P7-06 منجزة: `src/nawa/memory/mutability.py` (تصنيف المعرفة: `KnowledgeMutability` بثلاث قيم STABLE/CHANGING/UNKNOWN؛ دالة `mutability_reasons` المركزية و`is_train_eligible_by_mutability`؛ `MemoryItem.mutability`؛ `MemoryStore.write(mutability=)`؛ `data_verify.train_eligibility` يرفض CHANGING وUNKNOWN من أي manifest تدريب) و`tests/test_changing_knowledge.py` (23 اختبارًا في 4 فئات: 8 ذاكرة، و2 استرجاع، و10 manifest، و3 طفرات). 3/3 طفرات مقتولة. 1287 passed / 1 skipped الكلية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-06، G7 |
 | 1.43.0 | 2026-10-03 | P7-02 منجزة: `src/nawa/experts/spec.py` (مواصفات 7 خبراء stub: ExpertDomain بـ 7 مجالات؛ ExpertSpec وDataContract وExpertLimits وExpertTestCase وFailureMode؛ routing_kinds وrouting_handler وrouting_priority باستخدام أنواع nawa.routing الموجودة) و`src/nawa/experts/registry.py` (ExpertRegistry قابل للنسخ والتعديل؛ snapshot للعزل P7-04) و`tests/test_expert_specs.py` (51 اختبارًا في 11 فئة: تغطية المجالات، تجمد وتسلسل، بيانات اصطناعية فقط، حالات اختبار، حدود، قرارات توجيه، سجل، stubs حتمية، تحقق، أوضاع فشل، 3 طفرات). 3/3 طفرات مقتولة. 1338 passed / 1 skipped الكلية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-02، G7 |
+| 1.44.0 | 2026-10-03 | P7-03 منجزة: `src/nawa/experts/router.py` (ExpertRoute يغلّف P6-06 Route بـ composition؛ route_with_experts يستدعي nawa.routing.route ثم يفحص السجل؛ _matches بشرط مزدوج kind+handler؛ safety ABSTAIN فقط عند current=ABSTAIN؛ max_experts؛ ترتيب (priority, expert_id) حتمي) و`tests/test_expert_router.py` (26 اختبارًا في 10 فئات: تفويض، fallback، أولوية safety، trace، خبراء متعددون، معطّل، لا موجّه ثانٍ، غامض، خصائص ExpertRoute، _matches). 1364 passed / 1 skipped الكلية. لا ادعاء جودة، ولا تغيير لأي هدف أو عتبة. | P7-03، G7 |
 
 > يُضاف كل تغيير لاحق هنا في نفس PR الذي يغير الخارطة.

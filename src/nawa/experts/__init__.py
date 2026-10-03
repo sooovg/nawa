@@ -15,8 +15,10 @@ from nawa.experts.spec import (DataContract, DataPolicy, EXPERT_SPECS, ExpertDom
                                 validate_expert_specs)
 from nawa.experts.registry import (EXPERT_REGISTRY, ExpertRegistry, ExpertStatus, deregister_expert,
                                    get_expert, list_experts, register_expert, registry_snapshot)
+from nawa.experts.router import ExpertRoute, route_with_experts
 
 __all__ = ["DataContract", "DataPolicy", "EXPERT_REGISTRY", "EXPERT_SPECS", "ExpertDomain",
-           "ExpertLimits", "ExpertRegistry", "ExpertSpec", "ExpertStatus", "ExpertTestCase",
-           "FailureMode", "deregister_expert", "get_expert", "get_expert_spec", "list_experts",
-           "register_expert", "registry_snapshot", "validate_expert_specs"]
+           "ExpertLimits", "ExpertRegistry", "ExpertRoute", "ExpertSpec", "ExpertStatus",
+           "ExpertTestCase", "FailureMode", "deregister_expert", "get_expert", "get_expert_spec",
+           "list_experts", "register_expert", "registry_snapshot", "route_with_experts",
+           "validate_expert_specs"]
