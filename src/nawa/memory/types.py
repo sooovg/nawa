@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from nawa.memory.provenance import Provenance
+from nawa.memory.mutability import KnowledgeMutability
 from nawa.verification.states import VerificationState
 
 EPOCH = _dt.datetime(2026, 1, 1, tzinfo=_dt.timezone.utc)  # fixed synthetic epoch for tick → ISO rendering
@@ -98,6 +99,7 @@ class MemoryItem:
     steps: tuple[str, ...] = ()
     due_at: int | None = None                        # prospective memory: when a task should be done
     read_only: bool = False
+    mutability: KnowledgeMutability | None = None       # P7-06: STABLE/CHANGING/UNKNOWN for knowledge records
 
     @property
     def epistemic(self) -> str | None:
@@ -122,6 +124,7 @@ class MemoryItem:
             "fact_key": list(self.fact_key) if self.fact_key else None,
             "task_status": self.task_status.value if self.task_status else None, "steps": list(self.steps),
             "due_at": self.due_at, "read_only": self.read_only,
+            "mutability": self.mutability.value if self.mutability else None,
         }
 
     @classmethod
@@ -137,6 +140,7 @@ class MemoryItem:
             fact_key=tuple(r["fact_key"]) if r["fact_key"] else None,
             task_status=TaskStatus(r["task_status"]) if r["task_status"] else None, steps=tuple(r["steps"]),
             due_at=r["due_at"], read_only=bool(r["read_only"]),
+            mutability=KnowledgeMutability(r["mutability"]) if r.get("mutability") else None,
         )
 
 

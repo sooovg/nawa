@@ -168,7 +168,8 @@ class MemoryStore:
               confidence: float, consent: bool = False, verification_state: VerificationState | None = None,
               modality=None, tags: tuple[str, ...] = (), fact_key: tuple[str, ...] | None = None,
               task_status: TaskStatus | None = None, steps: tuple[str, ...] = (), due_at: int | None = None,
-              read_only: bool = False, ttl: int | None = None) -> MemoryItem:
+              read_only: bool = False, ttl: int | None = None,
+              mutability=None) -> MemoryItem:
         req = policy.WriteRequest(kind, content, provenance, confidence, consent, verification_state, modality,
                                   tuple(tags), tuple(fact_key) if fact_key else None, task_status, tuple(steps),
                                   due_at, read_only, ttl)
@@ -185,7 +186,8 @@ class MemoryStore:
             confidence=prov.check_confidence(confidence), created_at=now, updated_at=now,
             expires_at=policy.expiry(req, now), modality=modality, tags=tuple(sorted(set(tags))), consent=consent,
             verification_state=verification_state, fact_key=req.fact_key, task_status=task_status,
-            steps=tuple(steps), due_at=due_at, read_only=read_only)
+            steps=tuple(steps), due_at=due_at, read_only=read_only,
+            mutability=mutability if kind is MemoryKind.KNOWLEDGE else None)
         p.items[it.item_id] = it
         self._index(p, it)
         p.invalidate()
